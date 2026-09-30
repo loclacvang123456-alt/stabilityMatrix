@@ -1,0 +1,207 @@
+﻿<controls:AppWindowBase
+    x:Class="StabilityMatrix.Avalonia.Views.MainWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:base="clr-namespace:StabilityMatrix.Avalonia.ViewModels.Base"
+    xmlns:controls="clr-namespace:StabilityMatrix.Avalonia.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:fluentIcons="clr-namespace:FluentIcons.Avalonia.Fluent;assembly=FluentIcons.Avalonia.Fluent"
+    xmlns:lang="clr-namespace:StabilityMatrix.Avalonia.Languages"
+    xmlns:local="using:StabilityMatrix.Avalonia"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:mocks="clr-namespace:StabilityMatrix.Avalonia.DesignData"
+    xmlns:ui="using:FluentAvalonia.UI.Controls"
+    xmlns:vm="using:StabilityMatrix.Avalonia.ViewModels"
+    Title="Stability Matrix"
+    Width="1300"
+    Height="950"
+    d:DataContext="{x:Static mocks:DesignData.MainWindowViewModel}"
+    d:DesignHeight="550"
+    d:DesignWidth="800"
+    x:DataType="vm:MainWindowViewModel"
+    BackRequested="TopLevel_OnBackRequested"
+    DockProperties.IsDragEnabled="True"
+    DockProperties.IsDropEnabled="True"
+    Icon="/Assets/Icon.ico"
+    mc:Ignorable="d">
+
+    <controls:AppWindowBase.Resources>
+        <SolidColorBrush x:Key="BrushB0" Color="#FFFFFFFF" />
+        <DrawingImage x:Key="BrandsPatreonSymbolWhite">
+            <DrawingGroup>
+                <GeometryDrawing Brush="{DynamicResource BrushB0}" Geometry="F1 M1033.05 324.45C1032.86 186.55 925.46 73.53 799.45 32.75C642.97 -17.89 436.59 -10.55 287.17 59.95C106.07 145.41 49.18 332.61 47.06 519.31C45.32 672.81 60.64 1077.1 288.68 1079.98C458.12 1082.13 483.35 863.8 561.75 758.65C617.53 683.84 689.35 662.71 777.76 640.83C929.71 603.22 1033.27 483.3 1033.05 324.45Z" />
+            </DrawingGroup>
+        </DrawingImage>
+    </controls:AppWindowBase.Resources>
+
+    <controls:AppWindowBase.KeyBindings>
+        <KeyBinding Command="{Binding OpenDocumentationCommand}" Gesture="F1" />
+    </controls:AppWindowBase.KeyBindings>
+
+    <Grid RowDefinitions="Auto,Auto,Auto,*">
+        <Grid
+            Name="TitleBarHost"
+            Background="Transparent"
+            ColumnDefinitions="Auto,Auto,*,Auto">
+            <!--
+                Windows hosts the icon/title/caption buttons here; on macOS & Linux those are
+                native, so collapse the strip to avoid an empty band under the system title bar.
+            -->
+            <Grid.Height>
+                <OnPlatform Default="0">
+                    <On Content="32" Options="Windows" />
+                </OnPlatform>
+            </Grid.Height>
+            <Image
+                Name="WindowIcon"
+                Width="18"
+                Height="18"
+                Margin="12,4"
+                DockPanel.Dock="Left"
+                IsHitTestVisible="False"
+                RenderOptions.BitmapInterpolationMode="HighQuality"
+                Source="/Assets/Icon.ico">
+                <Image.IsVisible>
+                    <OnPlatform Default="False">
+                        <On Content="True" Options="Windows" />
+                    </OnPlatform>
+                </Image.IsVisible>
+            </Image>
+            <TextBlock
+                Grid.Column="1"
+                VerticalAlignment="Center"
+                FontSize="12"
+                IsHitTestVisible="False"
+                Text="{Binding Title, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}">
+                <TextBlock.IsVisible>
+                    <OnPlatform Default="False">
+                        <On Content="True" Options="Windows" />
+                    </OnPlatform>
+                </TextBlock.IsVisible>
+            </TextBlock>
+
+            <Border Grid.Column="2" Padding="6" />
+        </Grid>
+
+        <!--  Notification Banner  -->
+        <controls:NotificationBanner Grid.Row="1" DataContext="{Binding NotificationBannerViewModel}" />
+
+        <ui:NavigationView
+            Name="NavigationView"
+            Grid.Row="2"
+            Grid.RowSpan="2"
+            BackRequested="NavigationView_OnBackRequested"
+            FooterMenuItemsSource="{Binding FooterPages, Mode=OneWay}"
+            IsBackButtonVisible="True"
+            IsBackEnabled="True"
+            IsPaneOpen="{Binding IsPaneOpen, Mode=TwoWay}"
+            IsSettingsVisible="False"
+            ItemInvoked="NavigationView_OnItemInvoked"
+            MenuItemsSource="{Binding Pages, Mode=OneWay}"
+            OpenPaneLength="{Binding PaneWidth}"
+            PaneDisplayMode="Left"
+            SelectedItem="{Binding SelectedCategory}">
+
+            <ui:NavigationView.MenuItemTemplate>
+                <DataTemplate DataType="{x:Type base:PageViewModelBase}">
+                    <ui:NavigationViewItem
+                        Margin="0,0,0,0"
+                        Content="{Binding Title}"
+                        IconSource="{Binding IconSource}"
+                        Tag="{Binding}" />
+                </DataTemplate>
+            </ui:NavigationView.MenuItemTemplate>
+
+            <ui:NavigationView.PaneFooter>
+                <StackPanel>
+                    <!--  Update button  -->
+                    <ui:NavigationViewItem
+                        Name="FooterUpdateItem"
+                        Content="{x:Static lang:Resources.Label_UpdateAvailable}"
+                        DataContext="{Binding UpdateViewModel}"
+                        IsEnabled="{Binding IsUpdateAvailable}"
+                        IsVisible="{Binding IsUpdateAvailable}"
+                        Tapped="FooterUpdateItem_OnTapped">
+                        <ui:NavigationViewItem.IconSource>
+                            <fluentIcons:SymbolIconSource
+                                FontSize="18"
+                                Foreground="LimeGreen"
+                                IconVariant="Filled"
+                                Symbol="ArrowDownload" />
+                        </ui:NavigationViewItem.IconSource>
+                    </ui:NavigationViewItem>
+
+                    <!--  Support Us  -->
+                    <ui:NavigationViewItem
+                        Name="FooterSupportItem"
+                        Content="{x:Static lang:Resources.Label_SupportUs}"
+                        Tapped="FooterSupportItem_OnTapped">
+                        <ui:NavigationViewItem.IconSource>
+                            <fluentIcons:SymbolIconSource IconVariant="Filled" Symbol="Heart" />
+                        </ui:NavigationViewItem.IconSource>
+                    </ui:NavigationViewItem>
+
+                    <!--  Discord  -->
+                    <ui:NavigationViewItem
+                        Name="FooterDiscordItem"
+                        Content="{x:Static lang:Resources.Label_JoinDiscord}"
+                        Tapped="FooterDiscordItem_OnTapped">
+                        <ui:NavigationViewItem.IconSource>
+                            <controls:FASymbolIconSource Symbol="fa-brands fa-discord" />
+                        </ui:NavigationViewItem.IconSource>
+                    </ui:NavigationViewItem>
+
+                    <!--  Activity flyout (downloads + notifications)  -->
+                    <ui:NavigationViewItem
+                        Name="FooterDownloadItem"
+                        Content="{x:Static lang:Resources.Label_Activity}"
+                        DataContext="{Binding ProgressManagerViewModel}"
+                        IconSource="{Binding IconSource}"
+                        Tapped="FooterDownloadItem_OnTapped">
+                        <ui:NavigationViewItem.Styles>
+                            <!--  Override the baked-in FlyoutPresenter MaxWidth (~456) so the activity panel can grow  -->
+                            <Style Selector="FlyoutPresenter">
+                                <Setter Property="MaxWidth" Value="800" />
+                                <Setter Property="MaxHeight" Value="600" />
+                            </Style>
+                        </ui:NavigationViewItem.Styles>
+                        <ui:NavigationViewItem.ContextFlyout>
+                            <controls:BetterFlyout
+                                Content="{Binding}"
+                                HorizontalScrollBarVisibility="Hidden"
+                                Placement="RightEdgeAlignedBottom"
+                                VerticalScrollBarVisibility="Auto" />
+                        </ui:NavigationViewItem.ContextFlyout>
+                        <ui:NavigationViewItem.InfoBadge>
+                            <ui:InfoBadge IsVisible="{Binding IsBadgeVisible}" Value="{Binding TotalBadgeCount}" />
+                        </ui:NavigationViewItem.InfoBadge>
+                    </ui:NavigationViewItem>
+                </StackPanel>
+            </ui:NavigationView.PaneFooter>
+
+            <!--  Since the data context is set dynamically, cannot use compiled bindings  -->
+            <ui:Frame Name="FrameView">
+                <ui:Frame.NavigationPageFactory>
+                    <local:ViewLocator />
+                </ui:Frame.NavigationPageFactory>
+            </ui:Frame>
+
+        </ui:NavigationView>
+        <ui:TeachingTip
+            Name="UpdateAvailableTeachingTip"
+            Title="{x:Static lang:Resources.Label_UpdateAvailable}"
+            Grid.Row="2"
+            Grid.RowSpan="2"
+            PreferredPlacement="Right"
+            Target="{Binding #FooterUpdateItem}" />
+
+        <ui:TeachingTip
+            Name="ActivityTeachingTip"
+            Title="{x:Static lang:Resources.TeachingTip_ActivityCenter_Title}"
+            Grid.Row="2"
+            Grid.RowSpan="2"
+            PreferredPlacement="Right"
+            Subtitle="{x:Static lang:Resources.TeachingTip_ActivityCenter_Subtitle}"
+            Target="{Binding #FooterDownloadItem}" />
+    </Grid>
+</controls:AppWindowBase>

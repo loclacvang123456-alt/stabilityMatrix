@@ -1,0 +1,749 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Action_Launch" xml:space="preserve">
+    <value>啟動</value>
+  </data>
+  <data name="Action_Quit" xml:space="preserve">
+    <value>退出</value>
+  </data>
+  <data name="Action_Save" xml:space="preserve">
+    <value>保存</value>
+  </data>
+  <data name="Action_Cancel" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="Label_Language" xml:space="preserve">
+    <value>語言</value>
+  </data>
+  <data name="Text_RelaunchRequiredToApplyLanguage" xml:space="preserve">
+    <value>需要重新啟動才能使新語言選項生效</value>
+  </data>
+  <data name="Action_Relaunch" xml:space="preserve">
+    <value>重新啟動</value>
+  </data>
+  <data name="Action_RelaunchLater" xml:space="preserve">
+    <value>稍後重新啟動</value>
+  </data>
+  <data name="Label_RelaunchRequired" xml:space="preserve">
+    <value>需要重新啟動</value>
+  </data>
+  <data name="Label_UnknownPackage" xml:space="preserve">
+    <value>未知包</value>
+  </data>
+  <data name="Action_Import" xml:space="preserve">
+    <value>導入</value>
+  </data>
+  <data name="Label_PackageType" xml:space="preserve">
+    <value>包類型</value>
+  </data>
+  <data name="Label_Version" xml:space="preserve">
+    <value>版本</value>
+  </data>
+  <data name="Label_VersionType" xml:space="preserve">
+    <value>版本類型</value>
+  </data>
+  <data name="Label_Releases" xml:space="preserve">
+    <value>發布</value>
+  </data>
+  <data name="Label_Branches" xml:space="preserve">
+    <value>分支</value>
+  </data>
+  <data name="Label_DragAndDropCheckpointsHereToImport" xml:space="preserve">
+    <value>將模型拖放到此處進行導入</value>
+  </data>
+  <data name="Label_Emphasis" xml:space="preserve">
+    <value>強調</value>
+  </data>
+  <data name="Label_Deemphasis" xml:space="preserve">
+    <value>輕描淡寫</value>
+  </data>
+  <data name="Label_EmbeddingsOrTextualInversion" xml:space="preserve">
+    <value>嵌入 / 文本倒置</value>
+  </data>
+  <data name="Label_NetworksLoraOrLycoris" xml:space="preserve">
+    <value>網絡（Lora / LyCORIS）</value>
+  </data>
+  <data name="Label_Comments" xml:space="preserve">
+    <value>評論</value>
+  </data>
+  <data name="Label_ShowPixelGridAtHighZoomLevels" xml:space="preserve">
+    <value>在高縮放級別下顯示像素網格</value>
+  </data>
+  <data name="Label_Steps" xml:space="preserve">
+    <value>迭代步數</value>
+  </data>
+  <data name="Label_StepsBase" xml:space="preserve">
+    <value>迭代步數 - Base</value>
+  </data>
+  <data name="Label_StepsRefiner" xml:space="preserve">
+    <value>迭代步數 - Refiner</value>
+  </data>
+  <data name="Label_CFGScale" xml:space="preserve">
+    <value>提示詞引導係數</value>
+  </data>
+  <data name="Label_DenoisingStrength" xml:space="preserve">
+    <value>重繪幅度</value>
+  </data>
+  <data name="Label_Width" xml:space="preserve">
+    <value>寬度</value>
+  </data>
+  <data name="Label_Height" xml:space="preserve">
+    <value>高度</value>
+  </data>
+  <data name="Label_Refiner" xml:space="preserve">
+    <value>Refiner</value>
+  </data>
+  <data name="Label_VAE" xml:space="preserve">
+    <value>VAE</value>
+  </data>
+  <data name="Label_Model" xml:space="preserve">
+    <value>模型</value>
+  </data>
+  <data name="Action_Connect" xml:space="preserve">
+    <value>連接</value>
+  </data>
+  <data name="Label_ConnectingEllipsis" xml:space="preserve">
+    <value>連接中...</value>
+  </data>
+  <data name="Action_Close" xml:space="preserve">
+    <value>關閉</value>
+  </data>
+  <data name="Label_WaitingToConnectEllipsis" xml:space="preserve">
+    <value>等待連接...</value>
+  </data>
+  <data name="Label_UpdateAvailable" xml:space="preserve">
+    <value>可更新</value>
+  </data>
+  <data name="Label_BecomeAPatron" xml:space="preserve">
+    <value>成為贊助商</value>
+  </data>
+  <data name="Label_JoinDiscord" xml:space="preserve">
+    <value>加入Discord 服務器</value>
+  </data>
+  <data name="Label_Downloads" xml:space="preserve">
+    <value>下載</value>
+  </data>
+  <data name="Action_Install" xml:space="preserve">
+    <value>安裝</value>
+  </data>
+  <data name="Label_SkipSetup" xml:space="preserve">
+    <value>跳過首次設置</value>
+  </data>
+  <data name="Label_UnexpectedErrorOccurred" xml:space="preserve">
+    <value>發生意外錯誤</value>
+  </data>
+  <data name="Action_ExitApplication" xml:space="preserve">
+    <value>退出程序</value>
+  </data>
+  <data name="Label_DisplayName" xml:space="preserve">
+    <value>顯示名稱</value>
+  </data>
+  <data name="Label_InstallationWithThisNameExists" xml:space="preserve">
+    <value>已存在使用此名稱的安裝。</value>
+  </data>
+  <data name="Label_PleaseChooseDifferentName" xml:space="preserve">
+    <value>請選擇不同的名稱或不同的安裝位置。</value>
+  </data>
+  <data name="Label_AdvancedOptions" xml:space="preserve">
+    <value>高級選項</value>
+  </data>
+  <data name="Label_Commit" xml:space="preserve">
+    <value>提交</value>
+  </data>
+  <data name="Label_SharedModelFolderStrategy" xml:space="preserve">
+    <value>共享模型文件夾方案</value>
+  </data>
+  <data name="Label_PyTorchVersion" xml:space="preserve">
+    <value>PyTorch版本</value>
+  </data>
+  <data name="Label_CloseDialogWhenFinished" xml:space="preserve">
+    <value>完成後關閉對話框</value>
+  </data>
+  <data name="Label_DataDirectory" xml:space="preserve">
+    <value>數據目錄</value>
+  </data>
+  <data name="Label_DataDirectoryExplanation" xml:space="preserve">
+    <value>這裡將安裝模型，LORA，Web UIs，設置等等。</value>
+  </data>
+  <data name="Label_FatWarning" xml:space="preserve">
+    <value>使用 FAT32或exFAT硬盤時可能會遭遇錯誤。請選擇不同的硬盤，以獲得更流暢的體驗。</value>
+  </data>
+  <data name="Label_PortableMode" xml:space="preserve">
+    <value>便攜模式</value>
+  </data>
+  <data name="Label_PortableModeExplanation" xml:space="preserve">
+    <value>在便攜模式下，所有數據和設置都將存儲在與應用程序相同的目錄中。您可以將應用程序及其 &quot;Data &quot;文件夾移動到不同的位置或電腦上。</value>
+  </data>
+  <data name="Action_Continue" xml:space="preserve">
+    <value>繼續</value>
+  </data>
+  <data name="Label_PreviousImage" xml:space="preserve">
+    <value>上一張圖片</value>
+  </data>
+  <data name="Label_NextImage" xml:space="preserve">
+    <value>下一張圖片</value>
+  </data>
+  <data name="Label_ModelDescription" xml:space="preserve">
+    <value>模型描述</value>
+  </data>
+  <data name="Label_NewVersionAvailable" xml:space="preserve">
+    <value>新版Stability Matrix已發布！</value>
+  </data>
+  <data name="Label_ImportLatest" xml:space="preserve">
+    <value>導入最新版本</value>
+  </data>
+  <data name="Label_AllVersions" xml:space="preserve">
+    <value>所有版本</value>
+  </data>
+  <data name="Label_ModelSearchWatermark" xml:space="preserve">
+    <value>搜索模型、#標籤或@用戶</value>
+  </data>
+  <data name="Action_Search" xml:space="preserve">
+    <value>搜尋</value>
+  </data>
+  <data name="Label_Sort" xml:space="preserve">
+    <value>分類</value>
+  </data>
+  <data name="Label_TimePeriod" xml:space="preserve">
+    <value>期間</value>
+  </data>
+  <data name="Label_ModelType" xml:space="preserve">
+    <value>模型類型</value>
+  </data>
+  <data name="Label_BaseModel" xml:space="preserve">
+    <value>基礎模型</value>
+  </data>
+  <data name="Label_ShowNsfwContent" xml:space="preserve">
+    <value>顯示 NSFW 內容</value>
+  </data>
+  <data name="Label_DataProvidedByCivitAi" xml:space="preserve">
+    <value>數據由 CivitAI 提供</value>
+  </data>
+  <data name="Label_Page" xml:space="preserve">
+    <value>頁次</value>
+  </data>
+  <data name="Label_FirstPage" xml:space="preserve">
+    <value>第一頁</value>
+  </data>
+  <data name="Label_PreviousPage" xml:space="preserve">
+    <value>上一頁</value>
+  </data>
+  <data name="Label_NextPage" xml:space="preserve">
+    <value>下一頁</value>
+  </data>
+  <data name="Label_LastPage" xml:space="preserve">
+    <value>最後一頁</value>
+  </data>
+  <data name="Action_Rename" xml:space="preserve">
+    <value>重新命名</value>
+  </data>
+  <data name="Action_Delete" xml:space="preserve">
+    <value>刪除</value>
+  </data>
+  <data name="Action_OpenOnCivitAi" xml:space="preserve">
+    <value>在 CivitAI上打開</value>
+  </data>
+  <data name="Label_ConnectedModel" xml:space="preserve">
+    <value>已連接CivitAI元數據</value>
+  </data>
+  <data name="Label_LocalModel" xml:space="preserve">
+    <value>本地模型</value>
+  </data>
+  <data name="Action_ShowInExplorer" xml:space="preserve">
+    <value>在資源管理器中顯示</value>
+  </data>
+  <data name="Action_New" xml:space="preserve">
+    <value>新</value>
+  </data>
+  <data name="Label_Folder" xml:space="preserve">
+    <value>文件夾</value>
+  </data>
+  <data name="Label_DropFileToImport" xml:space="preserve">
+    <value>將文件放入此處以導入</value>
+  </data>
+  <data name="Label_ImportAsConnected" xml:space="preserve">
+    <value>導入時獲取元數據</value>
+  </data>
+  <data name="Label_ImportAsConnectedExplanation" xml:space="preserve">
+    <value>搜索本地新導入模型的元數據</value>
+  </data>
+  <data name="Label_Indexing" xml:space="preserve">
+    <value>正在索引...</value>
+  </data>
+  <data name="Label_ModelsFolder" xml:space="preserve">
+    <value>模型文件夾</value>
+  </data>
+  <data name="Label_Categories" xml:space="preserve">
+    <value>類別</value>
+  </data>
+  <data name="Label_LetsGetStarted" xml:space="preserve">
+    <value>讓我們開始吧</value>
+  </data>
+  <data name="Label_ReadAndAgree" xml:space="preserve">
+    <value>我已閱讀並同意</value>
+  </data>
+  <data name="Label_LicenseAgreement" xml:space="preserve">
+    <value>許可協議。</value>
+  </data>
+  <data name="Label_FindConnectedMetadata" xml:space="preserve">
+    <value>查找連接的元數據</value>
+  </data>
+  <data name="Label_ShowModelImages" xml:space="preserve">
+    <value>顯示模型圖片</value>
+  </data>
+  <data name="Label_Appearance" xml:space="preserve">
+    <value>外觀</value>
+  </data>
+  <data name="Label_Theme" xml:space="preserve">
+    <value>主題</value>
+  </data>
+  <data name="Label_CheckpointManager" xml:space="preserve">
+    <value>模型管理器</value>
+  </data>
+  <data name="Label_RemoveSymlinksOnShutdown" xml:space="preserve">
+    <value>關閉時刪除共享模型目錄的符號鏈接</value>
+  </data>
+  <data name="Label_RemoveSymlinksOnShutdown_Details" xml:space="preserve">
+    <value>如果您在將 Stability Matrix 移至另一個驅動器時遇到問題，請選擇此選項</value>
+  </data>
+  <data name="Label_ResetCheckpointsCache" xml:space="preserve">
+    <value>重置模型緩存</value>
+  </data>
+  <data name="Label_ResetCheckpointsCache_Details" xml:space="preserve">
+    <value>重建已安裝模型的緩存。如果模型在模型瀏覽器中被錯誤標註，則使用此功能</value>
+  </data>
+  <data name="Label_PackageEnvironment" xml:space="preserve">
+    <value>軟件包環境</value>
+  </data>
+  <data name="Action_Edit" xml:space="preserve">
+    <value>編輯</value>
+  </data>
+  <data name="Label_EnvironmentVariables" xml:space="preserve">
+    <value>環境變量</value>
+  </data>
+  <data name="Label_EmbeddedPython" xml:space="preserve">
+    <value>嵌入式Python</value>
+  </data>
+  <data name="Action_CheckVersion" xml:space="preserve">
+    <value>檢查版本</value>
+  </data>
+  <data name="Label_Integrations" xml:space="preserve">
+    <value>集成</value>
+  </data>
+  <data name="Label_DiscordRichPresence" xml:space="preserve">
+    <value>Discord Rich Presence</value>
+  </data>
+  <data name="Label_System" xml:space="preserve">
+    <value>系統</value>
+  </data>
+  <data name="Label_AddToStartMenu" xml:space="preserve">
+    <value>將Stability Matrix添加到開始菜單</value>
+  </data>
+  <data name="Label_AddToStartMenu_Details" xml:space="preserve">
+    <value>使用當前應用程序的位置，如果應用程序移動了，可以再次運行此功能</value>
+  </data>
+  <data name="Label_OnlyAvailableOnWindows" xml:space="preserve">
+    <value>僅適用於 Windows</value>
+  </data>
+  <data name="Action_AddForCurrentUser" xml:space="preserve">
+    <value>為當前用戶添加</value>
+  </data>
+  <data name="Action_AddForAllUsers" xml:space="preserve">
+    <value>為所有用戶添加</value>
+  </data>
+  <data name="Label_SelectNewDataDirectory" xml:space="preserve">
+    <value>選擇新數據目錄</value>
+  </data>
+  <data name="Label_SelectNewDataDirectory_Details" xml:space="preserve">
+    <value>不移動現有數據</value>
+  </data>
+  <data name="Action_SelectDirectory" xml:space="preserve">
+    <value>選擇目錄</value>
+  </data>
+  <data name="Label_About" xml:space="preserve">
+    <value>關於</value>
+  </data>
+  <data name="Label_StabilityMatrix" xml:space="preserve">
+    <value>Stability Matrix</value>
+  </data>
+  <data name="Label_LicenseAndOpenSourceNotices" xml:space="preserve">
+    <value>許可與開源告示</value>
+  </data>
+  <data name="TeachingTip_ClickLaunchToGetStarted" xml:space="preserve">
+    <value>點擊 &quot;啟動 &quot;開始！</value>
+  </data>
+  <data name="Action_Stop" xml:space="preserve">
+    <value>停止</value>
+  </data>
+  <data name="Action_SendInput" xml:space="preserve">
+    <value>發送輸入</value>
+  </data>
+  <data name="Label_Input" xml:space="preserve">
+    <value>輸入</value>
+  </data>
+  <data name="Action_Send" xml:space="preserve">
+    <value>發送</value>
+  </data>
+  <data name="Label_InputRequired" xml:space="preserve">
+    <value>需要輸入</value>
+  </data>
+  <data name="Label_ConfirmQuestion" xml:space="preserve">
+    <value>確認？</value>
+  </data>
+  <data name="Action_Yes" xml:space="preserve">
+    <value>是</value>
+  </data>
+  <data name="Label_No" xml:space="preserve">
+    <value>否</value>
+  </data>
+  <data name="Action_OpenWebUI" xml:space="preserve">
+    <value>打開Web UI</value>
+  </data>
+  <data name="Text_WelcomeToStabilityMatrix" xml:space="preserve">
+    <value>歡迎使用Stability Matrix！</value>
+  </data>
+  <data name="Text_OneClickInstaller_SubHeader" xml:space="preserve">
+    <value>選擇您喜歡的交互界面，然後點擊安裝開始使用</value>
+  </data>
+  <data name="Label_Installing" xml:space="preserve">
+    <value>正在安裝</value>
+  </data>
+  <data name="Text_ProceedingToLaunchPage" xml:space="preserve">
+    <value>正在進入啟動頁面</value>
+  </data>
+  <data name="Progress_DownloadingPackage" xml:space="preserve">
+    <value>正在下載軟件包...</value>
+  </data>
+  <data name="Progress_DownloadComplete" xml:space="preserve">
+    <value>下載完畢</value>
+  </data>
+  <data name="Progress_InstallationComplete" xml:space="preserve">
+    <value>安裝完畢</value>
+  </data>
+  <data name="Progress_InstallingPrerequisites" xml:space="preserve">
+    <value>正在安裝文件依賴...</value>
+  </data>
+  <data name="Progress_InstallingPackageRequirements" xml:space="preserve">
+    <value>正在安裝軟件包依賴...</value>
+  </data>
+  <data name="Action_OpenInExplorer" xml:space="preserve">
+    <value>在資源管理器中打開</value>
+  </data>
+  <data name="Action_OpenInFinder" xml:space="preserve">
+    <value>在 Finder中打開</value>
+  </data>
+  <data name="Action_Uninstall" xml:space="preserve">
+    <value>卸載</value>
+  </data>
+  <data name="Action_CheckForUpdates" xml:space="preserve">
+    <value>檢查更新</value>
+  </data>
+  <data name="Action_Update" xml:space="preserve">
+    <value>更新</value>
+  </data>
+  <data name="Action_AddPackage" xml:space="preserve">
+    <value>添加軟件包</value>
+  </data>
+  <data name="TeachingTip_AddPackageToGetStarted" xml:space="preserve">
+    <value>添加軟件包即可開始使用！</value>
+  </data>
+  <data name="Label_EnvVarsTable_Name" xml:space="preserve">
+    <value>名稱</value>
+  </data>
+  <data name="Label_EnvVarsTable_Value" xml:space="preserve">
+    <value>值</value>
+  </data>
+  <data name="Action_Remove" xml:space="preserve">
+    <value>移除</value>
+  </data>
+  <data name="Label_Details" xml:space="preserve">
+    <value>詳細信息</value>
+  </data>
+  <data name="Label_Callstack" xml:space="preserve">
+    <value>調用棧</value>
+  </data>
+  <data name="Label_InnerException" xml:space="preserve">
+    <value>內部異常</value>
+  </data>
+  <data name="Label_SearchEllipsis" xml:space="preserve">
+    <value>搜尋...</value>
+  </data>
+  <data name="Action_OK" xml:space="preserve">
+    <value>好的</value>
+  </data>
+  <data name="Action_Retry" xml:space="preserve">
+    <value>重試</value>
+  </data>
+  <data name="Label_PythonVersionInfo" xml:space="preserve">
+    <value>Python版本信息</value>
+  </data>
+  <data name="Action_Restart" xml:space="preserve">
+    <value>重新啟動</value>
+  </data>
+  <data name="Label_ConfirmDelete" xml:space="preserve">
+    <value>確認刪除</value>
+  </data>
+  <data name="Text_PackageUninstall_Details" xml:space="preserve">
+    <value>操作將會刪除軟件包文件夾及其所有的內容，包括任何已生成的圖像和您可能已添加的文件。</value>
+  </data>
+  <data name="Progress_UninstallingPackage" xml:space="preserve">
+    <value>軟件包卸載中...</value>
+  </data>
+  <data name="Label_PackageUninstalled" xml:space="preserve">
+    <value>軟件包已卸載</value>
+  </data>
+  <data name="Text_SomeFilesCouldNotBeDeleted" xml:space="preserve">
+    <value>某些文件無法被刪除。請關閉軟件包目錄中所有打開的文件，然後重試。</value>
+  </data>
+  <data name="Label_InvalidPackageType" xml:space="preserve">
+    <value>無效軟件包類型</value>
+  </data>
+  <data name="TextTemplate_UpdatingPackage" xml:space="preserve">
+    <value>正在更新 {0}</value>
+  </data>
+  <data name="Progress_UpdateComplete" xml:space="preserve">
+    <value>更新完畢</value>
+  </data>
+  <data name="TextTemplate_PackageUpdatedToLatest" xml:space="preserve">
+    <value>{0} 已更新至最新版本</value>
+  </data>
+  <data name="TextTemplate_ErrorUpdatingPackage" xml:space="preserve">
+    <value>更新出錯 {0}</value>
+  </data>
+  <data name="Progress_UpdateFailed" xml:space="preserve">
+    <value>更新失敗</value>
+  </data>
+  <data name="Action_OpenInBrowser" xml:space="preserve">
+    <value>在瀏覽器中打開</value>
+  </data>
+  <data name="Label_ErrorInstallingPackage" xml:space="preserve">
+    <value>安裝軟件包出錯</value>
+  </data>
+  <data name="Label_Branch" xml:space="preserve">
+    <value>分支</value>
+  </data>
+  <data name="Label_CivitAi" xml:space="preserve">
+    <value>CivitAI</value>
+  </data>
+  <data name="Action_GoToSettings" xml:space="preserve">
+    <value>前往設定</value>
+  </data>
+  <data name="Text_LykosAccountUpgradeNotice" xml:space="preserve">
+    <value>## 重要提示：Lykos 帳戶登出和安全性升級
+
+我們對 Stability Matrix 處理 Lykos 帳戶的方式進行了一些重要的幕後改進，升級到更安全、更便捷的登入系統 **(OAuth 2.0 with OpenID Connect)**。 因此，您已登出 Lykos 帳戶。
+
+### 為什麼進行此變更？
+
+您的安全和隱私對我們很重要。 此升級帶來：
+
+*   **簡化的體驗：** 登入 [account.lykos.ai](https://account.lykos.ai) 一次即可連接到 Stability Matrix 和其他 Lykos AI 服務。
+*   **更多登入方式：** 使用您現有的 [lykos.ai](https://lykos.ai) 帳戶，或使用 **Apple**、**GitHub** 或 **Google** 登入。
+*   **增強的隱私：** Stability Matrix 僅請求其所需的權限。
+*   **行業標準安全性：** 我們正在使用 OAuth 2.0，這是安全登入的黃金標準。
+*   **為未來做好準備：** 這允許與其他應用程式和服務進行安全連接。
+
+### 我需要做什麼？
+
+點擊**「前往設定」**按鈕，然後點擊**「Lykos 帳戶」**旁邊的**「連線」**。
+
+### Lykos 帳戶是必需的嗎？
+
+不，Stability Matrix 在沒有帳戶的情況下仍然可以正常運作。 但是，您的 Lykos 帳戶可以啟用一些額外的連接功能，例如為我們的 Patreon 支持者自動更新到開發版本（以及更多即將推出的功能）。</value>
+  </data>
+  <data name="Action_Enable" xml:space="preserve">
+    <value>啟用</value>
+  </data>
+  <data name="Action_Disable" xml:space="preserve">
+    <value>停用</value>
+  </data>
+  <data name="Text_Login_ConnectTitle" xml:space="preserve">
+    <value>連接您的 Lykos 帳戶</value>
+  </data>
+  <data name="Text_Login_ConnectDescription" xml:space="preserve">
+    <value>請使用您的 Lykos 帳戶登入以使用連接功能。</value>
+  </data>
+  <data name="Text_Login_ExpiredTitle" xml:space="preserve">
+    <value>請重新登入</value>
+  </data>
+  <data name="Text_Login_ExpiredDescription" xml:space="preserve">
+    <value>您的登入已過期。請重新登入以繼續。</value>
+  </data>
+  <data name="Sponsorship_Title" xml:space="preserve">
+    <value>支持 Stability Matrix</value>
+  </data>
+  <data name="Sponsorship_ExistingSupporterPreamble" xml:space="preserve">
+    <value>感謝您支持 Stability Matrix！</value>
+  </data>
+  <data name="Sponsorship_ReqAnyTier" xml:space="preserve">
+    <value>**{0}** 等功能是我們為支持者提供的眾多權益之一。您的貢獻有助於我們支付伺服器成本並支持 Stability Matrix 的開發。</value>
+  </data>
+  <data name="Sponsorship_ReqSpecificTier" xml:space="preserve">
+    <value>**{0}** 等功能需達到 **{1}** 支持者等級（或更高）方可使用。您的貢獻有助於我們支付更進階連接功能的伺服器成本，並讓我們能夠為大家不斷改進 Stability Matrix。</value>
+  </data>
+  <data name="Sponsorship_ConnectPatreonPrompt" xml:space="preserve">
+    <value>如果您已在 Patreon 上支持我們，請關聯您的帳戶以繼續。</value>
+  </data>
+  <data name="Label_AccountSettings" xml:space="preserve">
+    <value>帳戶設定</value>
+  </data>
+  <data name="Action_ViewSupportOptions" xml:space="preserve">
+    <value>檢視支持選項</value>
+  </data>
+  <data name="Action_MaybeLater" xml:space="preserve">
+    <value>稍後再說</value>
+  </data>
+  <data name="Label_Status" xml:space="preserve">
+    <value>狀態</value>
+  </data>
+  <data name="ModelDiscovery_Active" xml:space="preserve">
+    <value>啟用</value>
+  </data>
+  <data name="ModelDiscovery_Inactive" xml:space="preserve">
+    <value>未啟用（使用標準連線）</value>
+  </data>
+  <data name="ModelDiscovery_Description" xml:space="preserve">
+    <value>從 Civitai 等線上儲存庫瀏覽模型時，體驗更快的搜尋結果。</value>
+  </data>
+  <data name="ModelDiscovery_Disclaimer" xml:space="preserve">
+    <value>針對第三方儲存庫的實驗性最佳化。非官方合作；可用性可能有所不同。</value>
+  </data>
+  <data name="Label_Beta" xml:space="preserve">
+    <value>測試版</value>
+  </data>
+  <data name="ModelDiscovery_Title" xml:space="preserve">
+    <value>加速模型搜尋</value>
+  </data>
+  <data name="PromptAmplifier_Disclaimer" xml:space="preserve">
+    <value>### ✨ 新功能上線：Prompt Amplifier
+
+這是我們的 AI 助理，它使用實驗性的 Spark 模型，能為您的提示生成更具創意的擴充。
+
+請注意：Prompt Amplifier 會在我們安全的雲端環境中執行，**不會**在您的本機電腦上執行。
+
+### ☁️ 為何使用雲端？
+
+Spark 模型規模龐大，算力需求堪比兆級參數的基礎模型。我們重視本機功能，但 Spark 的進階能力需要雲端支援，現在即可透過我們的雲端服務使用。
+
+### 🔒 隱私至上
+
+我們極其重視您的隱私（詳情請參閱[生成式 AI 條款](https://lykos.ai/gen-ai-terms)）。Lykos AI 及必要的雲端服務提供者**絕不會**使用您的提示或生成結果來訓練 AI 模型。我們僅在為確保功能正常運作時處理您的資料，**處理完成後也只保留必要的元數據（如時間、Token 數量），不保留提示內容本身**。您的資料絕不會被出售或分享。</value>
+  </data>
+</root>

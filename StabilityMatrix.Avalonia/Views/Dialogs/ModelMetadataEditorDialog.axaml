@@ -1,0 +1,220 @@
+﻿<controls:DropTargetUserControlBase
+    x:Class="StabilityMatrix.Avalonia.Views.Dialogs.ModelMetadataEditorDialog"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:api="clr-namespace:StabilityMatrix.Core.Models.Api;assembly=StabilityMatrix.Core"
+    xmlns:avalonia="https://github.com/projektanker/icons.avalonia"
+    xmlns:controls="clr-namespace:StabilityMatrix.Avalonia.Controls"
+    xmlns:converters="clr-namespace:StabilityMatrix.Avalonia.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:designData="clr-namespace:StabilityMatrix.Avalonia.DesignData"
+    xmlns:dialogs="clr-namespace:StabilityMatrix.Avalonia.ViewModels.Dialogs"
+    xmlns:helpers="clr-namespace:StabilityMatrix.Avalonia.Helpers"
+    xmlns:lang="clr-namespace:StabilityMatrix.Avalonia.Languages"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="using:FluentAvalonia.UI.Controls"
+    d:DataContext="{x:Static designData:DesignData.MetadataEditorDialogViewModel}"
+    d:DesignHeight="700"
+    d:DesignWidth="600"
+    x:DataType="dialogs:ModelMetadataEditorDialogViewModel"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <converters:EnumStringConverter x:Key="EnumStringConverter" />
+    </UserControl.Resources>
+
+    <ScrollViewer Padding="8">
+        <Grid
+            VerticalAlignment="Top"
+            ColumnDefinitions="Auto,*"
+            RowDefinitions="Auto,Auto,100,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+            <TextBlock
+                Grid.Row="0"
+                Grid.ColumnSpan="2"
+                Margin="0,16"
+                HorizontalAlignment="Center"
+                FontSize="24"
+                FontWeight="SemiBold"
+                Text="{x:Static lang:Resources.Label_EditModelMetadata}" />
+
+            <TextBlock
+                Grid.Row="1"
+                Grid.Column="0"
+                Margin="0,0,10,0"
+                VerticalAlignment="Center"
+                Text="{x:Static lang:Resources.Label_DisplayName}" />
+            <TextBox
+                Grid.Row="1"
+                Grid.Column="1"
+                Text="{Binding ModelName}" />
+
+            <TextBlock
+                Grid.Row="2"
+                Grid.Column="0"
+                Margin="0,10,10,0"
+                VerticalAlignment="Top"
+                Text="{x:Static lang:Resources.Label_ModelDescription}" />
+            <TextBox
+                Grid.Row="2"
+                Grid.Column="1"
+                Margin="0,10,0,0"
+                AcceptsReturn="True"
+                Text="{Binding ModelDescription}"
+                TextWrapping="Wrap" />
+
+            <GridSplitter
+                Grid.Row="3"
+                Grid.Column="1"
+                MaxWidth="50"
+                Margin="0,8,0,0"
+                VerticalAlignment="Center"
+                Background="White"
+                BorderThickness="1"
+                CornerRadius="4"
+                Opacity="0.5" />
+
+            <TextBlock
+                Grid.Row="4"
+                Grid.Column="0"
+                Margin="0,10,10,0"
+                VerticalAlignment="Center"
+                Text="{x:Static lang:Resources.Label_NSFW}" />
+            <ToggleSwitch
+                Grid.Row="4"
+                Grid.Column="1"
+                Margin="0,10,0,0"
+                IsChecked="{Binding IsNsfw}"
+                OffContent="{x:Static lang:Resources.Label_No}"
+                OnContent="{x:Static lang:Resources.Action_Yes}" />
+
+            <TextBlock
+                Grid.Row="5"
+                Grid.Column="0"
+                Margin="0,10,10,0"
+                VerticalAlignment="Top"
+                Text="{x:Static lang:Resources.Label_Tags}" />
+            <TextBox
+                Grid.Row="5"
+                Grid.Column="1"
+                Height="100"
+                Margin="0,10,0,0"
+                AcceptsReturn="True"
+                Text="{Binding Tags}"
+                TextWrapping="Wrap" />
+
+            <TextBlock
+                Grid.Row="6"
+                Grid.Column="0"
+                Margin="0,10,10,0"
+                VerticalAlignment="Center"
+                Text="{x:Static lang:Resources.Label_ModelType}" />
+            <controls:BetterComboBox
+                Grid.Row="6"
+                Grid.Column="1"
+                Margin="0,10,0,0"
+                ItemsSource="{x:Static helpers:EnumHelpers.MetadataEditorCivitModelTypes}"
+                SelectedItem="{Binding ModelType}" />
+
+            <TextBlock
+                Grid.Row="7"
+                Grid.Column="0"
+                Margin="0,10,10,0"
+                VerticalAlignment="Center"
+                Text="{x:Static lang:Resources.Label_VersionName}" />
+            <TextBox
+                Grid.Row="7"
+                Grid.Column="1"
+                Margin="0,10,0,0"
+                Text="{Binding VersionName}" />
+
+            <TextBlock
+                Grid.Row="8"
+                Grid.Column="0"
+                Margin="0,10,10,0"
+                VerticalAlignment="Center"
+                Text="{x:Static lang:Resources.Label_BaseModel}" />
+            <controls:BetterComboBox
+                Grid.Row="8"
+                Grid.Column="1"
+                Margin="0,10,0,0"
+                ItemsSource="{Binding BaseModelTypes}"
+                SelectedItem="{Binding BaseModelType}">
+                <controls:BetterComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="api:CivitBaseModelType">
+                        <TextBlock Text="{Binding ., Converter={StaticResource EnumStringConverter}}" />
+                    </DataTemplate>
+                </controls:BetterComboBox.ItemTemplate>
+            </controls:BetterComboBox>
+
+            <TextBlock
+                Grid.Row="9"
+                Grid.Column="0"
+                Margin="0,10,10,0"
+                VerticalAlignment="Top"
+                Text="{x:Static lang:Resources.Label_TrainedWords}" />
+            <TextBox
+                Grid.Row="9"
+                Grid.Column="1"
+                Height="100"
+                Margin="0,10,0,0"
+                AcceptsReturn="True"
+                Text="{Binding TrainedWords}"
+                TextWrapping="Wrap" />
+
+            <TextBlock
+                Grid.Row="10"
+                Grid.Column="0"
+                Margin="0,10,10,0"
+                VerticalAlignment="Top"
+                IsVisible="{Binding ShowInferenceDefaults}"
+                Text="Inference Defaults" />
+
+            <ToggleSwitch
+                Grid.Row="10"
+                Grid.Column="1"
+                IsChecked="{Binding IsInferenceDefaultsEnabled}"
+                IsVisible="{Binding ShowInferenceDefaults}" />
+
+            <controls:SamplerCard
+                Grid.Row="11"
+                Grid.Column="1"
+                Margin="0,10,0,0"
+                DataContext="{Binding SamplerCardViewModel}">
+                <controls:SamplerCard.IsVisible>
+                    <MultiBinding Converter="{x:Static BoolConverters.And}">
+                        <Binding Path="$parent[Grid].((dialogs:ModelMetadataEditorDialogViewModel)DataContext).IsInferenceDefaultsEnabled" />
+                        <Binding Path="$parent[Grid].((dialogs:ModelMetadataEditorDialogViewModel)DataContext).ShowInferenceDefaults" />
+                    </MultiBinding>
+                </controls:SamplerCard.IsVisible>
+            </controls:SamplerCard>
+
+            <TextBlock
+                Grid.Row="12"
+                Grid.Column="0"
+                Margin="0,10,10,0"
+                VerticalAlignment="Top"
+                Text="{x:Static lang:Resources.Label_PreviewImage}" />
+            <StackPanel
+                Grid.Row="12"
+                Grid.Column="1"
+                Margin="0,10,0,0"
+                Orientation="Vertical"
+                Spacing="10">
+                <controls:BetterAdvancedImage
+                    Height="200"
+                    DragDrop.AllowDrop="True"
+                    Source="{Binding ThumbnailFilePath}"
+                    Stretch="Uniform" />
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBox Grid.Column="0" Text="{Binding ThumbnailFilePath}" />
+                    <Button
+                        Grid.Column="1"
+                        Margin="10,0,0,0"
+                        Command="{Binding OpenFilePickerDialogCommand}">
+                        <ui:SymbolIcon Symbol="OpenFolder" />
+                    </Button>
+                </Grid>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</controls:DropTargetUserControlBase>

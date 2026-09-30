@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "husky": {
+      "version": "0.7.2",
+      "commands": [
+        "husky"
+      ],
+      "rollForward": false
+    },
+    "xamlstyler.console": {
+      "version": "3.2404.2",
+      "commands": [
+        "xstyler"
+      ],
+      "rollForward": false
+    },
+    "csharpier": {
+      "version": "1.0.1",
+      "commands": [
+        "csharpier"
+      ],
+      "rollForward": false
+    },
+    "refitter": {
+      "version": "1.4.1",
+      "commands": [
+        "refitter"
+      ],
+      "rollForward": false
+    },
+    "dotnet-script": {
+      "version": "1.6.0",
+      "commands": [
+        "dotnet-script"
+      ],
+      "rollForward": false
+    }
+  }
+}

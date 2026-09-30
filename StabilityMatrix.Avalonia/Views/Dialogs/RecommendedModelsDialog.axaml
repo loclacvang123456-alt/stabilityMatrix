@@ -1,0 +1,148 @@
+﻿<controls:UserControlBase
+    x:Class="StabilityMatrix.Avalonia.Views.Dialogs.RecommendedModelsDialog"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:asyncImageLoader="clr-namespace:AsyncImageLoader;assembly=AsyncImageLoader.Avalonia"
+    xmlns:controls="clr-namespace:StabilityMatrix.Avalonia.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:dialogs="clr-namespace:StabilityMatrix.Avalonia.ViewModels.Dialogs"
+    xmlns:lang="clr-namespace:StabilityMatrix.Avalonia.Languages"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:mocks="clr-namespace:StabilityMatrix.Avalonia.DesignData"
+    xmlns:vendorLabs="clr-namespace:StabilityMatrix.Avalonia.Controls.VendorLabs"
+    d:DataContext="{x:Static mocks:DesignData.RecommendedModelsViewModel}"
+    d:DesignHeight="725"
+    d:DesignWidth="700"
+    x:DataType="dialogs:RecommendedModelsViewModel"
+    mc:Ignorable="d">
+    <controls:UserControlBase.Styles>
+        <Style Selector="Button#RootButton">
+            <Style Selector="^ vendorLabs|BetterAsyncImage">
+                <Setter Property="Transitions">
+                    <Transitions>
+                        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.237">
+                            <TransformOperationsTransition.Easing>
+                                <QuadraticEaseInOut />
+                            </TransformOperationsTransition.Easing>
+                        </TransformOperationsTransition>
+                    </Transitions>
+                </Setter>
+            </Style>
+
+            <Style Selector="^:pointerover">
+                <Setter Property="Cursor" Value="Hand" />
+                <Style Selector="^ vendorLabs|BetterAsyncImage">
+                    <Setter Property="CornerRadius" Value="12" />
+                    <Setter Property="RenderTransform" Value="scale(1.03, 1.03)" />
+                </Style>
+                <Style Selector="^ Border#ModelCardBottom">
+                    <Setter Property="Background" Value="#CC000000" />
+                </Style>
+            </Style>
+
+            <Style Selector="^:not(:pointerover)">
+                <Setter Property="Cursor" Value="Arrow" />
+                <Style Selector="^ vendorLabs|BetterAsyncImage">
+                    <Setter Property="CornerRadius" Value="8" />
+                    <Setter Property="RenderTransform" Value="scale(1, 1)" />
+                </Style>
+                <Style Selector="^ Border#ModelCardBottom">
+                    <Setter Property="Background" Value="#99000000" />
+                </Style>
+            </Style>
+        </Style>
+    </controls:UserControlBase.Styles>
+
+    <controls:UserControlBase.Resources>
+        <DataTemplate x:Key="PackageTemplate" x:DataType="dialogs:RecommendedModelItemViewModel">
+            <Button
+                Name="RootButton"
+                Margin="4"
+                Padding="-4"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                Classes="transparent-full"
+                Command="{Binding ToggleSelectionCommand}"
+                CornerRadius="8">
+                <controls:Card Margin="0" Padding="0">
+
+                    <Grid RowDefinitions="Auto, *, Auto">
+                        <CheckBox
+                            Margin="0,4,-8,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            CornerRadius="100"
+                            IsChecked="{Binding IsSelected}"
+                            ZIndex="1">
+                            <CheckBox.RenderTransform>
+                                <ScaleTransform ScaleX="1.5" ScaleY="1.5" />
+                            </CheckBox.RenderTransform>
+                        </CheckBox>
+                        <vendorLabs:BetterAsyncImage
+                            Grid.Row="0"
+                            Grid.RowSpan="3"
+                            Width="300"
+                            Height="300"
+                            CornerRadius="8"
+                            Source="{Binding ThumbnailUrl}"
+                            Stretch="UniformToFill" />
+                        <Border
+                            Name="ModelCardBottom"
+                            Grid.Row="2"
+                            Padding="8"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            Background="#DD000000"
+                            CornerRadius="0,0,8,8"
+                            ZIndex="1">
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    FontSize="14"
+                                    Text="{Binding CivitModel.Name}" />
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    FontSize="12"
+                                    Text="{Binding Author}" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </controls:Card>
+            </Button>
+        </DataTemplate>
+    </controls:UserControlBase.Resources>
+    <StackPanel>
+        <TextBlock
+            Margin="8,8"
+            FontSize="26"
+            Text="{x:Static lang:Resources.Label_RecommendedModels}"
+            TextAlignment="Left" />
+
+        <TextBlock
+            Margin="8,0,0,8"
+            Text="{x:Static lang:Resources.Label_RecommendedModelsSubText}"
+            TextAlignment="Left"
+            TextWrapping="WrapWithOverflow" />
+
+        <controls:ProgressRing
+            Width="96"
+            Height="96"
+            Margin="8"
+            IsIndeterminate="True"
+            IsVisible="{Binding IsLoading}" />
+
+        <ScrollViewer
+            Margin="4,8,4,8"
+            HorizontalScrollBarVisibility="Disabled"
+            IsVisible="{Binding !IsLoading}"
+            VerticalScrollBarVisibility="Auto">
+            <ItemsControl ItemTemplate="{StaticResource PackageTemplate}" ItemsSource="{Binding RecommendedModels}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel HorizontalAlignment="Center" Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+        </ScrollViewer>
+    </StackPanel>
+</controls:UserControlBase>

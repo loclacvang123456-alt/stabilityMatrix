@@ -1,0 +1,124 @@
+﻿using System;
+using System.Threading.Tasks;
+using StabilityMatrix.Avalonia.ViewModels.Base;
+using StabilityMatrix.Core.Models;
+using StabilityMatrix.Core.Models.Progress;
+using StabilityMatrix.Core.Services;
+
+namespace StabilityMatrix.Avalonia.ViewModels.Progress;
+
+public class DownloadProgressItemViewModel : PausableProgressItemViewModelBase
+{
+    private readonly ITrackedDownloadService downloadService;
+    private readonly TrackedDownload download;
+
+    public DownloadProgressItemViewModel(ITrackedDownloadService downloadService, TrackedDownload download)
+    {
+        this.downloadService = downloadService;
+        this.download = download;
+
+        Id = download.Id;
+        Name = download.FileName;
+        State = download.ProgressState;
+        OnProgressStateChanged(State);
+
+        // If initial progress provided, load it
+        if (download is { TotalBytes: > 0, DownloadedBytes: > 0 })
+        {
+            var current = download.DownloadedBytes / (double)download.TotalBytes;
+            Progress.Value = (float)Math.Ceiling(Math.Clamp(current, 0, 1) * 100);
+        }
+
+        download.ProgressUpdate += (s, e) =>
+        {
+            Progress.Value = e.Percentage;
+            Progress.IsIndeterminate = e.IsIndeterminate;
+            Progress.DownloadSpeedInMBps = e.SpeedInMBps;
+        };
+
+        download.ProgressStateChanged += (s, e) =>
+        {
+            State = e;
+            OnProgressStateChanged(e);
+        };
+    }
+
+    private void OnProgressStateChanged(ProgressState state)
+    {
+        if (state is ProgressState.Inactive or ProgressState.Paused)
+        {
+            Progress.Text = "Paused";
+        }
+        else if (state == ProgressState.Working)
+        {
+            Progress.Text = "Downloading...";
+        }
+        else if (state == ProgressState.Success)
+        {
+            Progress.Text = "Completed";
+        }
+        else if (state == ProgressState.Cancelled)
+        {
+            Progress.Text = "Cancelled";
+        }
+        else if (state == ProgressState.Failed)
+        {
+            Progress.Text = "Failed";
+        }
+        else if (state == ProgressState.Pending)
+        {
+            Progress.Text = "Waiting for other downloads to finish";
+        }
+    }
+
+    /// <summary>
+    /// Downloads support manual retry when they reach the Failed state.
+    /// </summary>
+    public override bool SupportsRetry => true;
+
+    /// <summary>
+    /// Downloads support dismiss, which cleans up all sidecar files when
+    /// the user discards a failed download without retrying.
+    /// </summary>
+    public override bool SupportsDismiss => true;
+
+    /// <inheritdoc />
+    public override Task Cancel()
+    {
+        download.Cancel();
+        return Task.CompletedTask;
+    }
+
+    /// <inheritdoc />
+    public override Task Pause()
+    {
+        download.Pause();
+        State = ProgressState.Paused;
+        return Task.CompletedTask;
+    }
+
+    /// <inheritdoc />
+    public override Task Resume()
+    {
+        return downloadService.TryResumeDownload(download);
+    }
+
+    /// <inheritdoc />
+    /// Resets the internal retry counter so the user gets a fresh 3-attempt budget,
+    /// then re-registers the download in the service dictionary (it was removed on
+    /// failure) and resumes it through the normal concurrency queue.
+    public override Task Retry()
+    {
+        download.ResetAttempts();
+        return downloadService.TryRestartDownload(download);
+    }
+
+    /// <inheritdoc />
+    /// Runs full cleanup (temp file + sidecar files) for a failed download the user
+    /// chooses not to retry, then transitions to Cancelled so the service removes it.
+    public override Task Dismiss()
+    {
+        download.Dismiss();
+        return Task.CompletedTask;
+    }
+}

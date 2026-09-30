@@ -1,0 +1,546 @@
+name: Release
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        type: string
+        required: true
+        description: Version (Semver without leading v)
+      sentry-release:
+        type: boolean
+        description: Make Sentry Release?
+        default: true
+      github-release:
+        type: boolean
+        description: Make GitHub Release?
+        default: true
+      github-release-draft:
+        type: boolean
+        description: Mark GitHub Release as Draft?
+        default: false
+      github-release-prerelease:
+        type: boolean
+        description: Mark GitHub Release as Prerelease?
+        default: false
+      auto-update-release:
+        type: boolean
+        description: Release auto-update?
+        default: false
+      auto-update-release-mode:
+        type: choice
+        description: Release auto-update mode
+        options:
+          - github url
+          - upload to b2
+      auto-update-release-channel:
+        type: choice
+        description: Release auto-update channel
+        options:
+          - stable
+          - preview
+          - development
+      sign-windows:
+        type: boolean
+        description: Sign Windows executable?
+        default: true
+      test-release-artifacts:
+        type: boolean
+        description: "[Debug] Test release artifacts?"
+        default: false
+
+jobs:
+  release-linux:
+    name: Release (linux-x64)
+    env:
+      platform-id: linux-x64
+      out-name: StabilityMatrix.AppImage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: olegtarasov/get-tag@v2.1.2
+        if: github.event_name == 'release'
+        id: tag_name
+        with:
+          tagRegex: "v(.*)"
+          
+      - name: Set Version from Tag
+        if: github.event_name == 'release'
+        run: |
+          echo "Using tag ${{ env.GIT_TAG_NAME }}"
+          echo "RELEASE_VERSION=${{ env.GIT_TAG_NAME }}" >> $GITHUB_ENV
+          
+      - name: Set Version from manual input
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "Using version ${{ github.event.inputs.version }}"
+          echo "RELEASE_VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          # Net 9 for app, Net 8 for PupNet 1.9
+          dotnet-version: | 
+            8.0.x
+            9.0.x
+
+      - name: Install AppImage build dependencies
+        run: |
+          sudo apt-get -y install fuse3
+          wget -q https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+          sudo mv appimagetool-x86_64.AppImage /usr/local/bin/
+          sudo chmod +x /usr/local/bin/appimagetool-x86_64.AppImage
+      
+      - name: Install PupNet
+        run: dotnet tool install -g KuiperZone.PupNet --version 1.9.1
+      
+      - name: PupNet Build
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        run: pupnet -r linux-x64 -c Release --kind appimage --app-version $RELEASE_VERSION --clean -y
+
+      - name: Post Build
+        run: mv ./Release/linux-x64/StabilityMatrix.x86_64.AppImage ${{ env.out-name }}
+      
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: StabilityMatrix-${{ env.platform-id }}
+          path: ${{ env.out-name }}
+          retention-days: 1
+          if-no-files-found: error
+         
+      - name: Create Sentry release
+        if: ${{ github.event.inputs.sentry-release == 'true' }}
+        uses: getsentry/action-release@v1
+        env:
+          MAKE_SENTRY_RELEASE: ${{ secrets.SENTRY_PROJECT != '' }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+        with:
+          environment: production
+          ignore_missing: true
+          ignore_empty: true
+          version: StabilityMatrix.Avalonia@${{ github.event.inputs.version }}
+
+          
+  release-windows:
+    name: Release (win-x64)
+    env:
+      platform-id: win-x64
+      out-name: StabilityMatrix.exe
+    runs-on: windows-latest
+    # Binds the OIDC subject to the environment (branch-agnostic), so releases from
+    # any branch (main, dev, ...) match a single federated credential.
+    environment: release
+    # OIDC (id-token) is required for passwordless Azure login used by code signing.
+    # contents: read is the minimum needed for checkout (overrides the workflow-level contents: write).
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: olegtarasov/get-tag@v2.1.2
+        if: github.event_name == 'release'
+        id: tag_name
+        with:
+          tagRegex: "v(.*)"
+
+      - name: Set Version from Tag
+        if: github.event_name == 'release'
+        run: |
+          echo "Using tag ${{ env.GIT_TAG_NAME }}"
+          echo "RELEASE_VERSION=${{ env.GIT_TAG_NAME }}" >> $env:GITHUB_ENV
+
+      - name: Set Version from manual input
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "Using version ${{ github.event.inputs.version }}"
+          echo "RELEASE_VERSION=${{ github.event.inputs.version }}" >> $env:GITHUB_ENV
+
+      - name: Set up .NET 9
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Install dependencies
+        run: dotnet restore
+
+      - name: .NET Publish
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        run: >
+          dotnet publish ./StabilityMatrix.Avalonia/StabilityMatrix.Avalonia.csproj
+          -o out -c Release -r ${{ env.platform-id }}
+          -p:Version=$env:RELEASE_VERSION
+          -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:PublishReadyToRun=true
+          -p:SentryOrg=${{ secrets.SENTRY_ORG }} -p:SentryProject=${{ secrets.SENTRY_PROJECT }}
+          -p:SentryUploadSymbols=true -p:SentryUploadSources=true
+
+      - name: Post Build
+        run: mv ./out/StabilityMatrix.Avalonia.exe ./out/${{ env.out-name }}
+
+      # Passwordless login via OIDC federated credentials (no client secret stored).
+      # Skipped when sign-windows is explicitly disabled (escape hatch for unsigned releases).
+      - name: Azure Login (OIDC)
+        if: ${{ github.event.inputs.sign-windows != 'false' }}
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # The signing action installs its tooling (sign CLI, SDK build tools) via NuGet
+      # with --add-source, which NuGet rejects while our packageSourceMapping is active.
+      # Move our config aside for the sign step; restored immediately after.
+      - name: Disable NuGet source mapping for signing
+        if: ${{ github.event.inputs.sign-windows != 'false' }}
+        run: Rename-Item NuGet.Config NuGet.Config.disabled
+
+      # Authenticode-sign the published single-file exe before upload, so every
+      # downstream channel (GitHub release, B2 / matrix auto-update) ships signed bytes.
+      - name: Sign Windows executable
+        if: ${{ github.event.inputs.sign-windows != 'false' }}
+        uses: azure/trusted-signing-action@v2.0.0
+        with:
+          endpoint: ${{ vars.SIGNING_ENDPOINT }}
+          signing-account-name: ${{ vars.SIGNING_ACCOUNT_NAME }}
+          certificate-profile-name: ${{ vars.SIGNING_CERT_PROFILE_NAME }}
+          files-folder: ${{ github.workspace }}\out
+          files-folder-filter: exe
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
+
+      # Restore the config even if signing failed, so the tree stays consistent.
+      - name: Restore NuGet source mapping
+        if: ${{ always() && github.event.inputs.sign-windows != 'false' }}
+        run: Rename-Item NuGet.Config.disabled NuGet.Config
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: StabilityMatrix-${{ env.platform-id }}
+          path: ./out/${{ env.out-name }}
+          retention-days: 1
+          if-no-files-found: error
+
+  release-macos:
+    name: Release (macos-arm64)
+    env:
+      platform-id: osx-arm64
+      app-name: "Stability Matrix.app"
+      out-name: "StabilityMatrix-macos-arm64.dmg"
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: olegtarasov/get-tag@v2.1.2
+        if: github.event_name == 'release'
+        id: tag_name
+        with:
+          tagRegex: "v(.*)"
+
+      - name: Set Version from Tag
+        if: github.event_name == 'release'
+        run: |
+          echo "Using tag ${{ env.GIT_TAG_NAME }}"
+          echo "RELEASE_VERSION=${{ env.GIT_TAG_NAME }}" >> $GITHUB_ENV
+
+      - name: Set Version from manual input
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "Using version ${{ github.event.inputs.version }}"
+          echo "RELEASE_VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+
+      - name: Set up .NET 9
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Install dependencies
+        run: dotnet restore -p:PublishReadyToRun=true
+        
+      - name: Check Version
+        run: echo $RELEASE_VERSION
+
+      - name: .NET Msbuild (App)
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        run: >
+          dotnet msbuild ./StabilityMatrix.Avalonia/StabilityMatrix.Avalonia.csproj
+          -t:BundleApp -p:UseAppHost=true -p:SelfContained=true
+          -p:Configuration=Release -p:RuntimeIdentifier=${{ env.platform-id }}
+          -p:Version=$RELEASE_VERSION
+          -p:PublishDir=out
+          -p:PublishReadyToRun=true
+          -p:CFBundleShortVersionString=$RELEASE_VERSION
+          -p:CFBundleName="Stability Matrix"
+          -p:CFBundleDisplayName="Stability Matrix"
+          -p:CFBundleVersion=$RELEASE_VERSION
+          -p:SentryOrg=${{ secrets.SENTRY_ORG }} -p:SentryProject=${{ secrets.SENTRY_PROJECT }}
+          -p:SentryUploadSymbols=true -p:SentryUploadSources=true
+
+      - name: Post Build (App)
+        run: mkdir -p signing && mv "./StabilityMatrix.Avalonia/out/Stability Matrix.app" "./signing/${{ env.app-name }}"
+
+      - name: Codesign app bundle
+        env:
+          MACOS_CERTIFICATE: ${{ secrets.PROD_MACOS_CERTIFICATE }}
+          MACOS_CERTIFICATE_PWD: ${{ secrets.PROD_MACOS_CERTIFICATE_PWD }}
+          MACOS_CERTIFICATE_NAME: ${{ secrets.PROD_MACOS_CERTIFICATE_NAME }}
+          MACOS_CI_KEYCHAIN_PWD: ${{ secrets.PROD_MACOS_CI_KEYCHAIN_PWD }}
+        run: ./Build/codesign_macos.sh "./signing/${{ env.app-name }}"
+
+      - name: Notarize app bundle
+        env:
+          MACOS_NOTARIZATION_APPLE_ID: ${{ secrets.PROD_MACOS_NOTARIZATION_APPLE_ID }}
+          MACOS_NOTARIZATION_TEAM_ID: ${{ secrets.PROD_MACOS_NOTARIZATION_TEAM_ID }}
+          MACOS_NOTARIZATION_PWD: ${{ secrets.PROD_MACOS_NOTARIZATION_PWD }}
+        run: ./Build/notarize_macos.sh "./signing/${{ env.app-name }}"
+
+      - name: Zip Artifact (App)
+        working-directory: signing
+        run: zip -r -y "../StabilityMatrix-${{ env.platform-id }}-app.zip" "${{ env.app-name }}"
+
+      - name: Upload Artifact (App)
+        uses: actions/upload-artifact@v4
+        with:
+          name: StabilityMatrix-${{ env.platform-id }}-app
+          path: StabilityMatrix-${{ env.platform-id }}-app.zip
+          retention-days: 1
+          if-no-files-found: error
+          
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.11.x'
+      
+      - name: Install dependencies for dmg creation
+        run: brew install graphicsmagick imagemagick && npm install --global create-dmg
+      
+      - name: Create dmg
+        working-directory: signing
+        run: >
+          create-dmg "${{ env.app-name }}" --overwrite --identity "${{ secrets.PROD_MACOS_CERTIFICATE_NAME }}"
+          
+      - name: Rename dmg
+        working-directory: signing
+        run: mv "$(find . -type f -name "*.dmg")" "${{ env.out-name }}"
+          
+      - name: Zip Artifact (dmg)
+        working-directory: signing
+        run: zip -r -y "../StabilityMatrix-${{ env.platform-id }}-dmg.zip" "${{ env.out-name }}"
+        
+      - name: Upload Artifact (dmg)
+        uses: actions/upload-artifact@v4
+        with:
+          name: StabilityMatrix-${{ env.platform-id }}-dmg
+          path: StabilityMatrix-${{ env.platform-id }}-dmg.zip
+          retention-days: 1
+          if-no-files-found: error
+  
+  publish-release:
+    name: Publish GitHub Release
+    needs: [ release-linux, release-windows, release-macos ]
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.github-release == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Extract Release Notes
+        id: release_notes
+        run: |
+          RELEASE_NOTES="$(awk -v version="${{ github.event.inputs.version }}" '/## v/{if(p) exit; if($0 ~ version) p=1}; p' CHANGELOG.md)"
+          RELEASE_NOTES="${RELEASE_NOTES//'%'/'%25'}"
+          RELEASE_NOTES="${RELEASE_NOTES//$'\n'/'%0A'}"
+          RELEASE_NOTES="${RELEASE_NOTES//$'\r'/'%0D'}"
+          echo "::set-output name=release_notes::$RELEASE_NOTES"
+
+      # Downloads all previous artifacts to the current working directory
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        
+      # Zip each build (except macos which is already dmg)
+      - name: Zip Artifacts
+        run: |
+          cd StabilityMatrix-win-x64 && zip -r ../StabilityMatrix-win-x64.zip ./. && cd $OLDPWD
+          cd StabilityMatrix-linux-x64 && zip -r ../StabilityMatrix-linux-x64.zip ./. && cd $OLDPWD
+          unzip "StabilityMatrix-osx-arm64-dmg/StabilityMatrix-osx-arm64-dmg.zip"
+
+      - name: Create Github Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: |
+            StabilityMatrix-win-x64.zip
+            StabilityMatrix-linux-x64.zip
+            StabilityMatrix-macos-arm64.dmg
+          fail_on_unmatched_files: true
+          tag_name: v${{ github.event.inputs.version }}
+          body: ${{ steps.release_notes.outputs.release_notes }}
+          draft: ${{ github.event.inputs.github-release-draft == 'true' }}
+          prerelease: ${{ github.event.inputs.github-release-prerelease == 'true' }} 
+          
+  test-artifacts:
+    name: Test Release Artifacts
+    needs: [ release-linux, release-windows, release-macos ]
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.test-release-artifacts == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Extract Release Notes
+        id: release_notes
+        run: |
+          RELEASE_NOTES="$(awk -v version="${{ github.event.inputs.version }}" '/## v/{if(p) exit; if($0 ~ version) p=1}; p' CHANGELOG.md)"
+          RELEASE_NOTES="${RELEASE_NOTES//'%'/'%25'}"
+          RELEASE_NOTES="${RELEASE_NOTES//$'\n'/'%0A'}"
+          RELEASE_NOTES="${RELEASE_NOTES//$'\r'/'%0D'}"
+          echo "::set-output name=release_notes::$RELEASE_NOTES"
+          echo "Release Notes:"
+          echo "$RELEASE_NOTES"
+
+      # Downloads all previous artifacts to the current working directory
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+
+      # Zip each build (except macos which is already dmg)
+      - name: Zip Artifacts
+        run: |
+          cd StabilityMatrix-win-x64 && zip -r ../StabilityMatrix-win-x64.zip ./. && cd $OLDPWD
+          cd StabilityMatrix-linux-x64 && zip -r ../StabilityMatrix-linux-x64.zip ./. && cd $OLDPWD
+          unzip "StabilityMatrix-osx-arm64-dmg/StabilityMatrix-osx-arm64-dmg.zip"
+
+      # Check that the zips and CHANGELOG.md are in the current working directory
+      - name: Check files
+        run: |
+          if [ ! -f StabilityMatrix-win-x64.zip ]; then
+            echo "StabilityMatrix-win-x64.zip not found"
+            exit 1
+          else
+            echo "StabilityMatrix-win-x64.zip found"
+            sha256sum StabilityMatrix-win-x64.zip
+          fi
+          if [ ! -f StabilityMatrix-linux-x64.zip ]; then
+            echo "StabilityMatrix-linux-x64.zip not found"
+            exit 1
+          else
+            echo "StabilityMatrix-linux-x64.zip found"
+            sha256sum StabilityMatrix-linux-x64.zip
+          fi
+          if [ ! -f StabilityMatrix-macos-arm64.dmg ]; then
+            echo "StabilityMatrix-macos-arm64.dmg not found"
+            exit 1
+          else
+            echo "StabilityMatrix-macos-arm64.dmg found"
+            sha256sum StabilityMatrix-macos-arm64.dmg
+          fi
+          if [ ! -f CHANGELOG.md ]; then
+            echo "CHANGELOG.md not found"
+            exit 1
+          fi
+  
+  publish-auto-update-github:
+    name: Publish Auto-Update Release (GitHub)
+    needs: [ release-linux, release-windows, release-macos, publish-release ]
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.auto-update-release == 'true' && github.event.inputs.auto-update-release-mode == 'github url' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        
+      - name: Set Version from manual input
+        run: |
+          echo "Using version ${{ github.event.inputs.version }}"
+          echo "RELEASE_VERSION=${{ github.event.inputs.version }}" >> $env:GITHUB_ENV
+        
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          
+      - name: Install Python Dependencies
+        run: pip install stability-matrix-tools>=0.3.0 --upgrade
+        
+      - name: Publish Auto-Update Release
+        env:
+          SM_B2_API_ID: ${{ secrets.SM_B2_API_ID }}
+          SM_B2_API_KEY: ${{ secrets.SM_B2_API_KEY }}
+          SM_CF_CACHE_PURGE_TOKEN: ${{ secrets.SM_CF_CACHE_PURGE_TOKEN }}
+          SM_CF_ZONE_ID: ${{ secrets.SM_CF_ZONE_ID }}
+          SM_SIGNING_PRIVATE_KEY: ${{ secrets.SM_SIGNING_PRIVATE_KEY }}
+        run: sm-tools updates publish-matrix-v3 -v ${{ github.event.inputs.version }} -y
+
+  publish-auto-update-b2:
+    name: Publish Auto-Update Release (B2)
+    needs: [ release-linux, release-windows, release-macos ]
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.auto-update-release == 'true' && github.event.inputs.auto-update-release-mode == 'upload to b2' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set Version from manual input
+        run: |
+          echo "Using version ${{ github.event.inputs.version }}"
+          echo "RELEASE_VERSION=${{ github.event.inputs.version }}" >> $env:GITHUB_ENV
+
+      # Downloads all previous artifacts to the current working directory
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+      
+      # Zip each build (except macos which is already dmg)
+      - name: Zip Artifacts
+        run: |
+          cd StabilityMatrix-win-x64 && zip -r ../StabilityMatrix-win-x64.zip ./. && cd $OLDPWD
+          cd StabilityMatrix-linux-x64 && zip -r ../StabilityMatrix-linux-x64.zip ./. && cd $OLDPWD
+          unzip "StabilityMatrix-osx-arm64-dmg/StabilityMatrix-osx-arm64-dmg.zip"
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Python Dependencies
+        run: pip install stability-matrix-tools>=0.3.0 --upgrade
+      
+      # Check that the zips and CHANGELOG.md are in the current working directory
+      - name: Check files
+        run: |
+          if [ ! -f StabilityMatrix-win-x64.zip ]; then
+            echo "StabilityMatrix-win-x64.zip not found"
+            exit 1
+          fi
+          if [ ! -f StabilityMatrix-linux-x64.zip ]; then
+            echo "StabilityMatrix-linux-x64.zip not found"
+            exit 1
+          fi
+          if [ ! -f StabilityMatrix-macos-arm64.dmg ]; then
+            echo "StabilityMatrix-macos-arm64.dmg not found"
+            exit 1
+          fi
+          if [ ! -f CHANGELOG.md ]; then
+            echo "CHANGELOG.md not found"
+            exit 1
+          fi
+
+      - name: Publish Auto-Update Release
+        env:
+          SM_B2_API_ID: ${{ secrets.SM_B2_API_ID }}
+          SM_B2_API_KEY: ${{ secrets.SM_B2_API_KEY }}
+          SM_CF_CACHE_PURGE_TOKEN: ${{ secrets.SM_CF_CACHE_PURGE_TOKEN }}
+          SM_CF_ZONE_ID: ${{ secrets.SM_CF_ZONE_ID }}
+          SM_SIGNING_PRIVATE_KEY: ${{ secrets.SM_SIGNING_PRIVATE_KEY }}
+        run: >
+          sm-tools updates publish-files-v3 -v ${{ github.event.inputs.version }}
+          --channel ${{ github.event.inputs.auto-update-release-channel }}
+          --changelog CHANGELOG.md
+          --win-x64 StabilityMatrix-win-x64.zip
+          --linux-x64 StabilityMatrix-linux-x64.zip
+          --macos-arm64 StabilityMatrix-macos-arm64.dmg
+          -y

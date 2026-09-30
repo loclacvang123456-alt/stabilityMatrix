@@ -1,0 +1,1574 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Action_Launch" xml:space="preserve">
+    <value>Launch</value>
+  </data>
+  <data name="Action_Quit" xml:space="preserve">
+    <value>終了</value>
+  </data>
+  <data name="Action_Save" xml:space="preserve">
+    <value>保存</value>
+  </data>
+  <data name="Action_Cancel" xml:space="preserve">
+    <value>キャンセル</value>
+  </data>
+  <data name="Label_Language" xml:space="preserve">
+    <value>言語</value>
+  </data>
+  <data name="Text_RelaunchRequiredToApplyLanguage" xml:space="preserve">
+    <value>言語を変更するにはアプリの再起動が必要です</value>
+  </data>
+  <data name="Action_Relaunch" xml:space="preserve">
+    <value>再起動</value>
+  </data>
+  <data name="Action_RelaunchLater" xml:space="preserve">
+    <value>後で再起動</value>
+  </data>
+  <data name="Label_RelaunchRequired" xml:space="preserve">
+    <value>再起動が必要です</value>
+  </data>
+  <data name="Label_UnknownPackage" xml:space="preserve">
+    <value>不明なパッケージ</value>
+  </data>
+  <data name="Action_Import" xml:space="preserve">
+    <value>インポート</value>
+  </data>
+  <data name="Label_PackageType" xml:space="preserve">
+    <value>パッケージタイプ</value>
+  </data>
+  <data name="Label_Version" xml:space="preserve">
+    <value>Version</value>
+  </data>
+  <data name="Label_VersionType" xml:space="preserve">
+    <value>Version Type</value>
+  </data>
+  <data name="Label_Releases" xml:space="preserve">
+    <value>Releases</value>
+  </data>
+  <data name="Label_Branches" xml:space="preserve">
+    <value>ブランチ</value>
+  </data>
+  <data name="Label_DragAndDropCheckpointsHereToImport" xml:space="preserve">
+    <value>インポートするCheckpointをここにドラッグ＆ドロップ</value>
+  </data>
+  <data name="Label_Emphasis" xml:space="preserve">
+    <value>プロンプトの強調</value>
+  </data>
+  <data name="Label_Deemphasis" xml:space="preserve">
+    <value>プロンプトを弱める</value>
+  </data>
+  <data name="Label_EmbeddingsOrTextualInversion" xml:space="preserve">
+    <value>Embeddings / Textual Inversion</value>
+  </data>
+  <data name="Label_NetworksLoraOrLycoris" xml:space="preserve">
+    <value>Networks (Lora / LyCORIS)</value>
+  </data>
+  <data name="Label_Comments" xml:space="preserve">
+    <value>コメント</value>
+  </data>
+  <data name="Label_ShowPixelGridAtHighZoomLevels" xml:space="preserve">
+    <value>高倍率でピクセルグリッドを表示</value>
+  </data>
+  <data name="Label_Steps" xml:space="preserve">
+    <value>Steps</value>
+  </data>
+  <data name="Label_StepsBase" xml:space="preserve">
+    <value>Steps - Base</value>
+  </data>
+  <data name="Label_StepsRefiner" xml:space="preserve">
+    <value>Steps - Refiner</value>
+  </data>
+  <data name="Label_CFGScale" xml:space="preserve">
+    <value>CFG Scale</value>
+  </data>
+  <data name="Label_DenoisingStrength" xml:space="preserve">
+    <value>Denoising Strength</value>
+  </data>
+  <data name="Label_Width" xml:space="preserve">
+    <value>幅</value>
+  </data>
+  <data name="Label_Height" xml:space="preserve">
+    <value>高</value>
+  </data>
+  <data name="Label_Refiner" xml:space="preserve">
+    <value>Refiner</value>
+  </data>
+  <data name="Label_VAE" xml:space="preserve">
+    <value>VAE</value>
+  </data>
+  <data name="Label_Model" xml:space="preserve">
+    <value>モデル</value>
+  </data>
+  <data name="Action_Connect" xml:space="preserve">
+    <value>接続</value>
+  </data>
+  <data name="Label_ConnectingEllipsis" xml:space="preserve">
+    <value>接続中...</value>
+  </data>
+  <data name="Action_Close" xml:space="preserve">
+    <value>閉じる</value>
+  </data>
+  <data name="Label_WaitingToConnectEllipsis" xml:space="preserve">
+    <value>接続待ち...</value>
+  </data>
+  <data name="Label_UpdateAvailable" xml:space="preserve">
+    <value>更新あり</value>
+  </data>
+  <data name="Label_EarlyAccessUpdateAvailable" xml:space="preserve">
+    <value>Early Accessの更新あり</value>
+  </data>
+  <data name="Label_BecomeAPatron" xml:space="preserve">
+    <value>Patreonになる</value>
+  </data>
+  <data name="Label_JoinDiscord" xml:space="preserve">
+    <value>Discordに参加</value>
+  </data>
+  <data name="Label_Downloads" xml:space="preserve">
+    <value>ダウンロード</value>
+  </data>
+  <data name="Action_Install" xml:space="preserve">
+    <value>インストール</value>
+  </data>
+  <data name="Label_SkipSetup" xml:space="preserve">
+    <value>セットアップをスキップ</value>
+  </data>
+  <data name="Label_UnexpectedErrorOccurred" xml:space="preserve">
+    <value>予期せぬエラーが発生しました</value>
+  </data>
+  <data name="Action_ExitApplication" xml:space="preserve">
+    <value>アプリケーションを終了</value>
+  </data>
+  <data name="Label_DisplayName" xml:space="preserve">
+    <value>表示名</value>
+  </data>
+  <data name="Label_InstallationWithThisNameExists" xml:space="preserve">
+    <value>同じ名前が既に存在します。</value>
+  </data>
+  <data name="Label_PleaseChooseDifferentName" xml:space="preserve">
+    <value>別の名前を選択するか、別のインストール場所を選択してください。</value>
+  </data>
+  <data name="Label_AdvancedOptions" xml:space="preserve">
+    <value>高度なオプション</value>
+  </data>
+  <data name="Label_Commit" xml:space="preserve">
+    <value>コミット</value>
+  </data>
+  <data name="Label_SharedModelFolderStrategy" xml:space="preserve">
+    <value>Shared Model Folder Strategy</value>
+  </data>
+  <data name="Label_PyTorchVersion" xml:space="preserve">
+    <value>PyTorchバージョン</value>
+  </data>
+  <data name="Label_CloseDialogWhenFinished" xml:space="preserve">
+    <value>終了時にダイアログを閉じる</value>
+  </data>
+  <data name="Label_DataDirectory" xml:space="preserve">
+    <value>データフォルダ</value>
+  </data>
+  <data name="Label_DataDirectoryExplanation" xml:space="preserve">
+    <value>ここにCheckpoint、LORA、Web UI、設定などがインストールされます。</value>
+  </data>
+  <data name="Label_FatWarning" xml:space="preserve">
+    <value>フォーマット形式がFAT32またはexFATのドライブを使用するとエラーが発生する場合があります。他のドライブを選択することで、よりスムーズにご利用いただけます。</value>
+  </data>
+  <data name="Label_PortableMode" xml:space="preserve">
+    <value>Portableモード</value>
+  </data>
+  <data name="Label_PortableModeExplanation" xml:space="preserve">
+    <value>Portableモードではすべてのデータと設定はアプリケーションと同じフォルダに保存されます。アプリケーションと「Data」フォルダを一緒に移動させることで、別のフォルダや別のコンピュータに移すことができます。</value>
+  </data>
+  <data name="Action_Continue" xml:space="preserve">
+    <value>続ける</value>
+  </data>
+  <data name="Label_PreviousImage" xml:space="preserve">
+    <value>前の画像</value>
+  </data>
+  <data name="Label_NextImage" xml:space="preserve">
+    <value>次の画像</value>
+  </data>
+  <data name="Label_ModelDescription" xml:space="preserve">
+    <value>モデルの説明</value>
+  </data>
+  <data name="Label_NewVersionAvailable" xml:space="preserve">
+    <value>Stability Matrixの最新版がリリース！</value>
+  </data>
+  <data name="Label_ImportLatest" xml:space="preserve">
+    <value>最新版DL</value>
+  </data>
+  <data name="Label_AllVersions" xml:space="preserve">
+    <value>すべてのバージョン</value>
+  </data>
+  <data name="Label_ModelSearchWatermark" xml:space="preserve">
+    <value>検索 ( models, #tags, @users )</value>
+  </data>
+  <data name="Action_Search" xml:space="preserve">
+    <value>検索</value>
+  </data>
+  <data name="Label_Sort" xml:space="preserve">
+    <value>並び替え</value>
+  </data>
+  <data name="Label_TimePeriod" xml:space="preserve">
+    <value>期間</value>
+  </data>
+  <data name="Label_ModelType" xml:space="preserve">
+    <value>モデルタイプ</value>
+  </data>
+  <data name="Label_BaseModel" xml:space="preserve">
+    <value>ベースモデル</value>
+  </data>
+  <data name="Label_ShowNsfwContent" xml:space="preserve">
+    <value>NSFWコンテンツを表示</value>
+  </data>
+  <data name="Label_DataProvidedByCivitAi" xml:space="preserve">
+    <value>CivitAIによる情報</value>
+  </data>
+  <data name="Label_Page" xml:space="preserve">
+    <value>ページ</value>
+  </data>
+  <data name="Label_FirstPage" xml:space="preserve">
+    <value>最初のページ</value>
+  </data>
+  <data name="Label_PreviousPage" xml:space="preserve">
+    <value>前のページ</value>
+  </data>
+  <data name="Label_NextPage" xml:space="preserve">
+    <value>次のページ</value>
+  </data>
+  <data name="Label_LastPage" xml:space="preserve">
+    <value>最終ページ</value>
+  </data>
+  <data name="Action_Rename" xml:space="preserve">
+    <value>名前変更</value>
+  </data>
+  <data name="Action_Delete" xml:space="preserve">
+    <value>削除</value>
+  </data>
+  <data name="Action_OpenOnCivitAi" xml:space="preserve">
+    <value>CivitAIで開く</value>
+  </data>
+  <data name="Label_ConnectedModel" xml:space="preserve">
+    <value>メタデータ取得済みモデル</value>
+  </data>
+  <data name="Label_LocalModel" xml:space="preserve">
+    <value>ローカルモデル</value>
+  </data>
+  <data name="Action_ShowInExplorer" xml:space="preserve">
+    <value>エクスプローラで表示</value>
+  </data>
+  <data name="Action_New" xml:space="preserve">
+    <value>New</value>
+  </data>
+  <data name="Label_Folder" xml:space="preserve">
+    <value>フォルダ</value>
+  </data>
+  <data name="Label_DropFileToImport" xml:space="preserve">
+    <value>ここにファイルをドロップしてインポート</value>
+  </data>
+  <data name="Label_ImportAsConnected" xml:space="preserve">
+    <value>インポート時にメタデータを自動検索</value>
+  </data>
+  <data name="Label_ImportAsConnectedExplanation" xml:space="preserve">
+    <value>ローカルからのインポート時にオンラインでメタデータを検索して適用します</value>
+  </data>
+  <data name="Label_Indexing" xml:space="preserve">
+    <value>インデックス作成中...</value>
+  </data>
+  <data name="Label_ModelsFolder" xml:space="preserve">
+    <value>モデルフォルダ</value>
+  </data>
+  <data name="Label_Categories" xml:space="preserve">
+    <value>カテゴリ</value>
+  </data>
+  <data name="Label_LetsGetStarted" xml:space="preserve">
+    <value>さあ、始めよう</value>
+  </data>
+  <data name="Label_ReadAndAgree" xml:space="preserve">
+    <value>次の約款を読み、同意します：</value>
+  </data>
+  <data name="Label_LicenseAgreement" xml:space="preserve">
+    <value>使用許諾契約書</value>
+  </data>
+  <data name="Label_FindConnectedMetadata" xml:space="preserve">
+    <value>メタデータを探す</value>
+  </data>
+  <data name="Label_ShowModelImages" xml:space="preserve">
+    <value>モデルの見出し画像を表示</value>
+  </data>
+  <data name="Label_Appearance" xml:space="preserve">
+    <value>外観</value>
+  </data>
+  <data name="Label_Theme" xml:space="preserve">
+    <value>テーマ</value>
+  </data>
+  <data name="Label_CheckpointManager" xml:space="preserve">
+    <value>Checkpointマネージャー</value>
+  </data>
+  <data name="Label_RemoveSymlinksOnShutdown" xml:space="preserve">
+    <value>Checkpointフォルダ内のシンボリックリンクをシャットダウンか再起動時に削除</value>
+  </data>
+  <data name="Label_RemoveSymlinksOnShutdown_Details" xml:space="preserve">
+    <value>Stability Matrix を別のドライブに移動する際に問題が起きた場合、ここにチェック</value>
+  </data>
+  <data name="Label_ResetCheckpointsCache" xml:space="preserve">
+    <value>Checkpointキャッシュのリセット</value>
+  </data>
+  <data name="Label_ResetCheckpointsCache_Details" xml:space="preserve">
+    <value>Checkpointsキャッシュを再構築します。モデルブラウザでCheckpointsのラベルが正しくない場合に使用してください</value>
+  </data>
+  <data name="Label_PackageEnvironment" xml:space="preserve">
+    <value>パッケージ環境</value>
+  </data>
+  <data name="Action_Edit" xml:space="preserve">
+    <value>編集</value>
+  </data>
+  <data name="Label_EnvironmentVariables" xml:space="preserve">
+    <value>環境変数</value>
+  </data>
+  <data name="Label_EmbeddedPython" xml:space="preserve">
+    <value>組み込みPython</value>
+  </data>
+  <data name="Action_CheckVersion" xml:space="preserve">
+    <value>バージョンを確認</value>
+  </data>
+  <data name="Label_Integrations" xml:space="preserve">
+    <value>統合</value>
+  </data>
+  <data name="Label_DiscordRichPresence" xml:space="preserve">
+    <value>Stability Matrix利用中にDiscordステータス欄に表示</value>
+  </data>
+  <data name="Label_System" xml:space="preserve">
+    <value>システム</value>
+  </data>
+  <data name="Label_AddToStartMenu" xml:space="preserve">
+    <value>スタートメニューにStability Matrixを追加</value>
+  </data>
+  <data name="Label_AddToStartMenu_Details" xml:space="preserve">
+    <value>現在のアプリの場所を使用します。アプリを移動すると、これを再度実行できます</value>
+  </data>
+  <data name="Label_OnlyAvailableOnWindows" xml:space="preserve">
+    <value>Windowsのみ</value>
+  </data>
+  <data name="Action_AddForCurrentUser" xml:space="preserve">
+    <value>現在のユーザーに追加</value>
+  </data>
+  <data name="Action_AddForAllUsers" xml:space="preserve">
+    <value>全ユーザーに追加</value>
+  </data>
+  <data name="Label_SelectNewDataDirectory" xml:space="preserve">
+    <value>新しいデータフォルダを選択</value>
+  </data>
+  <data name="Label_SelectNewDataDirectory_Details" xml:space="preserve">
+    <value>既にあるデータは移動しません</value>
+    <comment>Fuzzy</comment>
+  </data>
+  <data name="Action_SelectDirectory" xml:space="preserve">
+    <value>フォルダを選択</value>
+  </data>
+  <data name="Label_About" xml:space="preserve">
+    <value>About</value>
+  </data>
+  <data name="Label_StabilityMatrix" xml:space="preserve">
+    <value>Stability Matrix</value>
+  </data>
+  <data name="Label_LicenseAndOpenSourceNotices" xml:space="preserve">
+    <value>ライセンスとオープンソースに関する注意事項</value>
+  </data>
+  <data name="TeachingTip_ClickLaunchToGetStarted" xml:space="preserve">
+    <value>&quot;Launch&quot;をクリックして始めよう！</value>
+  </data>
+  <data name="Action_Stop" xml:space="preserve">
+    <value>ストップ</value>
+  </data>
+  <data name="Action_SendInput" xml:space="preserve">
+    <value>インプットを送信</value>
+  </data>
+  <data name="Label_Input" xml:space="preserve">
+    <value>インプット</value>
+  </data>
+  <data name="Action_Send" xml:space="preserve">
+    <value>送信</value>
+  </data>
+  <data name="Label_InputRequired" xml:space="preserve">
+    <value>入力が必要</value>
+  </data>
+  <data name="Label_ConfirmQuestion" xml:space="preserve">
+    <value>これでいい？</value>
+  </data>
+  <data name="Action_Yes" xml:space="preserve">
+    <value>はい</value>
+  </data>
+  <data name="Label_No" xml:space="preserve">
+    <value>いいえ</value>
+  </data>
+  <data name="Action_OpenWebUI" xml:space="preserve">
+    <value>Web UIを開く</value>
+  </data>
+  <data name="Text_WelcomeToStabilityMatrix" xml:space="preserve">
+    <value>Stability Matrixへようこそ！</value>
+  </data>
+  <data name="Text_OneClickInstaller_SubHeader" xml:space="preserve">
+    <value>好きなUIをインストールして始めよう</value>
+    <comment>Fuzzy</comment>
+  </data>
+  <data name="Label_Installing" xml:space="preserve">
+    <value>インストール中</value>
+  </data>
+  <data name="Text_ProceedingToLaunchPage" xml:space="preserve">
+    <value>Launchページに進む</value>
+  </data>
+  <data name="Progress_DownloadingPackage" xml:space="preserve">
+    <value>パッケージをダウンロード中...</value>
+  </data>
+  <data name="Progress_DownloadComplete" xml:space="preserve">
+    <value>ダウンロード完了</value>
+  </data>
+  <data name="Progress_InstallationComplete" xml:space="preserve">
+    <value>インストール完了</value>
+  </data>
+  <data name="Progress_InstallingPrerequisites" xml:space="preserve">
+    <value>前提ライブラリのインストール中...</value>
+  </data>
+  <data name="Progress_InstallingPackageRequirements" xml:space="preserve">
+    <value>パッケージに必要なライブラリのインストール中...</value>
+  </data>
+  <data name="Action_OpenInExplorer" xml:space="preserve">
+    <value>エクスプローラで開く</value>
+  </data>
+  <data name="Action_OpenInFinder" xml:space="preserve">
+    <value>ファインダーで開く</value>
+  </data>
+  <data name="Action_Uninstall" xml:space="preserve">
+    <value>アンインストール</value>
+  </data>
+  <data name="Action_CheckForUpdates" xml:space="preserve">
+    <value>アップデートを確認</value>
+  </data>
+  <data name="Action_Update" xml:space="preserve">
+    <value>更新</value>
+  </data>
+  <data name="Action_AddPackage" xml:space="preserve">
+    <value>パッケージの追加</value>
+  </data>
+  <data name="TeachingTip_AddPackageToGetStarted" xml:space="preserve">
+    <value>パッケージを追加して始めよう！</value>
+  </data>
+  <data name="Label_EnvVarsTable_Name" xml:space="preserve">
+    <value>変数名</value>
+  </data>
+  <data name="Label_EnvVarsTable_Value" xml:space="preserve">
+    <value>値</value>
+  </data>
+  <data name="Action_Remove" xml:space="preserve">
+    <value>削除</value>
+  </data>
+  <data name="Label_Details" xml:space="preserve">
+    <value>詳細</value>
+  </data>
+  <data name="Label_Callstack" xml:space="preserve">
+    <value>コールスタック</value>
+  </data>
+  <data name="Label_InnerException" xml:space="preserve">
+    <value>内部例外</value>
+  </data>
+  <data name="Label_SearchEllipsis" xml:space="preserve">
+    <value>検索...</value>
+  </data>
+  <data name="Action_OK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Action_Retry" xml:space="preserve">
+    <value>リトライ</value>
+  </data>
+  <data name="Label_PythonVersionInfo" xml:space="preserve">
+    <value>Pythonバージョン情報</value>
+  </data>
+  <data name="Action_Restart" xml:space="preserve">
+    <value>リスタート</value>
+  </data>
+  <data name="Label_ConfirmDelete" xml:space="preserve">
+    <value>削除する</value>
+  </data>
+  <data name="Text_PackageUninstall_Details" xml:space="preserve">
+    <value>これにより、生成された画像や追加したファイルを含め、パッケージフォルダとそのすべてのコンテンツが削除されます。</value>
+  </data>
+  <data name="Progress_UninstallingPackage" xml:space="preserve">
+    <value>パッケージのアンインストール...</value>
+  </data>
+  <data name="Label_PackageUninstalled" xml:space="preserve">
+    <value>パッケージのアンインストール</value>
+  </data>
+  <data name="Text_SomeFilesCouldNotBeDeleted" xml:space="preserve">
+    <value>一部のファイルを削除できませんでした。該当のフォルダの開いているファイルを全て閉じて、もう一度試してください。</value>
+  </data>
+  <data name="Label_InvalidPackageType" xml:space="preserve">
+    <value>無効なパッケージタイプ</value>
+  </data>
+  <data name="TextTemplate_UpdatingPackage" xml:space="preserve">
+    <value>{0}の更新</value>
+  </data>
+  <data name="Progress_UpdateComplete" xml:space="preserve">
+    <value>更新完了</value>
+  </data>
+  <data name="TextTemplate_PackageUpdatedToLatest" xml:space="preserve">
+    <value>{0}が最新版に更新されました</value>
+  </data>
+  <data name="TextTemplate_ErrorUpdatingPackage" xml:space="preserve">
+    <value>{0}の更新エラー</value>
+  </data>
+  <data name="Progress_UpdateFailed" xml:space="preserve">
+    <value>更新失敗</value>
+  </data>
+  <data name="Action_OpenInBrowser" xml:space="preserve">
+    <value>ブラウザで開く</value>
+  </data>
+  <data name="Label_ErrorInstallingPackage" xml:space="preserve">
+    <value>パッケージのインストールエラー</value>
+  </data>
+  <data name="Label_Branch" xml:space="preserve">
+    <value>Branch</value>
+  </data>
+  <data name="Label_AutoScrollToEnd" xml:space="preserve">
+    <value>コンソール画面の最後まで自動スクロールする</value>
+  </data>
+  <data name="Label_License" xml:space="preserve">
+    <value>ライセンス</value>
+  </data>
+  <data name="Label_SharedModelStrategyShort" xml:space="preserve">
+    <value>モデルの共有</value>
+  </data>
+  <data name="Label_PleaseSelectDataDirectory" xml:space="preserve">
+    <value>データフォルダを選択してください</value>
+  </data>
+  <data name="Label_DataFolderName" xml:space="preserve">
+    <value>データフォルダの名前</value>
+  </data>
+  <data name="Label_CurrentDirectory" xml:space="preserve">
+    <value>現在のフォルダ:</value>
+  </data>
+  <data name="Text_AppWillRelaunchAfterUpdate" xml:space="preserve">
+    <value>アップデート完了後に再起動します</value>
+  </data>
+  <data name="Action_RemindMeLater" xml:space="preserve">
+    <value>また後で</value>
+  </data>
+  <data name="Action_InstallNow" xml:space="preserve">
+    <value>インストールする</value>
+  </data>
+  <data name="Label_ReleaseNotes" xml:space="preserve">
+    <value>リリースノート</value>
+  </data>
+  <data name="Action_OpenProjectEllipsis" xml:space="preserve">
+    <value>プロジェクトファイルを開く</value>
+  </data>
+  <data name="Action_SaveAsEllipsis" xml:space="preserve">
+    <value>名前をつけて保存</value>
+  </data>
+  <data name="Action_RestoreDefaultLayout" xml:space="preserve">
+    <value>レイアウトを初期状態に戻す</value>
+  </data>
+  <data name="Label_UseSharedOutputFolder" xml:space="preserve">
+    <value>共有画像フォルダ</value>
+  </data>
+  <data name="Label_BatchIndex" xml:space="preserve">
+    <value>Batch Index</value>
+  </data>
+  <data name="Action_Copy" xml:space="preserve">
+    <value>コピー</value>
+  </data>
+  <data name="Action_OpenInViewer" xml:space="preserve">
+    <value>Image Viewerで開く</value>
+  </data>
+  <data name="Label_NumImagesSelected" xml:space="preserve">
+    <value>{0}枚の画像を選択</value>
+  </data>
+  <data name="Label_OutputFolder" xml:space="preserve">
+    <value>Outputフォルダ</value>
+  </data>
+  <data name="Label_OutputType" xml:space="preserve">
+    <value>アウトプットタイプ</value>
+  </data>
+  <data name="Action_ClearSelection" xml:space="preserve">
+    <value>Clear Selection</value>
+  </data>
+  <data name="Action_SelectAll" xml:space="preserve">
+    <value>全て選択</value>
+  </data>
+  <data name="Action_SendToInference" xml:space="preserve">
+    <value>Inferenceに送る</value>
+  </data>
+  <data name="Label_TextToImage" xml:space="preserve">
+    <value>Text to Image</value>
+  </data>
+  <data name="Label_ImageToImage" xml:space="preserve">
+    <value>Image to Image</value>
+  </data>
+  <data name="Label_Inpainting" xml:space="preserve">
+    <value>Inpainting</value>
+  </data>
+  <data name="Label_Upscale" xml:space="preserve">
+    <value>アップスケール</value>
+  </data>
+  <data name="Label_OutputsPageTitle" xml:space="preserve">
+    <value>アウトプットブラウザ</value>
+  </data>
+  <data name="Label_OneImageSelected" xml:space="preserve">
+    <value>1枚の画像を選択</value>
+  </data>
+  <data name="Label_PythonPackages" xml:space="preserve">
+    <value>Pythonパッケージ</value>
+  </data>
+  <data name="Action_Consolidate" xml:space="preserve">
+    <value>Consolidate</value>
+  </data>
+  <data name="Label_AreYouSure" xml:space="preserve">
+    <value>よろしいですか？</value>
+  </data>
+  <data name="Label_ConsolidateExplanation" xml:space="preserve">
+    <value>これにより、選択したパッケージから生成されたすべてのイメージが、共有出力フォルダの Consolidated フォルダに移動します。この操作は元に戻せません。</value>
+  </data>
+  <data name="Action_Refresh" xml:space="preserve">
+    <value>更新</value>
+  </data>
+  <data name="Action_Upgrade" xml:space="preserve">
+    <value>アップグレード</value>
+  </data>
+  <data name="Action_Downgrade" xml:space="preserve">
+    <value>ダウングレード</value>
+  </data>
+  <data name="Action_OpenGithub" xml:space="preserve">
+    <value>GitHubで開く</value>
+  </data>
+  <data name="Label_Connected" xml:space="preserve">
+    <value>接続しました</value>
+  </data>
+  <data name="Action_Disconnect" xml:space="preserve">
+    <value>切断しました</value>
+  </data>
+  <data name="Label_Email" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="Label_Username" xml:space="preserve">
+    <value>ユーザ名</value>
+  </data>
+  <data name="Label_Password" xml:space="preserve">
+    <value>パスワード</value>
+  </data>
+  <data name="Action_Login" xml:space="preserve">
+    <value>ログイン</value>
+  </data>
+  <data name="Action_Signup" xml:space="preserve">
+    <value>サインアップ</value>
+  </data>
+  <data name="Label_ConfirmPassword" xml:space="preserve">
+    <value>パスワード再確認</value>
+  </data>
+  <data name="Label_ApiKey" xml:space="preserve">
+    <value>API Key</value>
+  </data>
+  <data name="Label_Accounts" xml:space="preserve">
+    <value>アカウント</value>
+  </data>
+  <data name="Label_Preprocessor" xml:space="preserve">
+    <value>プリプロセッサ</value>
+  </data>
+  <data name="Label_Strength" xml:space="preserve">
+    <value>強度</value>
+  </data>
+  <data name="Label_ControlWeight" xml:space="preserve">
+    <value>Control Weight</value>
+  </data>
+  <data name="Label_ControlSteps" xml:space="preserve">
+    <value>Control Steps</value>
+  </data>
+  <data name="Label_CivitAiLoginRequired" xml:space="preserve">
+    <value>ダウンロードにはCivitAIのログインが必要です。SettingからAPIキーを入力してください。</value>
+  </data>
+  <data name="Label_DownloadFailed" xml:space="preserve">
+    <value>ダウンロード失敗</value>
+  </data>
+  <data name="Label_AutoUpdates" xml:space="preserve">
+    <value>自動アップデート</value>
+  </data>
+  <data name="Label_UpdatesPreviewChannelDescription" xml:space="preserve">
+    <value>Previewビルドはアーリーアダプター向けです。Devビルドよりも信頼性が高く、安定版に近い状態で利用できます。ぜひ意見や感想を送ってください。問題とデザインの改善に大いに役立ちます。</value>
+  </data>
+  <data name="Label_UpdatesDevChannelDescription" xml:space="preserve">
+    <value>Devビルドはテクニカルなユーザ向けです。新機能をいち早く利用できます。荒削りな部分やバグがあるかもしれません。</value>
+  </data>
+  <data name="Label_Updates" xml:space="preserve">
+    <value>アップデート</value>
+  </data>
+  <data name="Label_YouAreUpToDate" xml:space="preserve">
+    <value>最新版です</value>
+  </data>
+  <data name="TextTemplate_LastChecked" xml:space="preserve">
+    <value>Last checked: {0}</value>
+  </data>
+  <data name="Action_CopyTriggerWords" xml:space="preserve">
+    <value>トリガーワードをコピー</value>
+  </data>
+  <data name="Label_TriggerWords" xml:space="preserve">
+    <value>トリガーワード:</value>
+  </data>
+  <data name="TeachingTip_MoreCheckpointCategories" xml:space="preserve">
+    <value>IPAdaptersやTextualInversions(embeddings)などのフォルダは、ここで有効にできます。</value>
+  </data>
+  <data name="Action_OpenOnHuggingFace" xml:space="preserve">
+    <value>Hugging Faceで開く</value>
+  </data>
+  <data name="Action_UpdateExistingMetadata" xml:space="preserve">
+    <value>Metadataをアップデートする</value>
+  </data>
+  <data name="Label_General" xml:space="preserve">
+    <value>General</value>
+    <comment>A general settings category</comment>
+  </data>
+  <data name="Label_Inference" xml:space="preserve">
+    <value>Inference</value>
+    <comment>The Inference feature page</comment>
+  </data>
+  <data name="Label_Prompt" xml:space="preserve">
+    <value>プロンプト</value>
+    <comment>A settings category for Inference generation prompts</comment>
+  </data>
+  <data name="Label_OutputImageFiles" xml:space="preserve">
+    <value>アウトプット画像</value>
+  </data>
+  <data name="Label_ImageViewer" xml:space="preserve">
+    <value>イメージビューア</value>
+  </data>
+  <data name="Label_AutoCompletion" xml:space="preserve">
+    <value>自動補完</value>
+  </data>
+  <data name="Label_CompletionReplaceUnderscoresWithSpaces" xml:space="preserve">
+    <value>入力補完でアンダースコアをスペースに置き換える</value>
+  </data>
+  <data name="Label_PromptTags" xml:space="preserve">
+    <value>Prompt Tags</value>
+    <comment>Tags for image generation prompts</comment>
+  </data>
+  <data name="Label_PromptTagsImport" xml:space="preserve">
+    <value>Import Prompt tags</value>
+  </data>
+  <data name="Label_PromptTagsDescription" xml:space="preserve">
+    <value>入力補完に使用するタグリスト(拡張機能a1111-sd-webui-tagcomplete内にあるcsvファイルが使えます)</value>
+  </data>
+  <data name="Label_SystemInformation" xml:space="preserve">
+    <value>システム情報</value>
+  </data>
+  <data name="Label_CivitAi" xml:space="preserve">
+    <value>CivitAI</value>
+  </data>
+  <data name="Label_HuggingFace" xml:space="preserve">
+    <value>Hugging Face</value>
+  </data>
+  <data name="Label_Addons" xml:space="preserve">
+    <value>アドオン</value>
+    <comment>Inference Sampler Addons</comment>
+  </data>
+  <data name="Label_SaveIntermediateImage" xml:space="preserve">
+    <value>中間画像を保存</value>
+    <comment>Inference module step to save an intermediate image</comment>
+  </data>
+  <data name="Label_Settings" xml:space="preserve">
+    <value>設定</value>
+  </data>
+  <data name="Action_SelectFile" xml:space="preserve">
+    <value>ファイルを選択</value>
+  </data>
+  <data name="Action_ReplaceContents" xml:space="preserve">
+    <value>Replace Contents</value>
+  </data>
+  <data name="Label_WipFeature" xml:space="preserve">
+    <value>まだです</value>
+  </data>
+  <data name="Label_WipFeatureDescription" xml:space="preserve">
+    <value>今後のアップデートにご期待ください</value>
+  </data>
+  <data name="Label_MissingImageFile" xml:space="preserve">
+    <value>画像ファイルを見失ってます</value>
+  </data>
+  <data name="Label_HolidayMode" xml:space="preserve">
+    <value>ホリデーモード</value>
+  </data>
+  <data name="Label_CLIPSkip" xml:space="preserve">
+    <value>CLIP Skip</value>
+  </data>
+  <data name="Label_ImageToVideo" xml:space="preserve">
+    <value>Image to Video</value>
+  </data>
+  <data name="Label_Fps" xml:space="preserve">
+    <value>フレームレート(FPS)</value>
+  </data>
+  <data name="Label_MinCfg" xml:space="preserve">
+    <value>Min CFG</value>
+  </data>
+  <data name="Label_Lossless" xml:space="preserve">
+    <value>非圧縮</value>
+  </data>
+  <data name="Label_Frames" xml:space="preserve">
+    <value>Frames</value>
+  </data>
+  <data name="Label_MotionBucketId" xml:space="preserve">
+    <value>Motion Bucket ID</value>
+  </data>
+  <data name="Label_AugmentationLevel" xml:space="preserve">
+    <value>拡張レベル</value>
+  </data>
+  <data name="Label_VideoOutputMethod" xml:space="preserve">
+    <value>Method</value>
+  </data>
+  <data name="Label_VideoQuality" xml:space="preserve">
+    <value>Quality</value>
+  </data>
+  <data name="Label_FindInModelBrowser" xml:space="preserve">
+    <value>モデルブラウザで探す</value>
+  </data>
+  <data name="Label_Installed" xml:space="preserve">
+    <value>Installed</value>
+  </data>
+  <data name="Label_NoExtensionsFound" xml:space="preserve">
+    <value>拡張機能はありません</value>
+  </data>
+  <data name="Action_Hide" xml:space="preserve">
+    <value>隠す</value>
+  </data>
+  <data name="Action_CopyDetails" xml:space="preserve">
+    <value>Copy Details</value>
+  </data>
+  <data name="Action_Download" xml:space="preserve">
+    <value>ダウンロード</value>
+  </data>
+  <data name="TeachingTip_DownloadsExplanation" xml:space="preserve">
+    <value>Packageのインストール・Modelのダウンロードの進捗状況はこちらで確認できます。</value>
+  </data>
+  <data name="Label_RecommendedModels" xml:space="preserve">
+    <value>推奨Model</value>
+  </data>
+  <data name="Label_RecommendedModelsSubText" xml:space="preserve">
+    <value>Packageのインストール中に、推奨Modelをいくつかご紹介しましょう。</value>
+  </data>
+  <data name="Label_Notifications" xml:space="preserve">
+    <value>通知</value>
+  </data>
+  <data name="Label_NotificationOption_None" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="Label_ComfyRequiredTitle" xml:space="preserve">
+    <value>ComfyUIが必要です</value>
+  </data>
+  <data name="Label_ComfyRequiredDetail" xml:space="preserve">
+    <value>ComfyUIのインストールが必要です。インストールしますか？</value>
+  </data>
+  <data name="Error_PleaseSelectDownloadLocation" xml:space="preserve">
+    <value>ダウンロード先を選んでください。</value>
+  </data>
+  <data name="Label_SelectDownloadLocation" xml:space="preserve">
+    <value>ダウンロード先を選んでください:</value>
+  </data>
+  <data name="Label_Config" xml:space="preserve">
+    <value>設定</value>
+  </data>
+  <data name="Label_ToggleAutoScrolling" xml:space="preserve">
+    <value>最後まで自動スクロール</value>
+  </data>
+  <data name="Label_ConfirmExit" xml:space="preserve">
+    <value>終了を確認</value>
+  </data>
+  <data name="Label_ConfirmExitDetail" xml:space="preserve">
+    <value>本当に終了してもいいですか？現在実行中のパッケージも終了します。</value>
+  </data>
+  <data name="Label_Console" xml:space="preserve">
+    <value>コンソール</value>
+  </data>
+  <data name="Label_WebUi" xml:space="preserve">
+    <value>Web UI</value>
+  </data>
+  <data name="Label_Packages" xml:space="preserve">
+    <value>パッケージ</value>
+  </data>
+  <data name="Label_ActionCannotBeUndone" xml:space="preserve">
+    <value>このアクションは元に戻せません。</value>
+  </data>
+  <data name="Label_AreYouSureDeleteImages" xml:space="preserve">
+    <value>{0}枚の画像を削除してもいいですか？</value>
+  </data>
+  <data name="Label_CheckingHardware" xml:space="preserve">
+    <value>ハードウェアの仕様から互換性を判断しています。</value>
+  </data>
+  <data name="Label_EverythingLooksGood" xml:space="preserve">
+    <value>いい感じ！</value>
+  </data>
+  <data name="Label_NvidiaGpuRecommended" xml:space="preserve">
+    <value>快適な利用にはCUDA対応GPUを推奨します。非対応の場合一部のパッケージが動作しない場合や、動作が遅くなる場合があります。</value>
+  </data>
+  <data name="Label_Checkpoints" xml:space="preserve">
+    <value>Checkpoints</value>
+  </data>
+  <data name="Label_ModelBrowser" xml:space="preserve">
+    <value>モデルブラウザ</value>
+  </data>
+  <data name="Label_Workflows" xml:space="preserve">
+    <value>ワークフロー</value>
+  </data>
+  <data name="Label_InfiniteScrolling" xml:space="preserve">
+    <value>無限スクロール</value>
+  </data>
+  <data name="Label_WorkflowBrowser" xml:space="preserve">
+    <value>ワークフローブラウザ</value>
+  </data>
+  <data name="Action_OpenOnOpenArt" xml:space="preserve">
+    <value>OpenArtで開く</value>
+  </data>
+  <data name="Label_NodeDetails" xml:space="preserve">
+    <value>ノード詳細</value>
+  </data>
+  <data name="Label_WorkflowDescription" xml:space="preserve">
+    <value>ワークフロー概要</value>
+  </data>
+  <data name="Label_OpenArtBrowser" xml:space="preserve">
+    <value>OpenArtブラウザ</value>
+  </data>
+  <data name="Action_PreviewPreprocessor" xml:space="preserve">
+    <value>プリプロセッサをプレビュー</value>
+  </data>
+  <data name="TeachingTip_WebUiButtonMoved" xml:space="preserve">
+    <value>&apos;Web UIを開く&apos;ボタンがコマンドバーに移動しました</value>
+  </data>
+  <data name="Label_AnotherInstanceAlreadyRunning" xml:space="preserve">
+    <value>Stability Matrixは既に起動中です。終了してから、もう一度起動してください。</value>
+  </data>
+  <data name="Label_StabilityMatrixAlreadyRunning" xml:space="preserve">
+    <value>Stability Matrixは既に起動中です</value>
+  </data>
+  <data name="Label_WorkflowDeletedSuccessfully" xml:space="preserve">
+    <value>{0} 個削除しました</value>
+  </data>
+  <data name="Label_WorkflowDeleted" xml:space="preserve">
+    <value>ワークフローを削除しました</value>
+  </data>
+  <data name="Label_ErrorRetrievingWorkflows" xml:space="preserve">
+    <value>ワークフローの取得中にエラーが発生しました</value>
+  </data>
+  <data name="TabLabel_InstalledWorkflows" xml:space="preserve">
+    <value>インストールされたワークフロー</value>
+  </data>
+  <data name="Label_WorkflowImported" xml:space="preserve">
+    <value>ワークフローをインポートしました</value>
+  </data>
+  <data name="Label_FinishedImportingWorkflow" xml:space="preserve">
+    <value>ワークフローとカスタムノードをインポートしました</value>
+  </data>
+  <data name="Label_WorkflowImportComplete" xml:space="preserve">
+    <value>ワークフローとカスタムノードをインポートしました。</value>
+  </data>
+  <data name="TeachingTip_InferencePromptHelpButton" xml:space="preserve">
+    <value>ここをクリックしてプロンプトの構文を確認し、LoRAやEmbeddingsの使い方を確認してください。</value>
+  </data>
+  <data name="Label_ExtraNetworks" xml:space="preserve">
+    <value>Extra Networks (Lora / LyCORIS)</value>
+  </data>
+  <data name="Label_CLIPStrength" xml:space="preserve">
+    <value>CLIP Strength</value>
+  </data>
+  <data name="Label_NumberFormat" xml:space="preserve">
+    <value>Number Format</value>
+  </data>
+  <data name="Text_DeleteFollowingItems" xml:space="preserve">
+    <value>以下のアイテムを削除しようとしています:</value>
+  </data>
+  <data name="TextTemplate_DeleteFollowingCountItems" xml:space="preserve">
+    <value>{0}個のアイテムを削除しようとしています:</value>
+  </data>
+  <data name="Label_DeletePermanently" xml:space="preserve">
+    <value>完全に削除する</value>
+  </data>
+  <data name="Action_MoveToTrash" xml:space="preserve">
+    <value>ゴミ箱に送る</value>
+  </data>
+  <data name="Label_AreYouSureDeleteModels" xml:space="preserve">
+    <value>{0}個のモデルを削除しますか？</value>
+  </data>
+  <data name="Label_AutoSearchOnLoad" xml:space="preserve">
+    <value>ロード時に自動的に検索</value>
+  </data>
+  <data name="Label_AutoSearchOnLoad_Description" xml:space="preserve">
+    <value>モデルブラウザが読み込まれたら、自動的に検索を開始する</value>
+  </data>
+  <data name="Action_ToggleVisibility" xml:space="preserve">
+    <value>表示の切り替え</value>
+  </data>
+  <data name="Label_ClippingMask" xml:space="preserve">
+    <value>Clipping Mask</value>
+  </data>
+  <data name="Label_AppFolders" xml:space="preserve">
+    <value>App Folders</value>
+  </data>
+  <data name="Label_Logs" xml:space="preserve">
+    <value>Logs</value>
+  </data>
+  <data name="Label_AppData" xml:space="preserve">
+    <value>App Data</value>
+  </data>
+  <data name="TextTemplate_PackageUpdatedToSelected" xml:space="preserve">
+    <value>{0}のバージョンが更新されました。</value>
+  </data>
+  <data name="Action_CopyAsBitmap" xml:space="preserve">
+    <value>bitmapにコピー</value>
+  </data>
+  <data name="Label_DisableUpdateCheck" xml:space="preserve">
+    <value>アップデートチェックを無効にする</value>
+  </data>
+  <data name="Warning_PleaseExtractFirst" xml:space="preserve">
+    <value>Stability Matrixを実行する前に、ZIPファイルからアプリを抽出してください</value>
+  </data>
+  <data name="Label_HistorySize" xml:space="preserve">
+    <value>履歴数</value>
+  </data>
+  <data name="Label_HistorySize_Description" xml:space="preserve">
+    <value>コンソールに表示されている行より上にスクロールして戻ることができる行数</value>
+  </data>
+  <data name="Label_ConnectAccountFailed" xml:space="preserve">
+    <value>アカウント接続に問題が発生しました</value>
+  </data>
+  <data name="Label_EditModelMetadata" xml:space="preserve">
+    <value>モデルメタデータの編集</value>
+  </data>
+  <data name="Label_NSFW" xml:space="preserve">
+    <value>NSFW</value>
+  </data>
+  <data name="Label_Tags" xml:space="preserve">
+    <value>タグ</value>
+  </data>
+  <data name="Label_VersionName" xml:space="preserve">
+    <value>バージョン名</value>
+  </data>
+  <data name="Label_TrainedWords" xml:space="preserve">
+    <value>言葉を学習する</value>
+  </data>
+  <data name="Label_PreviewImage" xml:space="preserve">
+    <value>前の画像</value>
+  </data>
+  <data name="Label_BatchSize" xml:space="preserve">
+    <value>Batch Size</value>
+  </data>
+  <data name="Label_Batches" xml:space="preserve">
+    <value>Batches</value>
+  </data>
+  <data name="Label_Sampler" xml:space="preserve">
+    <value>サンプラー</value>
+  </data>
+  <data name="Label_Scheduler" xml:space="preserve">
+    <value>スケジューラー</value>
+  </data>
+  <data name="Label_MaxSize" xml:space="preserve">
+    <value>最大数</value>
+  </data>
+  <data name="Label_UseSeparatePrompt" xml:space="preserve">
+    <value>分割プロンプトを使う</value>
+  </data>
+  <data name="Label_Seed" xml:space="preserve">
+    <value>シード</value>
+  </data>
+  <data name="Label_NegativePrompt" xml:space="preserve">
+    <value>Negative Prompt</value>
+  </data>
+  <data name="Label_NewFolder" xml:space="preserve">
+    <value>新しいフォルダ</value>
+  </data>
+  <data name="Label_CopyLinkToClipboard" xml:space="preserve">
+    <value>リンクをクリップボードにコピー</value>
+  </data>
+  <data name="TextTemplate_OAuthLoginTitle" xml:space="preserve">
+    <value>{0} でサインイン</value>
+    <comment>e.g. &apos;Sign in with Google&apos;</comment>
+  </data>
+  <data name="Text_AllowBrowserOpenAppLink" xml:space="preserve">
+    <value>ブラウザ上でこのアプリを開くように指示されますので、その通りにしてください。</value>
+  </data>
+  <data name="Text_OAuthLoginDescription" xml:space="preserve">
+    <value>ブラウザのリンクを開き、指示に従ってアカウントを接続してください</value>
+  </data>
+  <data name="Label_PythonDependenciesOverride_Title" xml:space="preserve">
+    <value>Python Dependencies Override</value>
+  </data>
+  <data name="Label_PythonDependenciesOverride_Description" xml:space="preserve">
+    <value>インストールと更新時に依存関係を追加・置換・削除</value>
+  </data>
+  <data name="Label_DependencySpecifiers" xml:space="preserve">
+    <value>Dependency Specifiers</value>
+  </data>
+  <data name="AnalyticsExample_InstallData" xml:space="preserve">
+    <value>{
+  &quot;packageName&quot;: &quot;stable-diffusion-webui&quot;,
+  &quot;packageVersion&quot;: &quot;v1.10.0&quot;,
+  &quot;isSuccess&quot;: true,
+  &quot;type&quot;: &quot;install&quot;,
+  &quot;timestamp&quot;: &quot;2024-09-04T02:14:04.1967404+00:00&quot;
+}</value>
+  </data>
+  <data name="Label_Analytics" xml:space="preserve">
+    <value>アナリティクス</value>
+  </data>
+  <data name="TextTemplate_YouCanChangeThisBehavior" xml:space="preserve">
+    <value>この動作はいつでも {0} の手順で変更できます。</value>
+    <comment>e.g. &apos;You can always change this behavior in Settings &gt; Category &gt; Item.&apos;</comment>
+  </data>
+  <data name="Text_AnalyticsDescription" xml:space="preserve">
+    <value>Stability Matrixの改善にご協力ください。OS, パッケージの種類など改善に必要なデータのみ匿名で送信し、あなた及びあなたのアカウントとの関連付けはいたしません、また個人データ・機密情報は決して送信しません。</value>
+  </data>
+  <data name="Text_AnalyticsDescriptionShort" xml:space="preserve">
+    <value>使用された機能、OSのバージョン、インストールされているパッケージの種類などについての匿名データを送信して、Stability Matrixの改善にご協力ください。</value>
+  </data>
+  <data name="Text_AnalyticsDataPrivacyInfo" xml:space="preserve">
+    <value>送信されたデータは、あなたまたはあなたのアカウントとは決して関連付けられず、個人データや機密情報を含みません。</value>
+  </data>
+  <data name="Label_UsageData" xml:space="preserve">
+    <value>使用状況のデータ</value>
+  </data>
+  <data name="Label_PrivacyPolicy" xml:space="preserve">
+    <value>プライバシーポリシー</value>
+  </data>
+  <data name="Label_ImageHidden" xml:space="preserve">
+    <value>画像を隠す</value>
+  </data>
+  <data name="Label_NoImageFound" xml:space="preserve">
+    <value>画像が見つかりません</value>
+  </data>
+  <data name="Label_HideEmptyCategories" xml:space="preserve">
+    <value>非表示のカテゴリを非表示</value>
+  </data>
+  <data name="Label_ShowNsfwImages" xml:space="preserve">
+    <value>NSFW画像を表示</value>
+  </data>
+  <data name="Label_EnableLongPaths" xml:space="preserve">
+    <value>長いファイル名を有効にする</value>
+    <comment>(Setting to enable long file paths on windows)</comment>
+  </data>
+  <data name="Label_EnableLongPathsDescription" xml:space="preserve">
+    <value>MAX_PATH limitations を削除する(Windows で長いファイルパスを有効にする設定)</value>
+    <comment>(Setting to enable long file paths on windows)</comment>
+  </data>
+  <data name="Label_SystemSettings" xml:space="preserve">
+    <value>システム設定</value>
+  </data>
+  <data name="Label_ChangesApplied" xml:space="preserve">
+    <value>変更を適用する</value>
+  </data>
+  <data name="Text_RestartMayBeRequiredForSystemChanges" xml:space="preserve">
+    <value>変更を有効にするには、再起動が必要になる場合があります。</value>
+  </data>
+  <data name="Label_ReleasesUnavailableForThisPackage" xml:space="preserve">
+    <value>このパッケージではこのリリースを利用できません。</value>
+  </data>
+  <data name="Text_UnexpectedError_Description" xml:space="preserve">
+    <value>この問題の詳細を、圧縮したログファイルとともにお教えください。</value>
+  </data>
+  <data name="Text_UnexpectedErrorRecoverable_Description" xml:space="preserve">
+    <value>この後も続けて使えますが、再起動後にすべての機能を使えるようになります。この問題の詳細を、圧縮したログファイルとともにお教えください。</value>
+  </data>
+  <data name="Action_ShowLogInExplorer" xml:space="preserve">
+    <value>エクスプローラでログを開く</value>
+  </data>
+  <data name="Action_ShowLogInFinder" xml:space="preserve">
+    <value>Finderでログを開く</value>
+  </data>
+  <data name="Label_ExtensionPacks" xml:space="preserve">
+    <value>Extension Packs</value>
+  </data>
+  <data name="Label_NoExtensionPacksFound" xml:space="preserve">
+    <value>Extension Packsが見つかりません</value>
+  </data>
+  <data name="Label_OpenExtensionPacksFolder" xml:space="preserve">
+    <value>Extension Packフォルダを開く</value>
+  </data>
+  <data name="Label_InstallExtensionPack" xml:space="preserve">
+    <value>Extension Packをインストール</value>
+  </data>
+  <data name="Label_AddToExistingPack" xml:space="preserve">
+    <value>Extension Packを追加</value>
+  </data>
+  <data name="Label_NewExtensionPack" xml:space="preserve">
+    <value>新しいExtension Pack</value>
+  </data>
+  <data name="Label_CreateExtensionPackExplanation" xml:space="preserve">
+    <value>拡張機能を作成するには、&quot;利用可能な拡張機能&quot;または&quot;インストール済みの拡張機能&quot;タブから欲しい拡張機能を選んで保存をクリック</value>
+  </data>
+  <data name="Label_ImportExtensionPacksExplanation" xml:space="preserve">
+    <value>Dataディレクトリ内のExtensionPacksフォルダに.json拡張パックファイルを追加してください。</value>
+  </data>
+  <data name="Label_OrWithHyphensAround" xml:space="preserve">
+    <value>- または -</value>
+  </data>
+  <data name="Action_OpenOnOpenModelDb" xml:space="preserve">
+    <value>OpenModelDBを開く</value>
+  </data>
+  <data name="Label_Wildcards" xml:space="preserve">
+    <value>Wildcards</value>
+  </data>
+  <data name="Text_OAuthDeviceAuthDescription" xml:space="preserve">
+    <value>Stability Matrixのアカウント認証のため、ブラウザでリンクを開いて以下のコードを入力してください。</value>
+  </data>
+  <data name="Action_CopyAndOpen" xml:space="preserve">
+    <value>Copy and Open</value>
+  </data>
+  <data name="Text_LykosAccountUpgradeNotice" xml:space="preserve">
+    <value>## 【重要】 Lykosアカウントのログアウトとセキュリティ強化のお知らせ
+
+Stability MatrixとLykosアカウントの連携を、より安全で便利なシステム（OAuth 2.0 with OpenID Connect）へと変更しました。これに伴い、Lykosアカウントからログアウトされています。
+
+### アップグレードの理由は？
+
+あなたのセキュリティとプライバシーを最重視するため、今回のアップグレードで以下の改善を行いました：
+
+* **よりスムーズなログイン環境:** [account.lykos.ai](https://account.lykos.ai) に一度ログインするだけで、Stability Matrixや他のLykos AIサービスに簡単にアクセスできます。
+* **より柔軟なログイン方法:** 既存の[lykos.ai](https://lykos.ai)アカウント、または**Apple**、**GitHub**、**Google**でのサインインが可能になりました。
+* **プライバシー保護の強化:** Stability Matrixは必要な権限のみ要求します。
+* **業界標準のセキュリティ:** 安全なログインの金標準であるOAuth 2.0を採用しています。
+* **将来を見据えた準備:** これにより今後も他のアプリやサービスと安全に連携できます。
+
+### 何をすればいいの？
+
+改めて&quot;Settings&quot;から、&quot;Lykos account&quot;の横にある&quot;Connect&quot;をクリックしてください。
+
+### 今後、&quot;Lykos account&quot; の登録が必須ということ？
+
+必須ではないです！ Stability Matrixは&quot;Lykos account&quot;がなくてもお使い頂けます。&quot;Lykos account&quot;に登録連携することで追加機能を利用できます。現在はPatreonサポーター向けの開発ビルドの自動アップデートなどです。（今後も追加予定！）
+
+</value>
+  </data>
+  <data name="Action_GoToSettings" xml:space="preserve">
+    <value>設定に行く</value>
+  </data>
+  <data name="TeachingTip_PromptAmplifier" xml:space="preserve">
+    <value>Prompt Amplifierを試そう！ あなたのプロンプトを簡単にクオリティアップ！</value>
+  </data>
+  <data name="Action_Enable" xml:space="preserve">
+    <value>Enable</value>
+  </data>
+  <data name="Action_Disable" xml:space="preserve">
+    <value>Disable</value>
+  </data>
+  <data name="Text_Login_ConnectTitle" xml:space="preserve">
+    <value>Lykos accountに接続</value>
+  </data>
+  <data name="Text_Login_ConnectDescription" xml:space="preserve">
+    <value>この機能を使うには、Lykos accountにサインインしてください。</value>
+  </data>
+  <data name="Text_Login_ExpiredTitle" xml:space="preserve">
+    <value>もう一度サインインしてください</value>
+  </data>
+  <data name="Text_Login_ExpiredDescription" xml:space="preserve">
+    <value>ログイン期限が切れました。もう一度サインインしてください。</value>
+  </data>
+  <data name="Sponsorship_Title" xml:space="preserve">
+    <value>Stability Matrixをサポートする</value>
+  </data>
+  <data name="Sponsorship_ExistingSupporterPreamble" xml:space="preserve">
+    <value>Stability Matrixをサポートしてくれてありがとう！</value>
+  </data>
+  <data name="Sponsorship_ReqAnyTier" xml:space="preserve">
+    <value>**{0}**のような機能は、サポーターの皆様が利用できる特典です。Stability Matrixの開発とサーバー費用は、皆様のご支援により支えられております。</value>
+  </data>
+  <data name="Sponsorship_ReqSpecificTier" xml:space="preserve">
+    <value>**{0}**のような機能は、サポーターレベル**{1}**以上の方が利用できる特典です。皆様のご厚情により、サーバー費用と、より高度な接続機能を維持しながら、Stability Matrixの改良を続けられております。</value>
+  </data>
+  <data name="Sponsorship_ConnectPatreonPrompt" xml:space="preserve">
+    <value>もしも既にPatreonで私たちをサポートしている場合は、アカウントをリンクしてください。</value>
+  </data>
+  <data name="Label_AccountSettings" xml:space="preserve">
+    <value>アカウント設定</value>
+  </data>
+  <data name="Action_ViewSupportOptions" xml:space="preserve">
+    <value>サポートオプションを見る</value>
+  </data>
+  <data name="Action_MaybeLater" xml:space="preserve">
+    <value>Maybe Later</value>
+  </data>
+  <data name="Label_Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="ModelDiscovery_Active" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="ModelDiscovery_Inactive" xml:space="preserve">
+    <value>Inactive (標準接続を使用)</value>
+  </data>
+  <data name="ModelDiscovery_Description" xml:space="preserve">
+    <value>CivitAIなどのオンラインリポジトリからモデルを検索する際、より高速に取得できます。</value>
+  </data>
+  <data name="ModelDiscovery_Disclaimer" xml:space="preserve">
+    <value>実験的なサードパーティリポジトリ用の最適化です。公式な提携はなく、利用可否は変動する可能性があります。</value>
+  </data>
+  <data name="Label_Beta" xml:space="preserve">
+    <value>Beta</value>
+  </data>
+  <data name="ModelDiscovery_Title" xml:space="preserve">
+    <value>モデル検索の高速化</value>
+  </data>
+  <data name="PromptAmplifier_Disclaimer" xml:space="preserve">
+    <value>### 【🪄紹介】 Prompt Amplifier  
+私達が開発している実験中のプロンプト専用AIモデル&quot;Spark&quot;が、あなたのプロンプトを増強します。
+
+Prompt Amplifierはあなたのローカル環境を**使わず**、セキュアなエンタープライズグレードのクラウドサーバで稼働しています。
+
+### ☁️ クラウドを使う理由は？
+Sparkは兆レベルのパラメータを持つ基盤モデルで、膨大なパワーが必要です。ローカル環境で動作可能な機能の最大化に努めていますが、&quot;今のところ&quot;Sparkの高度な機能はクラウドを通じて利用可能です。
+
+### 🔒 プライバシーファースト
+私たちはプライバシーを最優先に考えています。([生成AI利用規約](https://lykos.ai/gen-ai-terms)) **あなたのプロンプトや出力内容は、Lykos AIや必要なクラウドインフラパートナーによるAI学習には一切使用されません。** 処理はお客様の質問に対する返答を生成するためだけに安全を重視して使われ、**その後はプロンプト内容そのものではなく、メタデータ(タイムスタンプやトークン数など)のみを保存します。** あなたのデータが販売や共有されることは決してありません。</value>
+  </data>
+  <data name="Label_SupportUs" xml:space="preserve">
+    <value>サポートする</value>
+  </data>
+  <data name="Label_Membership" xml:space="preserve">
+    <value>メンバーシップ</value>
+  </data>
+  <data name="Action_ManageMembership" xml:space="preserve">
+    <value>メンバーシップの管理</value>
+  </data>
+  <data name="Action_BecomeSupporter" xml:space="preserve">
+    <value>サポーターになる</value>
+  </data>
+  <data name="Label_LegacyConnections" xml:space="preserve">
+    <value>従来の連携</value>
+  </data>
+  <data name="Label_PatreonLegacyDescription" xml:space="preserve">
+    <value>Patreonは新規メンバーシップには使用されなくなりました。既存の連携は移行期間中、引き続き有効です。</value>
+  </data>
+  <data name="Sponsorship_ConnectLykosPrompt" xml:space="preserve">
+    <value>Lykosアカウントでサインインして、メンバーシップ特典を有効にしてください。</value>
+  </data>
+  <data name="InfoBar_PatreonMigration" xml:space="preserve">
+    <value>直接Lykosメンバーシップへ移行できるようになりました。ティアはそのまま、独立した開発を支援できます。</value>
+  </data>
+  <data name="InfoBar_PatreonGracePeriod" xml:space="preserve">
+    <value>Patreonの特典は{0}まで引き続きご利用いただけます。</value>
+    <comment>{0} = date</comment>
+  </data>
+  <data name="Action_LearnMore" xml:space="preserve">
+    <value>詳細を見る</value>
+  </data>
+  <data name="Action_MigrateNow" xml:space="preserve">
+    <value>今すぐ移行</value>
+  </data>
+  <data name="Label_ThankYouSupporter" xml:space="preserve">
+    <value>Stability Matrixをご支援いただきありがとうございます 💙</value>
+  </data>
+  <data name="Label_SupporterCTA" xml:space="preserve">
+    <value>オープンソース開発を支援し、追加機能やコミュニティ特典にアクセスしましょう。</value>
+  </data>
+  <data name="Action_ManageLykosAccount" xml:space="preserve">
+    <value>Lykosアカウントの管理</value>
+  </data>
+  <data name="Action_EditGravatar" xml:space="preserve">
+    <value>Gravatarでプロフィール画像を編集</value>
+  </data>
+  <data name="Action_CopyUserId" xml:space="preserve">
+    <value>ユーザーIDをコピー</value>
+  </data>
+  <data name="Label_LykosOffDescription" xml:space="preserve">
+    <value>Stability Matrixの連携機能の管理</value>
+  </data>
+  <data name="Label_PatreonOffDescription" xml:space="preserve">
+    <value>自動アップデートのプレビュー版および開発版リリースチャンネルへのアクセス</value>
+  </data>
+  <data name="Label_CivitAIOffDescription" xml:space="preserve">
+    <value>ログインが必要なモデルをCivitAIからダウンロードするために連携します</value>
+  </data>
+  <data name="Label_HuggingFaceOffDescription" xml:space="preserve">
+    <value>ログインが必要なモデルをHugging Faceからダウンロードするために連携します</value>
+  </data>
+  <data name="Label_ImageGenerationApis" xml:space="preserve">
+    <value>画像生成API</value>
+  </data>
+  <data name="Label_GeminiOffDescription" xml:space="preserve">
+    <value>Image LabでNano Bananaを使用するには、課金が有効な有料Gemini APIキーを追加してください</value>
+  </data>
+  <data name="Text_SetGeminiApiKeyDescription" xml:space="preserve">
+    <value>Image Lab の Nano Banana モデルでは、**有料版**の Gemini API キーが必要です。無料版のキーでは画像を生成できません。
+
+1. [Google AI Studio](https://aistudio.google.com/apikey) でキーを作成します。
+2. [Cloud Console](https://console.cloud.google.com/billing) で、そのキーの Google Cloud プロジェクトの課金を有効にします。
+3. 下にキーを貼り付けます。</value>
+  </data>
+  <data name="Action_CustomFolderEllipsis" xml:space="preserve">
+    <value>カスタム...</value>
+  </data>
+  <data name="Label_AboutAccountCredentials" xml:space="preserve">
+    <value>アカウント認証情報について</value>
+  </data>
+  <data name="Label_CredentialsStorageNotice" xml:space="preserve">
+    <value>アカウントの認証情報とトークンは、AES暗号化されてお使いのコンピュータにローカル保存されます。
+
+コンピュータのハードウェアを変更した場合、アカウントへの再ログインが必要になることがあります。
+
+アカウントトークンは保存後に表示されなくなるため、他の場所で使用する場合はメモしておいてください。</value>
+  </data>
+  <data name="Label_ConnectPatreonAccount" xml:space="preserve">
+    <value>Patreonアカウントを連携</value>
+  </data>
+  <data name="Label_ActiveSupporterTier" xml:space="preserve">
+    <value>{0} サポーター</value>
+    <comment>{0} = tier name (Supporter, Insider, Pioneer, Visionary)</comment>
+  </data>
+  <data name="Label_ContributorAccess" xml:space="preserve">
+    <value>コントリビューターアクセス権があります</value>
+  </data>
+  <data name="Label_ThankYouContributor" xml:space="preserve">
+    <value>共に創り上げてくれてありがとう 💙</value>
+  </data>
+    <data name="Label_ContributorAccessDescription" xml:space="preserve">
+    <value>プレビュー版および開発版リリースチャンネルへのコントリビューターアクセス権があります。</value>
+  </data>
+  <data name="Label_SupportingSince" xml:space="preserve">
+    <value>サポート開始</value>
+  </data>
+  <data name="Label_Benefits" xml:space="preserve">
+    <value>特典</value>
+  </data>
+  <data name="Label_Community" xml:space="preserve">
+    <value>コミュニティ</value>
+  </data>
+  <data name="Label_PromptAmplifierRateLimitTitle" xml:space="preserve">
+    <value>利用上限に達しました</value>
+  </data>
+  <data name="Label_PromptAmplifierRateLimitMessage" xml:space="preserve">
+    <value>今月のプロンプトアンプリファイアの利用回数がなくなりました。利用回数は毎月1日にリセットされます。（残り{0}日）</value>
+  </data>
+  <data name="Label_PromptAmplifierError" xml:space="preserve">
+    <value>プロンプトアンプリファイアエラー</value>
+  </data>
+  <data name="Label_ModerationError" xml:space="preserve">
+    <value>モデレーションエラー</value>
+  </data>
+  <data name="Label_PromptFlaggedMessage" xml:space="preserve">
+    <value>プロンプトがモデレーションシステムによってフラグされました。別のプロンプトでもう一度お試しください。</value>
+  </data>
+  <data name="Label_LoginRequiredMessage" xml:space="preserve">
+    <value>この機能を使用するにはログインが必要です。</value>
+  </data>
+  <data name="Label_RequestErrorMessage" xml:space="preserve">
+    <value>リクエストの処理中にエラーが発生しました。</value>
+  </data>
+  <data name="Label_BecomeSupporterDescription" xml:space="preserve">
+    <value>Stability Matrixチームを支援して、開発初期ビルドへのアクセスや新機能を最初に試す権利を獲得しましょう。</value>
+  </data>
+</root>

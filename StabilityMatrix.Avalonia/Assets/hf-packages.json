@@ -1,0 +1,1259 @@
+[
+  {
+    "ModelCategory": "BaseModel",
+    "ModelName": "Stable Diffusion 1.5",
+    "RepositoryPath": "runwayml/stable-diffusion-v1-5",
+    "Files": [
+      "v1-5-pruned-emaonly.safetensors"
+    ],
+    "LicenseType": "CreativeML Open RAIL-M"
+  },
+  {
+    "ModelCategory": "BaseModel",
+    "ModelName": "Stable Diffusion 2.1",
+    "RepositoryPath": "stabilityai/stable-diffusion-2-1",
+    "Files": [
+      "v2-1_768-ema-pruned.safetensors"
+    ],
+    "LicenseType": "Open RAIL++"
+  },
+  {
+    "ModelCategory": "BaseModel",
+    "ModelName": "Stable Diffusion XL (Base)",
+    "RepositoryPath": "stabilityai/stable-diffusion-xl-base-1.0",
+    "Files": [
+      "sd_xl_base_1.0_0.9vae.safetensors",
+      "sd_xl_offset_example-lora_1.0.safetensors"
+    ],
+    "LicenseType": "Open RAIL++",
+    "LicensePath": "LICENSE.md"
+  },
+  {
+    "ModelCategory": "BaseModel",
+    "ModelName": "Stable Diffusion XL (Refiner)",
+    "RepositoryPath": "stabilityai/stable-diffusion-xl-refiner-1.0",
+    "Files": [
+      "sd_xl_refiner_1.0_0.9vae.safetensors"
+    ],
+    "LicenseType": "Open RAIL++",
+    "LicensePath": "LICENSE.md"
+  },
+  {
+    "ModelCategory": "BaseModel",
+    "ModelName": "SDXL Turbo",
+    "RepositoryPath": "stabilityai/sdxl-turbo",
+    "Files": [
+      "sd_xl_turbo_1.0_fp16.safetensors"
+    ],
+    "LicenseType": "SAI-NC-Community",
+    "LicensePath": "LICENSE.TXT"
+  },
+  {
+    "ModelCategory": "BaseModel",
+    "ModelName": "Stable Video Diffusion",
+    "RepositoryPath": "stabilityai/stable-video-diffusion-img2vid",
+    "Files": [
+      "svd.safetensors"
+    ],
+    "LicenseType": "Stable-Video-Diffusion-NC-Community",
+    "LicensePath": "LICENSE"
+  },
+  {
+    "ModelCategory": "BaseModel",
+    "ModelName": "Stable Cascade",
+    "RepositoryPath": "stabilityai/stable-cascade",
+    "Files": [
+      "comfyui_checkpoints/stable_cascade_stage_b.safetensors",
+      "comfyui_checkpoints/stable_cascade_stage_c.safetensors"
+    ],
+    "LicenseType": "stable-cascade-nc-community",
+    "LicensePath": "LICENSE"
+  },
+  {
+    "ModelCategory": "ControlNet",
+    "ModelName": "Canny",
+    "RepositoryPath": "lllyasviel/ControlNet-v1-1",
+    "Files": [
+      "control_v11p_sd15_canny.pth",
+      "control_v11p_sd15_canny.yaml"
+    ],
+    "LicenseType": "Open RAIL"
+  },
+  {
+    "ModelCategory": "ControlNet",
+    "ModelName": "Depth",
+    "RepositoryPath": "lllyasviel/ControlNet-v1-1",
+    "Files": [
+      "control_v11f1p_sd15_depth.pth",
+      "control_v11f1p_sd15_depth.yaml"
+    ],
+    "LicenseType": "Open RAIL"
+  },
+  {
+    "ModelCategory": "ControlNet",
+    "ModelName": "MLSD",
+    "RepositoryPath": "lllyasviel/ControlNet-v1-1",
+    "Files": [
+      "control_v11p_sd15_mlsd.pth",
+      "control_v11p_sd15_mlsd.yaml"
+    ],
+    "LicenseType": "Open RAIL"
+  },
+  {
+    "ModelCategory": "ControlNet",
+    "ModelName": "Inpaint",
+    "RepositoryPath": "lllyasviel/ControlNet-v1-1",
+    "Files": [
+      "control_v11p_sd15_inpaint.pth",
+      "control_v11p_sd15_inpaint.yaml"
+    ],
+    "LicenseType": "Open RAIL"
+  },
+  {
+    "ModelCategory": "ControlNet",
+    "ModelName": "IP2P",
+    "RepositoryPath": "lllyasviel/ControlNet-v1-1",
+    "Files": [
+      "control_v11e_sd15_ip2p.pth",
+      "control_v11e_sd15_ip2p.yaml"
+    ],
+    "LicenseType": "Open RAIL"
+  },
+  {
+    "ModelCategory": "ControlNet",
+    "ModelName": "Tile",
+    "RepositoryPath": "lllyasviel/ControlNet-v1-1",
+    "Files": [
+      "control_v11f1e_sd15_tile.pth",
+      "control_v11f1e_sd15_tile.yaml"
+    ],
+    "LicenseType": "Open RAIL"
+  },
+  {
+    "ModelCategory": "ControlNet",
+    "ModelName": "OpenPose",
+    "RepositoryPath": "lllyasviel/ControlNet-v1-1",
+    "Files": [
+      "control_v11p_sd15_openpose.pth",
+      "control_v11p_sd15_openpose.yaml"
+    ],
+    "LicenseType": "Open RAIL"
+  },
+  {
+    "ModelCategory": "ControlNet",
+    "ModelName": "LineArt",
+    "RepositoryPath": "lllyasviel/ControlNet-v1-1",
+    "Files": [
+      "control_v11p_sd15_lineart.pth",
+      "control_v11p_sd15_lineart.yaml"
+    ],
+    "LicenseType": "Open RAIL"
+  },
+  {
+    "ModelCategory": "ControlNet",
+    "ModelName": "LineArt Anime",
+    "RepositoryPath": "lllyasviel/ControlNet-v1-1",
+    "Files": [
+      "control_v11p_sd15s2_lineart_anime.pth",
+      "control_v11p_sd15s2_lineart_anime.yaml"
+    ],
+    "LicenseType": "Open RAIL"
+  },
+  {
+    "ModelCategory": "ControlNet",
+    "ModelName": "NormalBae",
+    "RepositoryPath": "lllyasviel/ControlNet-v1-1",
+    "Files": [
+      "control_v11p_sd15_normalbae.pth",
+      "control_v11p_sd15_normalbae.yaml"
+    ],
+    "LicenseType": "Open RAIL"
+  },
+  {
+    "ModelCategory": "ControlNet",
+    "ModelName": "Seg",
+    "RepositoryPath": "lllyasviel/ControlNet-v1-1",
+    "Files": [
+      "control_v11p_sd15_seg.pth",
+      "control_v11p_sd15_seg.yaml"
+    ],
+    "LicenseType": "Open RAIL"
+  },
+  {
+    "ModelCategory": "ControlNet",
+    "ModelName": "Soft Edge",
+    "RepositoryPath": "lllyasviel/ControlNet-v1-1",
+    "Files": [
+      "control_v11p_sd15_softedge.pth",
+      "control_v11p_sd15_softedge.yaml"
+    ],
+    "LicenseType": "Open RAIL"
+  },
+  {
+    "ModelCategory": "ControlNet",
+    "ModelName": "Scribble",
+    "RepositoryPath": "lllyasviel/ControlNet-v1-1",
+    "Files": [
+      "control_v11p_sd15_scribble.pth",
+      "control_v11p_sd15_scribble.yaml"
+    ],
+    "LicenseType": "Open RAIL"
+  },
+  {
+    "ModelCategory": "ControlNet",
+    "ModelName": "Shuffle",
+    "RepositoryPath": "lllyasviel/ControlNet-v1-1",
+    "Files": [
+      "control_v11e_sd15_shuffle.pth",
+      "control_v11e_sd15_shuffle.yaml"
+    ],
+    "LicenseType": "Open RAIL"
+  },
+  {
+    "ModelCategory": "DiffusersControlNet",
+    "ModelName": "Canny",
+    "RepositoryPath": "lllyasviel/control_v11p_sd15_canny",
+    "Files": [
+      "diffusion_pytorch_model.safetensors",
+      "config.json"
+    ],
+    "Subfolder": "canny",
+    "LicenseType": "Open RAIL"
+  },
+  {
+    "ModelCategory": "DiffusersControlNet",
+    "ModelName": "Depth",
+    "RepositoryPath": "lllyasviel/control_v11f1p_sd15_depth",
+    "Files": [
+      "diffusion_pytorch_model.safetensors",
+      "config.json"
+    ],
+    "Subfolder": "depth",
+    "LicenseType": "Open RAIL"
+  },
+  {
+    "ModelCategory": "DiffusersControlNet",
+    "ModelName": "MLSD",
+    "RepositoryPath": "lllyasviel/control_v11p_sd15_mlsd",
+    "Files": [
+      "diffusion_pytorch_model.safetensors",
+      "config.json"
+    ],
+    "Subfolder": "MLSD",
+    "LicenseType": "Open RAIL"
+  },
+  {
+    "ModelCategory": "DiffusersControlNet",
+    "ModelName": "Inpaint",
+    "RepositoryPath": "lllyasviel/control_v11p_sd15_inpaint",
+    "Files": [
+      "diffusion_pytorch_model.safetensors",
+      "config.json"
+    ],
+    "Subfolder": "inpaint",
+    "LicenseType": "Open RAIL"
+  },
+  {
+    "ModelCategory": "DiffusersControlNet",
+    "ModelName": "IP2P",
+    "RepositoryPath": "lllyasviel/control_v11e_sd15_ip2p",
+    "Files": [
+      "diffusion_pytorch_model.safetensors",
+      "config.json"
+    ],
+    "Subfolder": "ip2p",
+    "LicenseType": "Open RAIL"
+  },
+  {
+    "ModelCategory": "DiffusersControlNet",
+    "ModelName": "Tile",
+    "RepositoryPath": "lllyasviel/control_v11f1e_sd15_tile",
+    "Files": [
+      "diffusion_pytorch_model.bin",
+      "config.json"
+    ],
+    "Subfolder": "tile",
+    "LicenseType": "Open RAIL"
+  },
+  {
+    "ModelCategory": "DiffusersControlNet",
+    "ModelName": "OpenPose",
+    "RepositoryPath": "lllyasviel/control_v11p_sd15_openpose",
+    "Files": [
+      "diffusion_pytorch_model.safetensors",
+      "config.json"
+    ],
+    "Subfolder": "openpose",
+    "LicenseType": "Open RAIL"
+  },
+  {
+    "ModelCategory": "DiffusersControlNet",
+    "ModelName": "LineArt",
+    "RepositoryPath": "lllyasviel/control_v11p_sd15_lineart",
+    "Files": [
+      "diffusion_pytorch_model.safetensors",
+      "config.json"
+    ],
+    "Subfolder": "lineart",
+    "LicenseType": "Open RAIL"
+  },
+  {
+    "ModelCategory": "DiffusersControlNet",
+    "ModelName": "LineArt Anime",
+    "RepositoryPath": "lllyasviel/control_v11p_sd15s2_lineart_anime",
+    "Files": [
+      "diffusion_pytorch_model.safetensors",
+      "config.json"
+    ],
+    "Subfolder": "lineart_anime",
+    "LicenseType": "Open RAIL"
+  },
+  {
+    "ModelCategory": "DiffusersControlNet",
+    "ModelName": "NormalBae",
+    "RepositoryPath": "lllyasviel/control_v11p_sd15_normalbae",
+    "Files": [
+      "diffusion_pytorch_model.safetensors",
+      "config.json"
+    ],
+    "Subfolder": "normalbae",
+    "LicenseType": "Open RAIL"
+  },
+  {
+    "ModelCategory": "DiffusersControlNet",
+    "ModelName": "Seg",
+    "RepositoryPath": "lllyasviel/control_v11p_sd15_seg",
+    "Files": [
+      "diffusion_pytorch_model.safetensors",
+      "config.json"
+    ],
+    "Subfolder": "seg",
+    "LicenseType": "Open RAIL"
+  },
+  {
+    "ModelCategory": "DiffusersControlNet",
+    "ModelName": "Soft Edge",
+    "RepositoryPath": "lllyasviel/control_v11p_sd15_softedge",
+    "Files": [
+      "diffusion_pytorch_model.safetensors",
+      "config.json"
+    ],
+    "Subfolder": "softedge",
+    "LicenseType": "Open RAIL"
+  },
+  {
+    "ModelCategory": "DiffusersControlNet",
+    "ModelName": "Scribble",
+    "RepositoryPath": "lllyasviel/control_v11p_sd15_scribble",
+    "Files": [
+      "diffusion_pytorch_model.safetensors",
+      "config.json"
+    ],
+    "Subfolder": "scribble",
+    "LicenseType": "Open RAIL"
+  },
+  {
+    "ModelCategory": "DiffusersControlNet",
+    "ModelName": "Shuffle",
+    "RepositoryPath": "lllyasviel/control_v11e_sd15_shuffle",
+    "Files": [
+      "diffusion_pytorch_model.safetensors",
+      "config.json"
+    ],
+    "Subfolder": "shuffle",
+    "LicenseType": "Open RAIL"
+  },
+  {
+    "ModelCategory": "DiffusersClipVision",
+    "ModelName": "CLIP Vision H",
+    "RepositoryPath": "Comfy-Org/Wan_2.1_ComfyUI_repackaged",
+    "Files": [
+      "split_files/clip_vision/clip_vision_h.safetensors"
+    ],
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "DiffusersClipVision",
+    "ModelName": "IP Adapter Encoder",
+    "RepositoryPath": "InvokeAI/ip_adapter_sd_image_encoder",
+    "Files": [
+      "config.json",
+      "model.safetensors"
+    ],
+    "Subfolder": "ip_adapter_sd_image_encoder",
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "DiffusersClipVision",
+    "ModelName": "IP Adapter Encoder (SDXL)",
+    "RepositoryPath": "InvokeAI/ip_adapter_sdxl_image_encoder",
+    "Files": [
+      "config.json",
+      "model.safetensors"
+    ],
+    "Subfolder": "ip_adapter_sdxl_image_encoder",
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "DiffusersIpAdapter",
+    "ModelName": "SD 1.5 Adapter",
+    "RepositoryPath": "InvokeAI/ip_adapter_sd15",
+    "Files": [
+      "ip-adapter_sd15.safetensors"
+    ],
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "DiffusersIpAdapter",
+    "ModelName": "SD 1.5 Light Adapter",
+    "RepositoryPath": "InvokeAI/ip_adapter_sd15_light",
+    "Files": [
+      "ip-adapter_sd15_light.safetensors"
+    ],
+    "Subfolder": "ip_adapter_sd15_light",
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "DiffusersIpAdapter",
+    "ModelName": "SD 1.5 Plus Adapter",
+    "RepositoryPath": "InvokeAI/ip_adapter_plus_sd15",
+    "Files": [
+      "ip-adapter-plus_sd15.safetensors"
+    ],
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "DiffusersIpAdapter",
+    "ModelName": "SD 1.5 Face Plus Adapter",
+    "RepositoryPath": "InvokeAI/ip_adapter_plus_face_sd15",
+    "Files": [
+      "ip-adapter-plus-face_sd15.safetensors"
+    ],
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "DiffusersIpAdapterXl",
+    "ModelName": "SDXL Adapter",
+    "RepositoryPath": "InvokeAI/ip_adapter_sdxl",
+    "Files": [
+      "ip-adapter_sdxl.safetensors"
+    ],
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "DiffusersIpAdapterXl",
+    "ModelName": "SDXL Plus Adapter",
+    "RepositoryPath": "InvokeAI/ip-adapter-plus_sdxl_vit-h",
+    "Files": [
+      "ip-adapter-plus_sdxl_vit-h.safetensors"
+    ],
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "DiffusersIpAdapterXl",
+    "ModelName": "SDXL Face Plus Adapter",
+    "RepositoryPath": "InvokeAI/ip-adapter-plus-face_sdxl_vit-h",
+    "Files": [
+      "ip-adapter-plus-face_sdxl_vit-h.safetensors"
+    ],
+    "LicenseType": "CreativeML Open RAIL-M"
+  },
+  {
+    "ModelCategory": "DiffusersT2IAdapter",
+    "ModelName": "Sketch",
+    "RepositoryPath": "TencentARC/t2iadapter_sketch_sd15v2",
+    "Files": [
+      "config.json",
+      "diffusion_pytorch_model.bin"
+    ],
+    "Subfolder": "t2iadapter_sketch_sd15v2",
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "DiffusersT2IAdapter",
+    "ModelName": "Depth",
+    "RepositoryPath": "TencentARC/t2iadapter_depth_sd15v2",
+    "Files": [
+      "config.json",
+      "diffusion_pytorch_model.bin"
+    ],
+    "Subfolder": "t2iadapter_depth_sd15v2",
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "DiffusersT2IAdapter",
+    "ModelName": "Canny",
+    "RepositoryPath": "TencentARC/t2iadapter_canny_sd15v2",
+    "Files": [
+      "config.json",
+      "diffusion_pytorch_model.bin"
+    ],
+    "Subfolder": "t2iadapter_canny_sd15v2",
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "DiffusersT2IAdapter",
+    "ModelName": "Depth-Zoe",
+    "RepositoryPath": "TencentARC/t2iadapter_zoedepth_sd15v1",
+    "Files": [
+      "config.json",
+      "diffusion_pytorch_model.bin"
+    ],
+    "Subfolder": "t2iadapter_zoedepth_sd15v1",
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "DiffusersT2IAdapter",
+    "ModelName": "Sketch (SDXL)",
+    "RepositoryPath": "TencentARC/t2i-adapter-sketch-sdxl-1.0",
+    "Files": [
+      "config.json",
+      "diffusion_pytorch_model.safetensors"
+    ],
+    "Subfolder": "t2i-adapter-sketch-sdxl-1.0",
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "DiffusersT2IAdapter",
+    "ModelName": "Depth-Zoe (SDXL)",
+    "RepositoryPath": "TencentARC/t2i-adapter-depth-zoe-sdxl-1.0",
+    "Files": [
+      "config.json",
+      "diffusion_pytorch_model.safetensors"
+    ],
+    "Subfolder": "t2i-adapter-depth-zoe-sdxl-1.0",
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "DiffusersT2IAdapter",
+    "ModelName": "OpenPose (SDXL)",
+    "RepositoryPath": "TencentARC/t2i-adapter-openpose-sdxl-1.0",
+    "Files": [
+      "config.json",
+      "diffusion_pytorch_model.safetensors"
+    ],
+    "Subfolder": "t2i-adapter-openpose-sdxl-1.0",
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "DiffusersT2IAdapter",
+    "ModelName": "Depth-MiDaS (SDXL)",
+    "RepositoryPath": "TencentARC/t2i-adapter-depth-midas-sdxl-1.0",
+    "Files": [
+      "config.json",
+      "diffusion_pytorch_model.safetensors"
+    ],
+    "Subfolder": "t2i-adapter-depth-midas-sdxl-1.0",
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "DiffusersT2IAdapter",
+    "ModelName": "LineArt (SDXL)",
+    "RepositoryPath": "TencentARC/t2i-adapter-lineart-sdxl-1.0",
+    "Files": [
+      "config.json",
+      "diffusion_pytorch_model.safetensors"
+    ],
+    "Subfolder": "t2i-adapter-lineart-sdxl-1.0",
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "DiffusersT2IAdapter",
+    "ModelName": "Canny (SDXL)",
+    "RepositoryPath": "TencentARC/t2i-adapter-canny-sdxl-1.0",
+    "Files": [
+      "config.json",
+      "diffusion_pytorch_model.safetensors"
+    ],
+    "Subfolder": "t2i-adapter-canny-sdxl-1.0",
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "ControlNetXl",
+    "ModelName": "Canny (Small, Diffusers)",
+    "RepositoryPath": "lllyasviel/sd_control_collection",
+    "Files": [
+      "diffusers_xl_canny_small.safetensors"
+    ],
+    "LicenseType": "Open RAIL++"
+  },
+  {
+    "ModelCategory": "ControlNetXl",
+    "ModelName": "Canny (Mid, Diffusers)",
+    "RepositoryPath": "lllyasviel/sd_control_collection",
+    "Files": [
+      "diffusers_xl_canny_mid.safetensors"
+    ],
+    "LicenseType": "Open RAIL++"
+  },
+  {
+    "ModelCategory": "ControlNetXl",
+    "ModelName": "Canny (Full, Diffusers)",
+    "RepositoryPath": "lllyasviel/sd_control_collection",
+    "Files": [
+      "diffusers_xl_canny_full.safetensors"
+    ],
+    "LicenseType": "Open RAIL++"
+  },
+  {
+    "ModelCategory": "ControlNetXl",
+    "ModelName": "Depth (Small, Diffusers)",
+    "RepositoryPath": "lllyasviel/sd_control_collection",
+    "Files": [
+      "diffusers_xl_depth_small.safetensors"
+    ],
+    "LicenseType": "Open RAIL++"
+  },
+  {
+    "ModelCategory": "ControlNetXl",
+    "ModelName": "Depth (Mid, Diffusers)",
+    "RepositoryPath": "lllyasviel/sd_control_collection",
+    "Files": [
+      "diffusers_xl_depth_mid.safetensors"
+    ],
+    "LicenseType": "Open RAIL++"
+  },
+  {
+    "ModelCategory": "ControlNetXl",
+    "ModelName": "Depth (Full, Diffusers)",
+    "RepositoryPath": "lllyasviel/sd_control_collection",
+    "Files": [
+      "diffusers_xl_depth_full.safetensors"
+    ],
+    "LicenseType": "Open RAIL++"
+  },
+  {
+    "ModelCategory": "ControlNetXl",
+    "ModelName": "Ioclab Recolor",
+    "RepositoryPath": "lllyasviel/sd_control_collection",
+    "Files": [
+      "ioclab_sd15_recolor.safetensors"
+    ],
+    "LicenseType": "Open RAIL++"
+  },
+  {
+    "ModelCategory": "ControlNetXl",
+    "ModelName": "Kohya Control-lllite Blur",
+    "RepositoryPath": "lllyasviel/sd_control_collection",
+    "Files": [
+      "kohya_controllllite_xl_blur.safetensors"
+    ],
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "ControlNetXl",
+    "ModelName": "Kohya Control-lllite Blur (Anime)",
+    "RepositoryPath": "lllyasviel/sd_control_collection",
+    "Files": [
+      "kohya_controllllite_xl_blur_anime.safetensors",
+      "kohya_controllllite_xl_blur_anime_beta.safetensors"
+    ],
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "ControlNetXl",
+    "ModelName": "Kohya Control-lllite Canny",
+    "RepositoryPath": "lllyasviel/sd_control_collection",
+    "Files": [
+      "kohya_controllllite_xl_canny.safetensors"
+    ],
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "ControlNetXl",
+    "ModelName": "Kohya Control-lllite Canny (Anime)",
+    "RepositoryPath": "lllyasviel/sd_control_collection",
+    "Files": [
+      "kohya_controllllite_xl_canny_anime.safetensors"
+    ],
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "ControlNetXl",
+    "ModelName": "Kohya Control-lllite Depth",
+    "RepositoryPath": "lllyasviel/sd_control_collection",
+    "Files": [
+      "kohya_controllllite_xl_depth.safetensors"
+    ],
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "ControlNetXl",
+    "ModelName": "Kohya Control-lllite Depth (Anime)",
+    "RepositoryPath": "lllyasviel/sd_control_collection",
+    "Files": [
+      "kohya_controllllite_xl_depth_anime.safetensors"
+    ],
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "ControlNetXl",
+    "ModelName": "Kohya Control-lllite Openpose (Anime)",
+    "RepositoryPath": "lllyasviel/sd_control_collection",
+    "Files": [
+      "kohya_controllllite_xl_openpose_anime.safetensors",
+      "kohya_controllllite_xl_openpose_anime_v2.safetensors"
+    ],
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "ControlNetXl",
+    "ModelName": "Kohya Controllllite Scribble Anime",
+    "RepositoryPath": "lllyasviel/sd_control_collection",
+    "Files": [
+      "kohya_controllllite_xl_scribble_anime.safetensors"
+    ],
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "ControlNetXl",
+    "ModelName": "SAI XL Depth 256 Lora",
+    "RepositoryPath": "lllyasviel/sd_control_collection",
+    "Files": [
+      "sai_xl_depth_256lora.safetensors"
+    ],
+    "LicenseType": "Stability AI Control-Lora CLA"
+  },
+  {
+    "ModelCategory": "ControlNetXl",
+    "ModelName": "SAI XL Depth 128 Lora",
+    "RepositoryPath": "lllyasviel/sd_control_collection",
+    "Files": [
+      "sai_xl_depth_128lora.safetensors"
+    ],
+    "LicenseType": "Stability AI Control-Lora CLA"
+  },
+  {
+    "ModelCategory": "ControlNetXl",
+    "ModelName": "SAI XL Canny 256 Lora",
+    "RepositoryPath": "lllyasviel/sd_control_collection",
+    "Files": [
+      "sai_xl_canny_256lora.safetensors"
+    ],
+    "LicenseType": "Stability AI Control-Lora CLA"
+  },
+  {
+    "ModelCategory": "ControlNetXl",
+    "ModelName": "SAI XL Canny 128 Lora",
+    "RepositoryPath": "lllyasviel/sd_control_collection",
+    "Files": [
+      "sai_xl_canny_128lora.safetensors"
+    ],
+    "LicenseType": "Stability AI Control-Lora CLA"
+  },
+  {
+    "ModelCategory": "ControlNetXl",
+    "ModelName": "SAI XL Recolor 256 Lora",
+    "RepositoryPath": "lllyasviel/sd_control_collection",
+    "Files": [
+      "sai_xl_recolor_256lora.safetensors"
+    ],
+    "LicenseType": "Stability AI Control-Lora CLA"
+  },
+  {
+    "ModelCategory": "ControlNetXl",
+    "ModelName": "SAI XL Recolor 128 Lora",
+    "RepositoryPath": "lllyasviel/sd_control_collection",
+    "Files": [
+      "sai_xl_recolor_128lora.safetensors"
+    ],
+    "LicenseType": "Stability AI Control-Lora CLA"
+  },
+  {
+    "ModelCategory": "ControlNetXl",
+    "ModelName": "SAI XL Sketch 256 Lora",
+    "RepositoryPath": "lllyasviel/sd_control_collection",
+    "Files": [
+      "sai_xl_sketch_256lora.safetensors"
+    ],
+    "LicenseType": "Stability AI Control-Lora CLA"
+  },
+  {
+    "ModelCategory": "ControlNetXl",
+    "ModelName": "SAI XL Sketch 128 Lora",
+    "RepositoryPath": "lllyasviel/sd_control_collection",
+    "Files": [
+      "sai_xl_sketch_128lora.safetensors"
+    ],
+    "LicenseType": "Stability AI Control-Lora CLA"
+  },
+  {
+    "ModelCategory": "ControlNetXl",
+    "ModelName": "SargeZT XL Depth",
+    "RepositoryPath": "lllyasviel/sd_control_collection",
+    "Files": [
+      "sargezt_xl_depth.safetensors"
+    ],
+    "LicenseType": "CreativeML Open RAIL-M"
+  },
+  {
+    "ModelCategory": "ControlNetXl",
+    "ModelName": "SargeZT XL Depth Faid Vidit",
+    "RepositoryPath": "lllyasviel/sd_control_collection",
+    "Files": [
+      "sargezt_xl_depth_faid_vidit.safetensors"
+    ],
+    "LicenseType": "CreativeML Open RAIL-M"
+  },
+  {
+    "ModelCategory": "ControlNetXl",
+    "ModelName": "SargeZT XL Depth Zeed",
+    "RepositoryPath": "lllyasviel/sd_control_collection",
+    "Files": [
+      "sargezt_xl_depth_zeed.safetensors"
+    ],
+    "LicenseType": "CreativeML Open RAIL-M"
+  },
+  {
+    "ModelCategory": "ControlNetXl",
+    "ModelName": "SargeZT XL Softedge",
+    "RepositoryPath": "lllyasviel/sd_control_collection",
+    "Files": [
+      "sargezt_xl_softedge.safetensors"
+    ],
+    "LicenseType": "CreativeML Open RAIL-M"
+  },
+  {
+    "ModelCategory": "ControlNetXl",
+    "ModelName": "Thibaud XL Openpose",
+    "RepositoryPath": "lllyasviel/sd_control_collection",
+    "Files": [
+      "thibaud_xl_openpose.safetensors"
+    ],
+    "LicenseType": "Unknown"
+  },
+  {
+    "ModelCategory": "Ultralytics",
+    "ModelName": "YOLOv8m (Face)",
+    "RepositoryPath": "Bingsu/adetailer",
+    "Files": [
+      "face_yolov8m.pt"
+    ],
+    "Subfolder": "bbox",
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "Ultralytics",
+    "ModelName": "YOLOv8n (Face)",
+    "RepositoryPath": "Bingsu/adetailer",
+    "Files": [
+      "face_yolov8n.pt"
+    ],
+    "Subfolder": "bbox",
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "Ultralytics",
+    "ModelName": "YOLOv8n v2 (Face)",
+    "RepositoryPath": "Bingsu/adetailer",
+    "Files": [
+      "face_yolov8n_v2.pt"
+    ],
+    "Subfolder": "bbox",
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "Ultralytics",
+    "ModelName": "YOLOv8s (Face)",
+    "RepositoryPath": "Bingsu/adetailer",
+    "Files": [
+      "face_yolov8s.pt"
+    ],
+    "Subfolder": "bbox",
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "Ultralytics",
+    "ModelName": "YOLOv9c (Face)",
+    "RepositoryPath": "Bingsu/adetailer",
+    "Files": [
+      "face_yolov9c.pt"
+    ],
+    "Subfolder": "bbox",
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "Ultralytics",
+    "ModelName": "YOLOv8n (Hand)",
+    "RepositoryPath": "Bingsu/adetailer",
+    "Files": [
+      "hand_yolov8n.pt"
+    ],
+    "Subfolder": "bbox",
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "Ultralytics",
+    "ModelName": "YOLOv8s (Hand)",
+    "RepositoryPath": "Bingsu/adetailer",
+    "Files": [
+      "hand_yolov8s.pt"
+    ],
+    "Subfolder": "bbox",
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "Ultralytics",
+    "ModelName": "YOLOv9c (Hand)",
+    "RepositoryPath": "Bingsu/adetailer",
+    "Files": [
+      "hand_yolov9c.pt"
+    ],
+    "Subfolder": "bbox",
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "Ultralytics",
+    "ModelName": "YOLOv8m-seg (Person)",
+    "RepositoryPath": "Bingsu/adetailer",
+    "Files": [
+      "person_yolov8m-seg.pt"
+    ],
+    "Subfolder": "segm",
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "Ultralytics",
+    "ModelName": "YOLOv8n-seg (Person)",
+    "RepositoryPath": "Bingsu/adetailer",
+    "Files": [
+      "person_yolov8n-seg.pt"
+    ],
+    "Subfolder": "segm",
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "Ultralytics",
+    "ModelName": "YOLOv8s-seg (Person)",
+    "RepositoryPath": "Bingsu/adetailer",
+    "Files": [
+      "person_yolov8s-seg.pt"
+    ],
+    "Subfolder": "segm",
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "Clip",
+    "ModelName": "CLIP L",
+    "RepositoryPath": "comfyanonymous/flux_text_encoders",
+    "Files": [
+      "clip_l.safetensors"
+    ],
+    "LicenseType": "MIT"
+  },
+  {
+    "ModelCategory": "Clip",
+    "ModelName": "CLIP G",
+    "RepositoryPath": "Comfy-Org/stable-diffusion-3.5-fp8",
+    "Files": [
+      "text_encoders/clip_g.safetensors"
+    ],
+    "LicenseType": "MIT"
+  },
+  {
+    "ModelCategory": "Clip",
+    "ModelName": "T5XXL fp16",
+    "RepositoryPath": "comfyanonymous/flux_text_encoders",
+    "Files": [
+      "t5xxl_fp16.safetensors"
+    ],
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "Clip",
+    "ModelName": "T5XXL fp8 e4m3fn",
+    "RepositoryPath": "comfyanonymous/flux_text_encoders",
+    "Files": [
+      "t5xxl_fp8_e4m3fn.safetensors"
+    ],
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "Clip",
+    "ModelName": "UMT5XXL fp16",
+    "RepositoryPath": "Comfy-Org/Wan_2.1_ComfyUI_repackaged",
+    "Files": [
+      "split_files/text_encoders/umt5_xxl_fp16.safetensors"
+    ],
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "Clip",
+    "ModelName": "UMT5XXL fp8 e4m3fn",
+    "RepositoryPath": "Comfy-Org/Wan_2.1_ComfyUI_repackaged",
+    "Files": [
+      "split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors"
+    ],
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "Clip",
+    "ModelName": "CLIP G (HiDream)",
+    "RepositoryPath": "Comfy-Org/HiDream-I1_ComfyUI",
+    "Files": [
+      "split_files/text_encoders/clip_g_hidream.safetensors"
+    ],
+    "LicenseType": "MIT"
+  },
+  {
+    "ModelCategory": "Clip",
+    "ModelName": "CLIP L (HiDream)",
+    "RepositoryPath": "Comfy-Org/HiDream-I1_ComfyUI",
+    "Files": [
+      "split_files/text_encoders/clip_l_hidream.safetensors"
+    ],
+    "LicenseType": "MIT"
+  },
+  {
+    "ModelCategory": "Clip",
+    "ModelName": "Llama 3.1 8b Instruct fp8",
+    "RepositoryPath": "Comfy-Org/HiDream-I1_ComfyUI",
+    "Files": [
+      "split_files/text_encoders/split_files/text_encoders/llama_3.1_8b_instruct_fp8_scaled.safetensors"
+    ],
+    "LicenseType": "Llama3.1"
+  },
+  {
+    "ModelCategory": "Unet",
+    "ModelName": "Wan 2.1 I2V 480p bf16",
+    "RepositoryPath": "Comfy-Org/Wan_2.1_ComfyUI_repackaged",
+    "Files": [
+      "split_files/diffusion_models/wan2.1_i2v_480p_14B_bf16.safetensors"
+    ],
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "Unet",
+    "ModelName": "Wan 2.1 I2V 480p fp8 e4m3fn",
+    "RepositoryPath": "Comfy-Org/Wan_2.1_ComfyUI_repackaged",
+    "Files": [
+      "split_files/diffusion_models/wan2.1_i2v_480p_14B_fp8_e4m3fn.safetensors"
+    ],
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "Unet",
+    "ModelName": "Wan 2.1 I2V 720p bf16",
+    "RepositoryPath": "Comfy-Org/Wan_2.1_ComfyUI_repackaged",
+    "Files": [
+      "split_files/diffusion_models/wan2.1_i2v_720p_14B_bf16.safetensors"
+    ],
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "Unet",
+    "ModelName": "Wan 2.1 I2V 720p fp8 e4m3fn",
+    "RepositoryPath": "Comfy-Org/Wan_2.1_ComfyUI_repackaged",
+    "Files": [
+      "split_files/diffusion_models/wan2.1_i2v_720p_14B_fp8_e4m3fn.safetensors"
+    ],
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "Unet",
+    "ModelName": "Wan 2.1 T2V 1.3B bf16",
+    "RepositoryPath": "Comfy-Org/Wan_2.1_ComfyUI_repackaged",
+    "Files": [
+      "split_files/diffusion_models/wan2.1_t2v_1.3B_bf16.safetensors"
+    ],
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "Unet",
+    "ModelName": "Wan 2.1 T2V 1.3B fp16",
+    "RepositoryPath": "Comfy-Org/Wan_2.1_ComfyUI_repackaged",
+    "Files": [
+      "split_files/diffusion_models/wan2.1_t2v_1.3B_fp16.safetensors"
+    ],
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "Unet",
+    "ModelName": "Wan 2.1 T2V 14B bf16",
+    "RepositoryPath": "Comfy-Org/Wan_2.1_ComfyUI_repackaged",
+    "Files": [
+      "split_files/diffusion_models/wan2.1_t2v_14B_bf16.safetensors"
+    ],
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "Unet",
+    "ModelName": "Wan 2.1 T2V 14B fp8 e4m3fn",
+    "RepositoryPath": "Comfy-Org/Wan_2.1_ComfyUI_repackaged",
+    "Files": [
+      "split_files/diffusion_models/wan2.1_t2v_14B_fp8_e4m3fn.safetensors"
+    ],
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "Unet",
+    "ModelName": "Wan 2.2 TI2V 5B fp16",
+    "RepositoryPath": "Comfy-Org/Wan_2.2_ComfyUI_Repackaged",
+    "Files": [
+      "split_files/diffusion_models/wan2.2_ti2v_5B_fp16.safetensors"
+    ],
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "Unet",
+    "ModelName": "Wan 2.2 I2V High Noise 14B fp16",
+    "RepositoryPath": "Comfy-Org/Wan_2.2_ComfyUI_Repackaged",
+    "Files": [
+      "split_files/diffusion_models/wan2.2_i2v_high_noise_14B_fp16.safetensors"
+    ],
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "Unet",
+    "ModelName": "Wan 2.2 I2V High Noise 14B fp8",
+    "RepositoryPath": "Comfy-Org/Wan_2.2_ComfyUI_Repackaged",
+    "Files": [
+      "split_files/diffusion_models/wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors"
+    ],
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "Unet",
+    "ModelName": "Wan 2.2 I2V Low Noise 14B fp16",
+    "RepositoryPath": "Comfy-Org/Wan_2.2_ComfyUI_Repackaged",
+    "Files": [
+      "split_files/diffusion_models/wan2.2_i2v_low_noise_14B_fp16.safetensors"
+    ],
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "Unet",
+    "ModelName": "Wan 2.2 I2V Low Noise 14B fp8",
+    "RepositoryPath": "Comfy-Org/Wan_2.2_ComfyUI_Repackaged",
+    "Files": [
+      "split_files/diffusion_models/wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors"
+    ],
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "Unet",
+    "ModelName": "Wan 2.2 T2V High Noise 14B fp16",
+    "RepositoryPath": "Comfy-Org/Wan_2.2_ComfyUI_Repackaged",
+    "Files": [
+      "split_files/diffusion_models/wan2.2_t2v_high_noise_14B_fp16.safetensors"
+    ],
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "Unet",
+    "ModelName": "Wan 2.2 T2V High Noise 14B fp8",
+    "RepositoryPath": "Comfy-Org/Wan_2.2_ComfyUI_Repackaged",
+    "Files": [
+      "split_files/diffusion_models/wan2.2_t2v_high_noise_14B_fp8_scaled.safetensors"
+    ],
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "Unet",
+    "ModelName": "Wan 2.2 T2V Low Noise 14B fp16",
+    "RepositoryPath": "Comfy-Org/Wan_2.2_ComfyUI_Repackaged",
+    "Files": [
+      "split_files/diffusion_models/wan2.2_t2v_low_noise_14B_fp16.safetensors"
+    ],
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "Unet",
+    "ModelName": "Wan 2.2 T2V Low Noise 14B fp8",
+    "RepositoryPath": "Comfy-Org/Wan_2.2_ComfyUI_Repackaged",
+    "Files": [
+      "split_files/diffusion_models/wan2.2_t2v_low_noise_14B_fp8_scaled.safetensors"
+    ],
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "Unet",
+    "ModelName": "HiDream I1 Dev bf16",
+    "RepositoryPath": "Comfy-Org/HiDream-I1_ComfyUI",
+    "Files": [
+      "split_files/diffusion_models/hidream_i1_dev_bf16.safetensors"
+    ],
+    "LicenseType": "MIT"
+  },
+  {
+    "ModelCategory": "Unet",
+    "ModelName": "HiDream I1 Dev fp8",
+    "RepositoryPath": "Comfy-Org/HiDream-I1_ComfyUI",
+    "Files": [
+      "split_files/diffusion_models/hidream_i1_dev_fp8.safetensors"
+    ],
+    "LicenseType": "MIT"
+  },
+  {
+    "ModelCategory": "Unet",
+    "ModelName": "HiDream I1 Fast bf16",
+    "RepositoryPath": "Comfy-Org/HiDream-I1_ComfyUI",
+    "Files": [
+      "split_files/diffusion_models/hidream_i1_fast_bf16.safetensors"
+    ],
+    "LicenseType": "MIT"
+  },
+  {
+    "ModelCategory": "Unet",
+    "ModelName": "HiDream I1 Fast fp8",
+    "RepositoryPath": "Comfy-Org/HiDream-I1_ComfyUI",
+    "Files": [
+      "split_files/diffusion_models/hidream_i1_fast_fp8.safetensors"
+    ],
+    "LicenseType": "MIT"
+  },
+  {
+    "ModelCategory": "Unet",
+    "ModelName": "HiDream I1 Full fp16",
+    "RepositoryPath": "Comfy-Org/HiDream-I1_ComfyUI",
+    "Files": [
+      "split_files/diffusion_models/hidream_i1_full_fp16.safetensors"
+    ],
+    "LicenseType": "MIT"
+  },
+  {
+    "ModelCategory": "Unet",
+    "ModelName": "HiDream I1 Full fp8",
+    "RepositoryPath": "Comfy-Org/HiDream-I1_ComfyUI",
+    "Files": [
+      "split_files/diffusion_models/hidream_i1_full_fp8.safetensors"
+    ],
+    "LicenseType": "MIT"
+  },
+  {
+    "ModelCategory": "Vae",
+    "ModelName": "Flux.1 VAE",
+    "RepositoryPath": "Comfy-Org/Lumina_Image_2.0_Repackaged",
+    "Files": [
+      "split_files/vae/ae.safetensors"
+    ],
+    "LicenseType": "Flux.1 Dev NonCommercial"
+  },
+  {
+    "ModelCategory": "Vae",
+    "ModelName": "Wan 2.1 VAE",
+    "RepositoryPath": "Comfy-Org/Wan_2.1_ComfyUI_repackaged",
+    "Files": [
+      "split_files/vae/wan_2.1_vae.safetensors"
+    ],
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "Vae",
+    "ModelName": "Wan 2.2 VAE",
+    "RepositoryPath": "Comfy-Org/Wan_2.2_ComfyUI_Repackaged",
+    "Files": [
+      "split_files/vae/wan2.2_vae.safetensors"
+    ],
+    "LicenseType": "Apache 2.0"
+  },
+  {
+    "ModelCategory": "Vae",
+    "ModelName": "HiDream I1 VAE",
+    "RepositoryPath": "Comfy-Org/HiDream-I1_ComfyUI",
+    "Files": [
+      "split_files/vae/ae.safetensors"
+    ],
+    "LicenseType": "MIT"
+  }
+]

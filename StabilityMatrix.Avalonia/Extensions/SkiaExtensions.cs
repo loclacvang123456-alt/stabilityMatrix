@@ -1,0 +1,290 @@
+﻿using System;
+using Avalonia;
+using Avalonia.Media;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
+using Avalonia.Rendering.SceneGraph;
+using Avalonia.Skia;
+using SkiaSharp;
+
+namespace StabilityMatrix.Avalonia.Extensions;
+
+public static class SkiaExtensions
+{
+    private record class SKBitmapDrawOperation : ICustomDrawOperation
+    {
+        public Rect Bounds { get; set; }
+
+        public Rect SourceBounds { get; set; }
+
+        public SKBitmap? Bitmap { get; init; }
+
+        public void Dispose()
+        {
+            //nop
+        }
+
+        public bool Equals(ICustomDrawOperation? other) => false;
+
+        public bool HitTest(Point p) => Bounds.Contains(p);
+
+        public void Render(ImmediateDrawingContext context)
+        {
+            if (
+                Bitmap != null
+                && context.PlatformImpl.GetFeature<ISkiaSharpApiLeaseFeature>() is { } leaseFeature
+            )
+            {
+                using var apiLease = leaseFeature.Lease();
+
+                apiLease.SkCanvas.DrawBitmap(
+                    Bitmap,
+                    SKRect.Create(
+                        (float)SourceBounds.X,
+                        (float)SourceBounds.Y,
+                        (float)SourceBounds.Width,
+                        (float)SourceBounds.Height
+                    ),
+                    SKRect.Create((float)Bounds.X, (float)Bounds.Y, (float)Bounds.Width, (float)Bounds.Height)
+                );
+            }
+        }
+    }
+
+    private class AvaloniaImage : IImage, IDisposable
+    {
+        private readonly SKBitmap? _source;
+        SKBitmapDrawOperation? _drawImageOperation;
+
+        public AvaloniaImage(SKBitmap? source)
+        {
+            _source = source;
+            if (source?.Info.Size is { } size)
+            {
+                Size = new Size(size.Width, size.Height);
+            }
+        }
+
+        public Size Size { get; }
+
+        public void Dispose() => _source?.Dispose();
+
+        public void Draw(DrawingContext context, Rect sourceRect, Rect destRect)
+        {
+            if (_drawImageOperation is null)
+            {
+                _drawImageOperation = new SKBitmapDrawOperation { Bitmap = _source };
+            }
+
+            _drawImageOperation.SourceBounds = sourceRect;
+            _drawImageOperation.Bounds = destRect;
+            context.Custom(_drawImageOperation);
+        }
+    }
+
+    public static SKBitmap? ToSKBitmap(this System.IO.Stream? stream)
+    {
+        if (stream == null)
+            return null;
+        return SKBitmap.Decode(stream);
+    }
+
+    public static IImage? ToAvaloniaImage(this SKBitmap? bitmap)
+    {
+        if (bitmap is not null)
+        {
+            return new AvaloniaImage(bitmap);
+        }
+        return default;
+    }
+
+    /// <summary>
+    /// Converts the <see cref="SKBitmap"/> to an Avalonia image, downscaling it to <paramref name="decodeWidth"/>
+    /// (preserving aspect ratio) if it is wider. Use for thumbnails so full-resolution bitmaps aren't kept in
+    /// memory or uploaded to the GPU. When <paramref name="decodeWidth"/> is <c>0</c> or the source is already
+    /// smaller, the bitmap is returned unscaled. Ownership of the bitmap (or its scaled replacement) is
+    /// transferred to the returned image.
+    /// </summary>
+    public static IImage? ToAvaloniaImageScaled(this SKBitmap? bitmap, int decodeWidth)
+    {
+        if (bitmap is null)
+        {
+            return null;
+        }
+
+        if (decodeWidth <= 0 || bitmap.Width <= decodeWidth)
+        {
+            return bitmap.ToAvaloniaImage();
+        }
+
+        var targetHeight = Math.Max(1, (int)Math.Round(bitmap.Height * ((double)decodeWidth / bitmap.Width)));
+
+        var resized = bitmap.Resize(
+            new SKImageInfo(decodeWidth, targetHeight),
+            new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Linear)
+        );
+
+        // If the resize failed, fall back to handing off the original bitmap unscaled.
+        if (resized is null)
+        {
+            return bitmap.ToAvaloniaImage();
+        }
+
+        bitmap.Dispose();
+        return resized.ToAvaloniaImage();
+    }
+
+    /// <summary>
+    /// Decodes an image stream into an Avalonia image, downscaling to <paramref name="decodeWidth"/> if wider.
+    /// Does not dispose the supplied stream.
+    /// </summary>
+    public static IImage? DecodeToAvaloniaImageScaled(System.IO.Stream? stream, int decodeWidth)
+    {
+        return stream.ToSKBitmap().ToAvaloniaImageScaled(decodeWidth);
+    }
+
+    /// <summary>
+    /// Decodes an image file into an Avalonia image, downscaling to <paramref name="decodeWidth"/> if wider.
+    /// </summary>
+    public static IImage? DecodeFileToAvaloniaImageScaled(string path, int decodeWidth)
+    {
+        using var stream = new SKFileStream(path);
+        return SKBitmap.Decode(stream).ToAvaloniaImageScaled(decodeWidth);
+    }
+
+    public static Bitmap ToAvaloniaBitmap(this SKBitmap bitmap)
+    {
+        return ToAvaloniaBitmap(bitmap, new Vector(96, 96));
+    }
+
+    public static Bitmap ToAvaloniaBitmap(this SKBitmap bitmap, Vector dpi)
+    {
+        // ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
+        var avaloniaColorFormat = bitmap.ColorType switch
+        {
+            SKColorType.Rgba8888 => PixelFormat.Rgba8888,
+            SKColorType.Bgra8888 => PixelFormat.Bgra8888,
+            _ => throw new NotSupportedException($"Unsupported SKColorType: {bitmap.ColorType}"),
+        };
+
+        // ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
+        var avaloniaAlphaFormat = bitmap.AlphaType switch
+        {
+            SKAlphaType.Opaque => AlphaFormat.Opaque,
+            SKAlphaType.Premul => AlphaFormat.Premul,
+            SKAlphaType.Unpremul => AlphaFormat.Unpremul,
+            _ => throw new NotSupportedException($"Unsupported SKAlphaType: {bitmap.AlphaType}"),
+        };
+
+        var result = new WriteableBitmap(
+            new PixelSize(bitmap.Width, bitmap.Height),
+            dpi,
+            avaloniaColorFormat,
+            avaloniaAlphaFormat
+        );
+
+        using var framebuffer = result.Lock();
+        CopyPixelRows(
+            bitmap.GetPixels(),
+            bitmap.RowBytes,
+            framebuffer.Address,
+            framebuffer.RowBytes,
+            bitmap.Height
+        );
+        return result;
+    }
+
+    public static Bitmap ToAvaloniaBitmap(this SKImage image)
+    {
+        return ToAvaloniaBitmap(image, new Vector(96, 96));
+    }
+
+    public static Bitmap ToAvaloniaBitmap(this SKImage image, Vector dpi)
+    {
+        ArgumentNullException.ThrowIfNull(image, nameof(image));
+
+        // PeekPixels returns null for GPU-backed images; only then do we need the extra copy.
+        using var pixmap = image.PeekPixels();
+        if (pixmap is null)
+        {
+            using var bitmap = SKBitmap.FromImage(image);
+            return bitmap.ToAvaloniaBitmap(dpi);
+        }
+
+        // ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
+        var avaloniaColorFormat = image.ColorType switch
+        {
+            SKColorType.Rgba8888 => PixelFormat.Rgba8888,
+            SKColorType.Bgra8888 => PixelFormat.Bgra8888,
+            _ => throw new NotSupportedException($"Unsupported SKColorType: {image.ColorType}"),
+        };
+
+        // ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
+        var avaloniaAlphaFormat = image.AlphaType switch
+        {
+            SKAlphaType.Opaque => AlphaFormat.Opaque,
+            SKAlphaType.Premul => AlphaFormat.Premul,
+            SKAlphaType.Unpremul => AlphaFormat.Unpremul,
+            _ => throw new NotSupportedException($"Unsupported SKAlphaType: {image.AlphaType}"),
+        };
+
+        var result = new WriteableBitmap(
+            new PixelSize(image.Width, image.Height),
+            dpi,
+            avaloniaColorFormat,
+            avaloniaAlphaFormat
+        );
+
+        using var framebuffer = result.Lock();
+        CopyPixelRows(
+            pixmap.GetPixels(),
+            pixmap.RowBytes,
+            framebuffer.Address,
+            framebuffer.RowBytes,
+            image.Height
+        );
+        return result;
+    }
+
+    private static unsafe void CopyPixelRows(
+        IntPtr source,
+        int sourceRowBytes,
+        IntPtr destination,
+        int destinationRowBytes,
+        int height
+    )
+    {
+        var bytesPerRow = Math.Min(sourceRowBytes, destinationRowBytes);
+        var src = (byte*)source;
+        var dest = (byte*)destination;
+
+        // When strides match the buffer is contiguous, so copy it all in one shot.
+        if (sourceRowBytes == destinationRowBytes)
+        {
+            var totalBytes = (long)sourceRowBytes * height;
+            Buffer.MemoryCopy(src, dest, totalBytes, totalBytes);
+            return;
+        }
+
+        for (var row = 0; row < height; row++)
+        {
+            Buffer.MemoryCopy(
+                src + ((long)row * sourceRowBytes),
+                dest + ((long)row * destinationRowBytes),
+                bytesPerRow,
+                bytesPerRow
+            );
+        }
+    }
+
+    public static PixelFormat ToAvaloniaPixelFormat(this SKColorType colorType)
+    {
+        // ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
+        return colorType switch
+        {
+            SKColorType.Rgba8888 => PixelFormat.Rgba8888,
+            SKColorType.Bgra8888 => PixelFormat.Bgra8888,
+            _ => throw new NotSupportedException($"Unsupported SKColorType: {colorType}"),
+        };
+    }
+}

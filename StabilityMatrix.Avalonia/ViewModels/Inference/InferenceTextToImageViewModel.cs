@@ -1,0 +1,580 @@
+﻿using System.Reactive.Linq;
+using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
+using DesktopNotifications;
+using DynamicData.Binding;
+using Injectio.Attributes;
+using NLog;
+using StabilityMatrix.Avalonia.Extensions;
+using StabilityMatrix.Avalonia.Models;
+using StabilityMatrix.Avalonia.Models.Inference;
+using StabilityMatrix.Avalonia.Services;
+using StabilityMatrix.Avalonia.ViewModels.Base;
+using StabilityMatrix.Avalonia.ViewModels.Inference.Modules;
+using StabilityMatrix.Core.Attributes;
+using StabilityMatrix.Core.Extensions;
+using StabilityMatrix.Core.Models;
+using StabilityMatrix.Core.Models.Api.Comfy;
+using StabilityMatrix.Core.Models.Api.Comfy.Nodes;
+using StabilityMatrix.Core.Models.Inference;
+using StabilityMatrix.Core.Models.Settings;
+using StabilityMatrix.Core.Services;
+using InferenceTextToImageView = StabilityMatrix.Avalonia.Views.Inference.InferenceTextToImageView;
+
+#pragma warning disable CS0657 // Not a valid attribute location for this declaration
+
+namespace StabilityMatrix.Avalonia.ViewModels.Inference;
+
+[View(typeof(InferenceTextToImageView), IsPersistent = true)]
+[ManagedService]
+[RegisterScoped<InferenceTextToImageViewModel>]
+public class InferenceTextToImageViewModel : InferenceGenerationViewModelBase, IParametersLoadableState
+{
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
+    private readonly INotificationService notificationService;
+    private readonly IModelIndexService modelIndexService;
+    private readonly TabContext tabContext;
+
+    [JsonIgnore]
+    public StackCardViewModel StackCardViewModel { get; }
+
+    [JsonPropertyName("Modules")]
+    public StackEditableCardViewModel ModulesCardViewModel { get; }
+
+    [JsonPropertyName("Model")]
+    public ModelCardViewModel ModelCardViewModel { get; }
+
+    [JsonPropertyName("Sampler")]
+    public SamplerCardViewModel SamplerCardViewModel { get; }
+
+    [JsonPropertyName("Prompt")]
+    public PromptCardViewModel PromptCardViewModel { get; }
+
+    [JsonPropertyName("BatchSize")]
+    public BatchSizeCardViewModel BatchSizeCardViewModel { get; }
+
+    [JsonPropertyName("Seed")]
+    public SeedCardViewModel SeedCardViewModel { get; }
+
+    public InferenceTextToImageViewModel(
+        INotificationService notificationService,
+        IInferenceClientManager inferenceClientManager,
+        ISettingsManager settingsManager,
+        IServiceManager<ViewModelBase> vmFactory,
+        IModelIndexService modelIndexService,
+        RunningPackageService runningPackageService,
+        TabContext tabContext
+    )
+        : base(vmFactory, inferenceClientManager, notificationService, settingsManager, runningPackageService)
+    {
+        this.notificationService = notificationService;
+        this.modelIndexService = modelIndexService;
+        this.tabContext = tabContext;
+
+        // Get sub view models from service manager
+
+        SeedCardViewModel = vmFactory.Get<SeedCardViewModel>();
+        SeedCardViewModel.GenerateNewSeed();
+
+        ModelCardViewModel = vmFactory.Get<ModelCardViewModel>();
+        ModelCardViewModel.RecommendedDefaultsRequested += ApplyRecommendedDefaults;
+
+        // When the model changes in the ModelCardViewModel, we'll have access to it in the TabContext
+
+        SamplerCardViewModel = vmFactory.Get<SamplerCardViewModel>(samplerCard =>
+        {
+            samplerCard.IsDimensionsEnabled = true;
+            samplerCard.IsCfgScaleEnabled = true;
+            samplerCard.IsSamplerSelectionEnabled = true;
+            samplerCard.IsSchedulerSelectionEnabled = true;
+            samplerCard.DenoiseStrength = 1.0d;
+        });
+
+        PromptCardViewModel = AddDisposable(vmFactory.Get<PromptCardViewModel>());
+
+        BatchSizeCardViewModel = vmFactory.Get<BatchSizeCardViewModel>();
+
+        ModulesCardViewModel = vmFactory.Get<StackEditableCardViewModel>(modulesCard =>
+        {
+            modulesCard.AvailableModules = new[]
+            {
+                typeof(CfzCudnnToggleModule),
+                typeof(FaceDetailerModule),
+                typeof(HiresFixModule),
+                typeof(SaveImageModule),
+                typeof(UpscalerModule),
+                typeof(FaceDetailerModule),
+            };
+            modulesCard.DefaultModules = new[] { typeof(HiresFixModule), typeof(UpscalerModule) };
+            modulesCard.InitializeDefaults();
+        });
+
+        StackCardViewModel = vmFactory.Get<StackCardViewModel>();
+        StackCardViewModel.AddCards(
+            ModelCardViewModel,
+            SamplerCardViewModel,
+            ModulesCardViewModel,
+            SeedCardViewModel,
+            BatchSizeCardViewModel
+        );
+
+        // When refiner is provided in model card, enable for sampler
+        AddDisposable(
+            ModelCardViewModel
+                .WhenPropertyChanged(x => x.IsRefinerSelectionEnabled)
+                .ObserveOn(SynchronizationContext.Current)
+                .Subscribe(e =>
+                {
+                    SamplerCardViewModel.IsRefinerStepsEnabled =
+                        e.Sender is { IsRefinerSelectionEnabled: true, SelectedRefiner: not null };
+                })
+        );
+
+        AddDisposable(
+            SamplerCardViewModel
+                .WhenPropertyChanged(x => x.SelectedScheduler)
+                .ObserveOn(SynchronizationContext.Current)
+                .Subscribe(next =>
+                {
+                    var isAlignYourSteps = next.Value is { Name: "align_your_steps" };
+                    ModelCardViewModel.ShowRefinerOption = !isAlignYourSteps;
+
+                    if (isAlignYourSteps)
+                    {
+                        ModelCardViewModel.IsRefinerSelectionEnabled = false;
+                    }
+                })
+        );
+    }
+
+    /// <inheritdoc />
+    protected override void BuildPrompt(BuildPromptEventArgs args)
+    {
+        base.BuildPrompt(args);
+
+        var builder = args.Builder;
+
+        // Load constants
+        builder.Connections.Seed = args.SeedOverride switch
+        {
+            { } seed => Convert.ToUInt64(seed),
+            _ => Convert.ToUInt64(SeedCardViewModel.Seed),
+        };
+
+        var applyArgs = args.ToModuleApplyStepEventArgs();
+
+        BatchSizeCardViewModel.ApplyStep(applyArgs);
+
+        // Load models
+        ModelCardViewModel.ApplyStep(applyArgs);
+
+        var useSd3Latent =
+            SamplerCardViewModel.ModulesCardViewModel.IsModuleEnabled<FluxGuidanceModule>()
+            || (IsUnetLoader && UsesSd3Latent);
+        var usePlasmaNoise = SamplerCardViewModel.ModulesCardViewModel.IsModuleEnabled<PlasmaNoiseModule>();
+
+        if (IsFlux2Unet)
+        {
+            builder.SetupEmptyLatentSource(
+                SamplerCardViewModel.Width,
+                SamplerCardViewModel.Height,
+                BatchSizeCardViewModel.BatchSize,
+                BatchSizeCardViewModel.IsBatchIndexEnabled ? BatchSizeCardViewModel.BatchIndex : null,
+                latentType: LatentType.Flux2
+            );
+        }
+        else if (useSd3Latent)
+        {
+            builder.SetupEmptyLatentSource(
+                SamplerCardViewModel.Width,
+                SamplerCardViewModel.Height,
+                BatchSizeCardViewModel.BatchSize,
+                BatchSizeCardViewModel.IsBatchIndexEnabled ? BatchSizeCardViewModel.BatchIndex : null,
+                latentType: LatentType.Sd3
+            );
+        }
+        else if (usePlasmaNoise)
+        {
+            var plasmaVm = SamplerCardViewModel
+                .ModulesCardViewModel.GetCard<PlasmaNoiseModule>()
+                .GetCard<PlasmaNoiseCardViewModel>();
+            builder.SetupPlasmaLatentSource(
+                SamplerCardViewModel.Width,
+                SamplerCardViewModel.Height,
+                builder.Connections.Seed,
+                plasmaVm.SelectedNoiseType,
+                plasmaVm.ValueMin,
+                plasmaVm.ValueMax,
+                plasmaVm.RedMin,
+                plasmaVm.RedMax,
+                plasmaVm.GreenMin,
+                plasmaVm.GreenMax,
+                plasmaVm.BlueMin,
+                plasmaVm.BlueMax,
+                plasmaVm.PlasmaTurbulence
+            );
+        }
+        else
+        {
+            // Setup empty latent
+            builder.SetupEmptyLatentSource(
+                SamplerCardViewModel.Width,
+                SamplerCardViewModel.Height,
+                BatchSizeCardViewModel.BatchSize,
+                BatchSizeCardViewModel.IsBatchIndexEnabled ? BatchSizeCardViewModel.BatchIndex : null
+            );
+        }
+
+        // Prompts and loras
+        PromptCardViewModel.ApplyStep(applyArgs);
+
+        ApplyModelSamplingForCurrentWorkflow(applyArgs);
+
+        // Setup Sampler and Refiner if enabled
+        ApplySamplerForCurrentWorkflow(applyArgs);
+
+        // Hires fix if enabled
+        foreach (var module in ModulesCardViewModel.Cards.OfType<ModuleBase>())
+        {
+            module.ApplyStep(applyArgs);
+        }
+
+        applyArgs.InvokeAllPreOutputActions();
+
+        builder.SetupOutputImage();
+    }
+
+    protected bool IsUnetLoader => ModelCardViewModel.SelectedModelLoader is ModelLoader.Unet;
+
+    protected InferenceWorkflowProfile ResolvedWorkflowProfile => ModelCardViewModel.ResolvedWorkflowProfile;
+
+    protected bool IsFlux2Unet =>
+        IsUnetLoader
+        && (
+            ResolvedWorkflowProfile is InferenceWorkflowProfile.Flux2
+            || (
+                ResolvedWorkflowProfile is InferenceWorkflowProfile.Custom
+                && ModelCardViewModel.SelectedClipType is "flux2"
+            )
+        );
+
+    protected bool IsZImageUnet =>
+        IsUnetLoader
+        && (
+            ResolvedWorkflowProfile
+                is InferenceWorkflowProfile.ZImageBase
+                    or InferenceWorkflowProfile.ZImageTurbo
+            || (
+                ResolvedWorkflowProfile is InferenceWorkflowProfile.Custom
+                && ModelCardViewModel.SelectedClipType is "lumina2"
+            )
+        );
+
+    protected bool UsesSd3Latent =>
+        ResolvedWorkflowProfile
+            is InferenceWorkflowProfile.Flux
+                or InferenceWorkflowProfile.ZImageBase
+                or InferenceWorkflowProfile.ZImageTurbo
+                or InferenceWorkflowProfile.HiDream
+        || (
+            ResolvedWorkflowProfile is InferenceWorkflowProfile.Custom
+            && ModelCardViewModel.SelectedClipType is not "stable_diffusion" and not "flux2"
+        );
+
+    protected bool UsesFluxGuidanceSampler =>
+        ResolvedWorkflowProfile is InferenceWorkflowProfile.Flux or InferenceWorkflowProfile.HiDream
+        || (
+            ResolvedWorkflowProfile is InferenceWorkflowProfile.Custom
+            && IsUnetLoader
+            && ModelCardViewModel.SelectedClipType is not "stable_diffusion" and not "lumina2" and not "flux2"
+        );
+
+    protected void ApplyModelSamplingForCurrentWorkflow(ModuleApplyStepEventArgs applyArgs)
+    {
+        if (!IsZImageUnet)
+            return;
+
+        var builder = applyArgs.Builder;
+        var modelSampling = builder.Nodes.AddTypedNode(
+            new ComfyNodeBuilder.ModelSamplingAuraFlow
+            {
+                Name = builder.Nodes.GetUniqueName(nameof(ComfyNodeBuilder.ModelSamplingAuraFlow)),
+                Model = builder.Connections.Base.Model.Unwrap(),
+                Shift = ModelCardViewModel.Shift,
+            }
+        );
+
+        builder.Connections.Base.Model = modelSampling.Output;
+    }
+
+    protected void ApplySamplerForCurrentWorkflow(
+        ModuleApplyStepEventArgs applyArgs,
+        bool includeGgufAsFluxGuidance = false
+    )
+    {
+        if (IsFlux2Unet)
+        {
+            SamplerCardViewModel.ApplyStepsInitialCustomSampler(applyArgs, false, useFlux2Scheduler: true);
+        }
+        else if (
+            (includeGgufAsFluxGuidance && ModelCardViewModel.IsGguf)
+            || (IsUnetLoader && UsesFluxGuidanceSampler)
+        )
+        {
+            SamplerCardViewModel.ApplyStepsInitialCustomSampler(applyArgs, true);
+        }
+        else if (SamplerCardViewModel.SelectedScheduler?.Name is "align_your_steps")
+        {
+            SamplerCardViewModel.ApplyStepsInitialCustomSampler(applyArgs, false);
+        }
+        else
+        {
+            SamplerCardViewModel.ApplyStep(applyArgs);
+        }
+    }
+
+    private void ApplyRecommendedDefaults(InferenceWorkflowProfile profile)
+    {
+        switch (profile)
+        {
+            case InferenceWorkflowProfile.DefaultCheckpoint:
+                SamplerCardViewModel.SelectedSampler = ComfySampler.EulerAncestral;
+                SamplerCardViewModel.SelectedScheduler = ComfyScheduler.Normal;
+                SamplerCardViewModel.Steps = 30;
+                SamplerCardViewModel.CfgScale = 5.0d;
+                break;
+            case InferenceWorkflowProfile.Flux:
+                SamplerCardViewModel.SelectedSampler = ComfySampler.Euler;
+                SamplerCardViewModel.SelectedScheduler = ComfyScheduler.Simple;
+                SamplerCardViewModel.Steps = 20;
+                SamplerCardViewModel.CfgScale = 3.5d;
+                break;
+            case InferenceWorkflowProfile.Flux2:
+                SamplerCardViewModel.SelectedSampler = ComfySampler.Euler;
+                SamplerCardViewModel.SelectedScheduler = ComfyScheduler.Normal;
+                SamplerCardViewModel.Steps = 20;
+                SamplerCardViewModel.CfgScale = 5.0d;
+                break;
+            case InferenceWorkflowProfile.ZImageTurbo:
+                SamplerCardViewModel.SelectedSampler = ComfySampler.ResMultistep;
+                SamplerCardViewModel.SelectedScheduler = ComfyScheduler.Simple;
+                SamplerCardViewModel.Steps = 8;
+                SamplerCardViewModel.CfgScale = 1.0d;
+                break;
+            case InferenceWorkflowProfile.ZImageBase:
+                SamplerCardViewModel.SelectedSampler = ComfySampler.ResMultistep;
+                SamplerCardViewModel.SelectedScheduler = ComfyScheduler.Simple;
+                SamplerCardViewModel.Steps = 30;
+                SamplerCardViewModel.CfgScale = 4.0d;
+                break;
+            case InferenceWorkflowProfile.Anima:
+                SamplerCardViewModel.SelectedSampler = ComfySampler.ErSde;
+                SamplerCardViewModel.SelectedScheduler = ComfyScheduler.Simple;
+                SamplerCardViewModel.Steps = 30;
+                SamplerCardViewModel.CfgScale = 4.0d;
+                break;
+        }
+    }
+
+    /// <inheritdoc />
+    protected override IEnumerable<ImageSource> GetInputImages()
+    {
+        var samplerImages = SamplerCardViewModel
+            .ModulesCardViewModel.Cards.OfType<IInputImageProvider>()
+            .SelectMany(m => m.GetInputImages());
+
+        var moduleImages = ModulesCardViewModel
+            .Cards.OfType<IInputImageProvider>()
+            .SelectMany(m => m.GetInputImages());
+
+        return samplerImages.Concat(moduleImages);
+    }
+
+    /// <inheritdoc />
+    protected override async Task GenerateImageImpl(
+        GenerateOverrides overrides,
+        CancellationToken cancellationToken
+    )
+    {
+        // Validate the prompts (per-line when queue mode is enabled)
+        if (!await PromptCardViewModel.ValidatePromptsForGenerationAsync())
+            return;
+
+        if (!await ModelCardViewModel.ValidateModel())
+            return;
+
+        foreach (var module in ModulesCardViewModel.Cards.OfType<ModuleBase>())
+        {
+            if (!module.IsEnabled)
+                continue;
+
+            if (module is not IValidatableModule validatableModule)
+                continue;
+
+            if (!await validatableModule.Validate())
+            {
+                return;
+            }
+        }
+
+        if (!await CheckClientConnectedWithPrompt(cancellationToken) || !ClientManager.IsConnected)
+            return;
+
+        var seedCard = StackCardViewModel.GetCard<SeedCardViewModel>();
+        var promptLines = PromptCardViewModel.GetQueuedPositivePromptLines();
+        var lineOrdinal = 0;
+        var totalBatches = 0;
+
+        try
+        {
+            foreach (var line in promptLines)
+            {
+                PromptCardViewModel.PromptDocument.Text = line;
+
+                if (overrides is not { UseCurrentSeed: true } && seedCard.IsRandomizeEnabled)
+                    seedCard.GenerateNewSeed();
+
+                var batches = BatchSizeCardViewModel.BatchCount;
+                var batchArgs = new List<ImageGenerationEventArgs>();
+
+                for (var i = 0; i < batches; i++)
+                {
+                    var seed = seedCard.Seed + i;
+                    var buildPromptArgs = new BuildPromptEventArgs
+                    {
+                        Overrides = overrides,
+                        SeedOverride = seed,
+                    };
+                    BuildPrompt(buildPromptArgs);
+
+                    var inferenceProject = InferenceProjectDocument.FromLoadable(this);
+                    if (inferenceProject.State?["Seed"]?["Seed"] is not null)
+                        inferenceProject = inferenceProject.WithState(x => x["Seed"]["Seed"] = seed);
+
+                    batchArgs.Add(
+                        new ImageGenerationEventArgs
+                        {
+                            Client = ClientManager.Client,
+                            Nodes = buildPromptArgs.Builder.ToNodeDictionary(),
+                            OutputNodeNames = buildPromptArgs.Builder.Connections.OutputNodeNames.ToArray(),
+                            Parameters = SaveStateToParameters(new GenerationParameters()) with
+                            {
+                                Seed = Convert.ToUInt64(seed),
+                            },
+                            Project = inferenceProject,
+                            FilesToTransfer = buildPromptArgs.FilesToTransfer,
+                            BatchIndex = i,
+                            ClearOutputImages = lineOrdinal == 0 && i == 0,
+                        }
+                    );
+                }
+
+                foreach (var args in batchArgs)
+                    await RunGeneration(args, cancellationToken);
+
+                totalBatches += batches;
+                lineOrdinal++;
+            }
+        }
+        finally
+        {
+            PromptCardViewModel.PromptDocument.Text = PromptCardViewModel.BasePromptDocument.Text;
+        }
+
+        // Only show batch notification when there's more than one item
+        // (single items already get a "Prompt Completed" notification)
+        if (totalBatches > 1)
+        {
+            await notificationService.ShowAsync(
+                NotificationKey.Inference_BatchCompleted,
+                new Notification
+                {
+                    Title = "Batch Completed",
+                    Body =
+                        $"Batch of {totalBatches} items [{Guid.NewGuid().ToString()[..7].ToLower()}] completed successfully",
+                    BodyImagePath = ImageGalleryCardViewModel
+                        .ImageSources.LastOrDefault()
+                        ?.LocalFile?.FullPath,
+                }
+            );
+        }
+    }
+
+    /// <inheritdoc />
+    public void LoadStateFromParameters(GenerationParameters parameters)
+    {
+        PromptCardViewModel.LoadStateFromParameters(parameters);
+        SamplerCardViewModel.LoadStateFromParameters(parameters);
+        ModelCardViewModel.LoadStateFromParameters(parameters);
+
+        SeedCardViewModel.Seed = Convert.ToInt64(parameters.Seed);
+
+        if (Math.Abs(SamplerCardViewModel.DenoiseStrength - 1.0d) > 0.01d)
+        {
+            SamplerCardViewModel.DenoiseStrength = 1.0d;
+        }
+    }
+
+    /// <inheritdoc />
+    public GenerationParameters SaveStateToParameters(GenerationParameters parameters)
+    {
+        parameters = PromptCardViewModel.SaveStateToParameters(parameters);
+        parameters = SamplerCardViewModel.SaveStateToParameters(parameters);
+        parameters = ModelCardViewModel.SaveStateToParameters(parameters);
+
+        parameters.Seed = (ulong)SeedCardViewModel.Seed;
+
+        return parameters;
+    }
+
+    // Deserialization overrides
+    public override void LoadStateFromJsonObject(JsonObject state, int version)
+    {
+        // For v2 and below, do migration
+        if (version <= 2)
+        {
+            ModulesCardViewModel.Clear();
+
+            // Add by default the original cards as steps - HiresFix, Upscaler
+            ModulesCardViewModel.AddModule<HiresFixModule>(module =>
+            {
+                module.IsEnabled = state.GetPropertyValueOrDefault<bool>("IsHiresFixEnabled");
+
+                if (state.TryGetPropertyValue("HiresSampler", out var hiresSamplerState))
+                {
+                    module
+                        .GetCard<SamplerCardViewModel>()
+                        .LoadStateFromJsonObject(hiresSamplerState!.AsObject());
+                }
+
+                if (state.TryGetPropertyValue("HiresUpscaler", out var hiresUpscalerState))
+                {
+                    module
+                        .GetCard<UpscalerCardViewModel>()
+                        .LoadStateFromJsonObject(hiresUpscalerState!.AsObject());
+                }
+            });
+
+            ModulesCardViewModel.AddModule<UpscalerModule>(module =>
+            {
+                module.IsEnabled = state.GetPropertyValueOrDefault<bool>("IsUpscaleEnabled");
+
+                if (state.TryGetPropertyValue("Upscaler", out var upscalerState))
+                {
+                    module
+                        .GetCard<UpscalerCardViewModel>()
+                        .LoadStateFromJsonObject(upscalerState!.AsObject());
+                }
+            });
+
+            // Add FreeU to sampler
+            SamplerCardViewModel.ModulesCardViewModel.AddModule<FreeUModule>(module =>
+            {
+                module.IsEnabled = state.GetPropertyValueOrDefault<bool>("IsFreeUEnabled");
+            });
+        }
+
+        base.LoadStateFromJsonObject(state);
+    }
+}

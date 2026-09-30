@@ -1,0 +1,30 @@
+{
+   "tasks": [
+      {
+         "name": "Run csharpier",
+         "group": "pre-commit",
+         "command": "dotnet",
+         "args": [ "csharpier", "format", "${staged}" ],
+         "include": [ "**/*.cs" ]
+      }, 
+      {
+         "name": "Run xamlstyler",
+         "group": "pre-commit",
+         "command": "dotnet",
+         "args": [ "xstyler", "-f", "${staged}" ],
+         "include": [ "**/*.axaml" ]
+      },
+      {
+         "name": "Run refitter for LykosAuthApi",
+         "group": "generate-openapi",
+         "command": "dotnet",
+         "args": ["refitter", "--settings-file", "./StabilityMatrix.Core/Api/LykosAuthApi/.refitter"]
+      },
+      {
+         "name": "Run refitter for PromptGenApi",
+         "group": "generate-promptgen-openapi",
+         "command": "dotnet",
+         "args": ["refitter", "--settings-file", "./StabilityMatrix.Core/Api/PromptGen/.refitter"]
+      }
+   ]
+}

@@ -1,0 +1,556 @@
+﻿<ResourceDictionary
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="clr-namespace:StabilityMatrix.Avalonia.Controls"
+    xmlns:converters="clr-namespace:StabilityMatrix.Avalonia.Converters"
+    xmlns:fluentIcons="clr-namespace:FluentIcons.Avalonia.Fluent;assembly=FluentIcons.Avalonia.Fluent"
+    xmlns:labs="clr-namespace:Avalonia.Labs.Controls;assembly=Avalonia.Labs.Controls"
+    xmlns:mocks="using:StabilityMatrix.Avalonia.DesignData"
+    xmlns:models="clr-namespace:StabilityMatrix.Core.Models;assembly=StabilityMatrix.Core"
+    xmlns:sg="clr-namespace:SpacedGridControl.Avalonia;assembly=SpacedGridControl.Avalonia"
+    xmlns:ui="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+    xmlns:vendorLabs="clr-namespace:StabilityMatrix.Avalonia.Controls.VendorLabs">
+
+    <Design.PreviewWith>
+        <Panel Width="550" Height="600">
+            <StackPanel
+                Width="250"
+                Margin="64,24"
+                HorizontalAlignment="Left"
+                Spacing="4">
+                <controls:BetterComboBox
+                    HorizontalAlignment="Stretch"
+                    ItemsSource="{x:Static mocks:DesignData.SampleHybridModels}"
+                    SelectedIndex="0" />
+
+                <controls:BetterComboBox
+                    HorizontalAlignment="Stretch"
+                    ItemsSource="{x:Static mocks:DesignData.SampleHybridModels}"
+                    SelectedIndex="0"
+                    Theme="{DynamicResource BetterComboBoxHybridModelTheme}" />
+            </StackPanel>
+        </Panel>
+    </Design.PreviewWith>
+
+    <converters:FileUriConverter x:Key="FileUriConverter" />
+
+    <!--  ReSharper disable once Xaml.StaticResourceNotResolved  -->
+    <ControlTheme
+        x:Key="BetterComboBoxItemHybridModelTheme"
+        BasedOn="{StaticResource {x:Type ComboBoxItem}}"
+        TargetType="ComboBoxItem">
+        <Setter Property="ToolTip.Placement" Value="RightEdgeAlignedTop" />
+        <Setter Property="ToolTip.Tip">
+            <Template>
+                <sg:SpacedGrid
+                    x:DataType="models:HybridModelFile"
+                    ColumnDefinitions="Auto,*"
+                    ColumnSpacing="6"
+                    RowSpacing="0">
+                    <!--  Image  -->
+                    <vendorLabs:BetterAsyncImage
+                        Width="64"
+                        Height="96"
+                        CornerRadius="6"
+                        IsVisible="{Binding Local.PreviewImageFullPathGlobal, Converter={x:Static StringConverters.IsNotNullOrEmpty}, FallbackValue=''}"
+                        RenderOptions.BitmapInterpolationMode="HighQuality"
+                        RenderOptions.EdgeMode="Antialias"
+                        Source="{Binding Local.PreviewImageFullPathGlobal, FallbackValue='', Converter={StaticResource FileUriConverter}}"
+                        Stretch="UniformToFill" />
+                    <StackPanel
+                        Grid.Column="1"
+                        MaxWidth="300"
+                        VerticalAlignment="Stretch">
+                        <!--  Title  -->
+                        <TextBlock
+                            Margin="0,0,0,4"
+                            HorizontalAlignment="Left"
+                            FontSize="14"
+                            FontWeight="Medium"
+                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                            IsVisible="{Binding Local.ConnectedModelInfo, Converter={x:Static ObjectConverters.IsNotNull}, FallbackValue=False}"
+                            Text="{Binding Local.ConnectedModelInfo.ModelName, FallbackValue=''}"
+                            TextWrapping="WrapWithOverflow" />
+                        <!--  Version  -->
+                        <TextBlock
+                            Margin="0,0,0,8"
+                            HorizontalAlignment="Left"
+                            FontSize="13"
+                            Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                            IsVisible="{Binding Local.ConnectedModelInfo, Converter={x:Static ObjectConverters.IsNotNull}, FallbackValue=False}"
+                            Text="{Binding Local.ConnectedModelInfo.VersionName, FallbackValue=''}"
+                            TextWrapping="WrapWithOverflow" />
+                        <!--  Path  -->
+                        <TextBlock
+                            HorizontalAlignment="Left"
+                            FontSize="13"
+                            Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                            Text="{Binding FileName}"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </sg:SpacedGrid>
+            </Template>
+        </Setter>
+    </ControlTheme>
+
+    <!--  ReSharper disable once Xaml.StaticResourceNotResolved  -->
+    <ControlTheme
+        x:Key="{x:Type controls:BetterComboBox}"
+        BasedOn="{StaticResource {x:Type ComboBox}}"
+        TargetType="controls:BetterComboBox">
+        <Setter Property="Padding" Value="{DynamicResource ComboBoxPadding}" />
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <Setter Property="MaxDropDownHeight" Value="504" />
+        <Setter Property="Foreground" Value="{DynamicResource ComboBoxForeground}" />
+        <Setter Property="Background" Value="{DynamicResource ComboBoxBackground}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ComboBoxBorderBrush}" />
+        <Setter Property="BorderThickness" Value="{DynamicResource ComboBoxBorderThemeThickness}" />
+        <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+        <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+        <Setter Property="MinHeight" Value="{DynamicResource ComboBoxMinHeight}" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="VerticalAlignment" Value="Top" />
+        <Setter Property="PlaceholderForeground" Value="{DynamicResource ComboBoxPlaceHolderForeground}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <DataValidationErrors>
+                    <Grid ColumnDefinitions="*,32">
+                        <Border
+                            x:Name="Background"
+                            Grid.Column="0"
+                            Grid.ColumnSpan="2"
+                            MinWidth="{DynamicResource ComboBoxThemeMinWidth}"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{TemplateBinding CornerRadius}" />
+                        <Border
+                            x:Name="HighlightBackground"
+                            Grid.Column="0"
+                            Grid.ColumnSpan="2"
+                            Background="{DynamicResource ComboBoxBackgroundUnfocused}"
+                            BorderBrush="{DynamicResource ComboBoxBackgroundBorderBrushUnfocused}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                            IsVisible="False" />
+                        <TextBlock
+                            x:Name="PlaceholderTextBlock"
+                            Grid.Column="0"
+                            Margin="{TemplateBinding Padding}"
+                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                            Foreground="{TemplateBinding PlaceholderForeground}"
+                            Text="{TemplateBinding PlaceholderText}">
+                            <TextBlock.IsVisible>
+                                <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                    <Binding
+                                        Converter="{x:Static ObjectConverters.IsNull}"
+                                        Path="SelectionBoxItem"
+                                        RelativeSource="{RelativeSource TemplatedParent}" />
+                                    <Binding Path="!IsEditable" RelativeSource="{RelativeSource TemplatedParent}" />
+                                </MultiBinding>
+                            </TextBlock.IsVisible>
+                        </TextBlock>
+                        <ContentControl
+                            x:Name="ContentPresenter"
+                            Grid.Column="0"
+                            Margin="{TemplateBinding Padding}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                            Content="{TemplateBinding SelectionBoxItem}"
+                            ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                            IsVisible="{TemplateBinding IsEditable,
+                                                        Converter={x:Static BoolConverters.Not}}" />
+
+                        <TextBox
+                            Name="PART_EditableTextBox"
+                            Grid.Column="0"
+                            Padding="{TemplateBinding Padding}"
+                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Foreground="{TemplateBinding Foreground}"
+                            IsVisible="{TemplateBinding IsEditable}"
+                            Text="{TemplateBinding Text,
+                                                   Mode=TwoWay}"
+                            Watermark="{TemplateBinding PlaceholderText}">
+                            <TextBox.Resources>
+                                <SolidColorBrush x:Key="TextControlBackgroundFocused">Transparent</SolidColorBrush>
+                                <SolidColorBrush x:Key="TextControlBackgroundPointerOver">Transparent</SolidColorBrush>
+                                <Thickness x:Key="TextControlBorderThemeThicknessFocused">0</Thickness>
+                            </TextBox.Resources>
+                        </TextBox>
+
+                        <Border
+                            x:Name="DropDownOverlay"
+                            Grid.Column="1"
+                            Width="30"
+                            Margin="0,1,1,1"
+                            HorizontalAlignment="Right"
+                            Background="Transparent"
+                            IsVisible="False" />
+
+                        <PathIcon
+                            x:Name="DropDownGlyph"
+                            Grid.Column="1"
+                            Width="12"
+                            Height="12"
+                            Margin="0,0,10,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Data="M1939 486L2029 576L1024 1581L19 576L109 486L1024 1401L1939 486Z"
+                            Foreground="{DynamicResource ComboBoxDropDownGlyphForeground}"
+                            IsHitTestVisible="False"
+                            UseLayoutRounding="False" />
+
+                        <Popup
+                            Name="PART_Popup"
+                            MinWidth="{Binding Bounds.Width, RelativeSource={RelativeSource TemplatedParent}}"
+                            MaxHeight="{TemplateBinding MaxDropDownHeight}"
+                            InheritsTransform="True"
+                            IsLightDismissEnabled="True"
+                            IsOpen="{TemplateBinding IsDropDownOpen,
+                                                     Mode=TwoWay}"
+                            PlacementTarget="Background"
+                            WindowManagerAddShadowHint="False">
+                            <Border
+                                x:Name="PopupBorder"
+                                Padding="{DynamicResource ComboBoxDropdownBorderPadding}"
+                                HorizontalAlignment="Stretch"
+                                Background="{DynamicResource ComboBoxDropDownBackground}"
+                                BorderBrush="{DynamicResource ComboBoxDropDownBorderBrush}"
+                                BorderThickness="{DynamicResource ComboBoxDropdownBorderThickness}"
+                                CornerRadius="{DynamicResource OverlayCornerRadius}">
+                                <Grid RowDefinitions="Auto,*">
+                                    <TextBox
+                                        Name="PART_SearchTextBox"
+                                        Grid.Row="0"
+                                        MinHeight="30"
+                                        Margin="8,8,8,4"
+                                        Classes="search"
+                                        Watermark="{TemplateBinding SearchWatermark}" />
+                                    <ScrollViewer
+                                        Grid.Row="1"
+                                        HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
+                                        IsDeferredScrollingEnabled="{TemplateBinding (ScrollViewer.IsDeferredScrollingEnabled)}"
+                                        IsScrollChainingEnabled="False"
+                                        VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}">
+                                        <ItemsPresenter
+                                            Name="PART_ItemsPresenter"
+                                            Margin="{DynamicResource ComboBoxDropdownContentMargin}"
+                                            ItemsPanel="{TemplateBinding ItemsPanel}" />
+                                    </ScrollViewer>
+                                </Grid>
+                            </Border>
+                        </Popup>
+                    </Grid>
+                </DataValidationErrors>
+            </ControlTemplate>
+        </Setter>
+
+        <Style Selector="^:pointerover /template/ Border#Background">
+            <Setter Property="Background" Value="{DynamicResource ComboBoxBackgroundPointerOver}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource ComboBoxBorderBrushPointerOver}" />
+        </Style>
+
+        <Style Selector="^:pressed /template/ Border#Background">
+            <Setter Property="Background" Value="{DynamicResource ComboBoxBackgroundPressed}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource ComboBoxBorderBrushPressed}" />
+        </Style>
+
+        <Style Selector="^:error /template/ Border#Background">
+            <Setter Property="BorderBrush" Value="{DynamicResource SystemControlErrorTextForegroundBrush}" />
+        </Style>
+
+        <Style Selector="^:focus:pressed">
+            <Style Selector="^ /template/ ContentControl#ContentPresenter">
+                <Setter Property="Foreground" Value="{DynamicResource ComboBoxForegroundFocusedPressed}" />
+            </Style>
+            <Style Selector="^ /template/ TextBlock#PlaceholderTextBlock">
+                <Setter Property="Foreground" Value="{DynamicResource ComboBoxPlaceHolderForegroundFocusedPressed}" />
+            </Style>
+            <Style Selector="^ /template/ PathIcon#DropDownGlyph">
+                <Setter Property="Foreground" Value="{DynamicResource ComboBoxDropDownGlyphForegroundFocusedPressed}" />
+            </Style>
+        </Style>
+
+        <Style Selector="^:focus-visible">
+            <Style Selector="^ /template/ Border#HighlightBackground">
+                <Setter Property="BorderBrush" Value="{DynamicResource ComboBoxBackgroundBorderBrushFocused}" />
+                <Setter Property="IsVisible" Value="True" />
+            </Style>
+            <Style Selector="^ /template/ ContentControl#ContentPresenter">
+                <Setter Property="Foreground" Value="{DynamicResource ComboBoxForegroundFocused}" />
+            </Style>
+            <Style Selector="^ /template/ TextBlock#PlaceholderTextBlock">
+                <Setter Property="Foreground" Value="{DynamicResource ComboBoxForegroundFocused}" />
+            </Style>
+            <Style Selector="^ /template/ PathIcon#DropDownGlyph">
+                <Setter Property="Foreground" Value="{DynamicResource ComboBoxDropDownGlyphForegroundFocused}" />
+            </Style>
+        </Style>
+
+        <Style Selector="^:disabled">
+            <Style Selector="^ /template/ Border#Background">
+                <Setter Property="Background" Value="{DynamicResource ComboBoxBackgroundDisabled}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource ComboBoxBorderBrushDisabled}" />
+            </Style>
+            <Style Selector="^ /template/ ContentControl#ContentPresenter">
+                <Setter Property="Foreground" Value="{DynamicResource ComboBoxForegroundDisabled}" />
+            </Style>
+            <Style Selector="^ /template/ TextBlock#PlaceholderTextBlock">
+                <Setter Property="Foreground" Value="{DynamicResource ComboBoxForegroundDisabled}" />
+            </Style>
+            <Style Selector="^ /template/ PathIcon#DropDownGlyph">
+                <Setter Property="Foreground" Value="{DynamicResource ComboBoxDropDownGlyphForegroundDisabled}" />
+            </Style>
+        </Style>
+
+        <Style Selector="^[UseLegacySearch=true] /template/ TextBox#PART_SearchTextBox">
+            <Setter Property="IsVisible" Value="False" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="MinHeight" Value="0" />
+            <Setter Property="Height" Value="0" />
+        </Style>
+
+        <Style Selector="^[IsEditable=true]">
+            <Setter Property="IsTabStop" Value="False" />
+            <Setter Property="KeyboardNavigation.TabNavigation" Value="Local" />
+        </Style>
+    </ControlTheme>
+
+    <ControlTheme
+        x:Key="BetterComboBoxHybridModelTheme"
+        BasedOn="{StaticResource {x:Type controls:BetterComboBox}}"
+        TargetType="controls:BetterComboBox">
+        <Setter Property="SearchWatermark" Value="Search models..." />
+
+        <ControlTheme.Resources>
+            <controls:HybridModelTemplateSelector x:Key="HybridModelTemplateSelector">
+                <DataTemplate x:Key="{x:Static models:HybridModelType.Downloadable}" DataType="models:HybridModelFile">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Foreground="{DynamicResource ThemeGreyColor}" Text="{Binding ShortDisplayName}" />
+                        <Button
+                            Grid.Column="1"
+                            Margin="8,0,0,0"
+                            Padding="0"
+                            Classes="transparent-full">
+                            <fluentIcons:SymbolIcon
+                                VerticalAlignment="Center"
+                                FontSize="18"
+                                Foreground="{DynamicResource ThemeGreyColor}"
+                                IconVariant="Filled"
+                                Symbol="CloudArrowDown" />
+                        </Button>
+                    </Grid>
+                </DataTemplate>
+
+                <DataTemplate x:Key="{x:Static models:HybridModelType.Local}" DataType="models:HybridModelFile">
+                    <sg:SpacedGrid
+                        HorizontalAlignment="Stretch"
+                        ColumnDefinitions="Auto,*"
+                        ColumnSpacing="8"
+                        TextBlock.TextTrimming="CharacterEllipsis"
+                        TextBlock.TextWrapping="NoWrap">
+                        <vendorLabs:BetterAsyncImage
+                            Grid.RowSpan="2"
+                            Width="42"
+                            Height="42"
+                            CornerRadius="20"
+                            RenderOptions.BitmapInterpolationMode="HighQuality"
+                            RenderOptions.EdgeMode="Antialias"
+                            Source="{Binding Local.PreviewImageFullPathGlobal, Converter={StaticResource FileUriConverter}}"
+                            Stretch="UniformToFill" />
+
+                        <!--  Text  -->
+                        <sg:SpacedGrid
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            ColumnDefinitions="Auto,*"
+                            RowDefinitions="Auto,Auto,Auto"
+                            RowSpacing="1">
+                            <TextBlock
+                                Grid.ColumnSpan="2"
+                                Text="{Binding Local.DisplayModelName}"
+                                TextTrimming="CharacterEllipsis" />
+                            <TextBlock
+                                Grid.Row="1"
+                                Grid.Column="0"
+                                FontSize="12"
+                                FontWeight="Regular"
+                                Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                Text="{Binding Local.DisplayModelVersion}"
+                                TextTrimming="CharacterEllipsis" />
+                            <TextBlock
+                                Grid.Row="2"
+                                Grid.Column="0"
+                                FontSize="11"
+                                FontWeight="Normal"
+                                Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                                Text="{Binding Local.DisplayModelFileName}" />
+
+                            <!--  Badges  -->
+                            <StackPanel
+                                Grid.Row="1"
+                                Grid.RowSpan="2"
+                                Grid.Column="1"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Bottom"
+                                Orientation="Horizontal">
+                                <fluentIcons:SymbolIcon
+                                    Margin="4"
+                                    Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                    IsVisible="{Binding Local.ConfigFullPath, Converter={x:Static StringConverters.IsNotNullOrEmpty}, FallbackValue=False}"
+                                    Symbol="BeakerSettings"
+                                    ToolTip.Tip="{Binding Local.DisplayConfigFileName}" />
+                                <Label
+                                    MinHeight="0"
+                                    Margin="0,0,0,0"
+                                    Padding="6,0,6,0"
+                                    Classes="Circle LightBlue"
+                                    Content="{Binding Local.ConnectedModelInfo.BaseModel}"
+                                    FontSize="10"
+                                    FontWeight="SemiBold"
+                                    Theme="{StaticResource TagLabel}" />
+                            </StackPanel>
+                        </sg:SpacedGrid>
+                    </sg:SpacedGrid>
+                </DataTemplate>
+
+                <DataTemplate x:Key="{x:Static models:HybridModelType.None}" DataType="models:HybridModelFile">
+                    <StackPanel>
+                        <TextBlock Text="{Binding ShortDisplayName}" TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                </DataTemplate>
+            </controls:HybridModelTemplateSelector>
+
+            <controls:HybridModelTemplateSelector x:Key="HybridModelSelectionBoxTemplateSelector">
+                <DataTemplate x:Key="{x:Static models:HybridModelType.Downloadable}" DataType="models:HybridModelFile">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Foreground="{DynamicResource ThemeGreyColor}" Text="{Binding ShortDisplayName}" />
+                        <Button
+                            Grid.Column="1"
+                            Margin="8,0,0,0"
+                            Padding="0"
+                            Classes="transparent-full">
+                            <fluentIcons:SymbolIcon
+                                VerticalAlignment="Center"
+                                FontSize="18"
+                                Foreground="{DynamicResource ThemeGreyColor}"
+                                IconVariant="Filled"
+                                Symbol="CloudArrowDown" />
+                        </Button>
+                    </Grid>
+                </DataTemplate>
+
+                <DataTemplate x:Key="{x:Static models:HybridModelType.Local}" DataType="models:HybridModelFile">
+                    <sg:SpacedGrid
+                        HorizontalAlignment="Stretch"
+                        ColumnDefinitions="Auto,*"
+                        ColumnSpacing="8"
+                        TextBlock.TextTrimming="CharacterEllipsis"
+                        TextBlock.TextWrapping="NoWrap">
+                        <vendorLabs:BetterAsyncImage
+                            Grid.RowSpan="2"
+                            Width="36"
+                            Height="36"
+                            CornerRadius="36"
+                            RenderOptions.BitmapInterpolationMode="HighQuality"
+                            Source="{Binding Local.PreviewImageFullPathGlobal, Converter={StaticResource FileUriConverter}}"
+                            Stretch="UniformToFill" />
+
+                        <!--<Label
+                            Grid.RowSpan="2"
+                            Theme="{StaticResource TagLabel}"
+                            Classes="Circle Solid White"
+                            VerticalAlignment="Bottom"
+                            FontSize="10"
+                            FontWeight="SemiBold"
+                            Padding="4,1"
+                            Content="{Binding Local.ConnectedModelInfo.BaseModel}"/>-->
+
+                        <!--  Text  -->
+                        <sg:SpacedGrid
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            ColumnDefinitions="*,Auto"
+                            RowDefinitions="Auto,Auto"
+                            RowSpacing="1">
+
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="0"
+                                Grid.ColumnSpan="2"
+                                Text="{Binding Local.DisplayModelName}"
+                                TextTrimming="CharacterEllipsis" />
+                            <TextBlock
+                                Grid.Row="1"
+                                Grid.Column="0"
+                                Grid.ColumnSpan="1"
+                                Margin="0,2,0,0"
+                                FontSize="12"
+                                FontWeight="Regular"
+                                Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                Text="{Binding Local.DisplayModelVersion}"
+                                TextTrimming="CharacterEllipsis" />
+
+                            <!--  Badges  -->
+                            <StackPanel
+                                Grid.Row="1"
+                                Grid.Column="1"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Bottom"
+                                Orientation="Horizontal">
+                                <fluentIcons:SymbolIcon
+                                    Margin="4"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                    IsVisible="{Binding Local.ConfigFullPath, Converter={x:Static StringConverters.IsNotNullOrEmpty}, FallbackValue=False}"
+                                    Symbol="BeakerSettings"
+                                    ToolTip.Tip="{Binding Local.DisplayConfigFileName}" />
+                                <Label
+                                    MinHeight="0"
+                                    Margin="0,0,0,0"
+                                    Padding="6,0,6,0"
+                                    Classes="Circle LightBlue"
+                                    Content="{Binding Local.ConnectedModelInfo.BaseModel}"
+                                    FontSize="10"
+                                    FontWeight="SemiBold"
+                                    Theme="{StaticResource TagLabel}" />
+                            </StackPanel>
+                        </sg:SpacedGrid>
+                    </sg:SpacedGrid>
+                </DataTemplate>
+
+                <DataTemplate x:Key="{x:Static models:HybridModelType.None}" DataType="models:HybridModelFile">
+                    <StackPanel>
+                        <TextBlock Text="{Binding ShortDisplayName}" TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                </DataTemplate>
+            </controls:HybridModelTemplateSelector>
+        </ControlTheme.Resources>
+
+        <Setter Property="TextBlock.TextWrapping" Value="NoWrap" />
+        <Setter Property="SelectionBoxItemTemplate" Value="{StaticResource HybridModelSelectionBoxTemplateSelector}" />
+        <Setter Property="ItemTemplate" Value="{StaticResource HybridModelTemplateSelector}" />
+        <Setter Property="ItemContainerTheme" Value="{StaticResource BetterComboBoxItemHybridModelTheme}" />
+
+        <Style Selector="^ /template/ Popup#PART_Popup">
+            <Setter Property="Width" Value="400" />
+            <Setter Property="Placement" Value="Bottom" />
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+            <Setter Property="Effect">
+                <DropShadowEffect
+                    BlurRadius="32"
+                    Opacity="0.6"
+                    Color="#FF000000" />
+            </Setter>
+        </Style>
+
+    </ControlTheme>
+
+</ResourceDictionary>

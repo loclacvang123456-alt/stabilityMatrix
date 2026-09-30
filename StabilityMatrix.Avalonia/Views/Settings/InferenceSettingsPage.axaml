@@ -1,0 +1,272 @@
+﻿<controls:UserControlBase
+    x:Class="StabilityMatrix.Avalonia.Views.Settings.InferenceSettingsPage"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="clr-namespace:StabilityMatrix.Avalonia.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:fluentIcons="clr-namespace:FluentIcons.Avalonia.Fluent;assembly=FluentIcons.Avalonia.Fluent"
+    xmlns:inference="clr-namespace:StabilityMatrix.Avalonia.Models.Inference"
+    xmlns:lang="clr-namespace:StabilityMatrix.Avalonia.Languages"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:mocks="clr-namespace:StabilityMatrix.Avalonia.DesignData"
+    xmlns:models1="clr-namespace:StabilityMatrix.Core.Models;assembly=StabilityMatrix.Core"
+    xmlns:native="clr-namespace:StabilityMatrix.Native;assembly=StabilityMatrix.Native"
+    xmlns:sg="clr-namespace:SpacedGridControl.Avalonia;assembly=SpacedGridControl.Avalonia"
+    xmlns:system="clr-namespace:System;assembly=System.Runtime"
+    xmlns:ui="using:FluentAvalonia.UI.Controls"
+    xmlns:vmSettings="clr-namespace:StabilityMatrix.Avalonia.ViewModels.Settings"
+    d:DataContext="{x:Static mocks:DesignData.InferenceSettingsViewModel}"
+    d:DesignHeight="650"
+    d:DesignWidth="900"
+    x:DataType="vmSettings:InferenceSettingsViewModel"
+    mc:Ignorable="d">
+
+    <controls:UserControlBase.Styles>
+        <Style Selector="sg|SpacedGrid &gt; ui|SettingsExpander">
+            <Setter Property="Margin" Value="8,0" />
+        </Style>
+    </controls:UserControlBase.Styles>
+
+    <controls:UserControlBase.Resources>
+        <models1:DimensionStringComparer x:Key="DimensionStringComparer" />
+    </controls:UserControlBase.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="8,16" Spacing="8">
+
+            <!--  Prompt  -->
+            <sg:SpacedGrid RowDefinitions="Auto,*" RowSpacing="4">
+                <TextBlock
+                    Margin="0,0,0,4"
+                    FontWeight="Medium"
+                    Text="{x:Static lang:Resources.Label_Prompt}" />
+                <!--  Auto Completion  -->
+                <ui:SettingsExpander
+                    Grid.Row="1"
+                    Margin="8,0"
+                    Header="{x:Static lang:Resources.Label_AutoCompletion}">
+
+                    <ui:SettingsExpander.IconSource>
+                        <controls:FASymbolIconSource Symbol="fa-solid fa-wand-magic-sparkles" />
+                    </ui:SettingsExpander.IconSource>
+
+                    <ui:SettingsExpander.Footer>
+                        <ToggleSwitch IsChecked="{Binding IsPromptCompletionEnabled}" />
+                    </ui:SettingsExpander.Footer>
+
+                    <!--  Tag csv selection  -->
+                    <ui:SettingsExpanderItem
+                        Content="{x:Static lang:Resources.Label_PromptTags}"
+                        Description="{x:Static lang:Resources.Label_PromptTagsDescription}"
+                        IconSource="Tag"
+                        IsEnabled="{Binding IsPromptCompletionEnabled}">
+                        <ui:SettingsExpanderItem.Footer>
+                            <ui:FAComboBox ItemsSource="{Binding AvailableTagCompletionCsvs}" SelectedItem="{Binding SelectedTagCompletionCsv}" />
+                        </ui:SettingsExpanderItem.Footer>
+                    </ui:SettingsExpanderItem>
+
+                    <!--  Tag csv import  -->
+                    <ui:SettingsExpanderItem
+                        Content="{x:Static lang:Resources.Label_PromptTagsImport}"
+                        IconSource="Add"
+                        IsEnabled="{Binding IsPromptCompletionEnabled}">
+                        <ui:SettingsExpanderItem.Footer>
+                            <Button Command="{Binding ImportTagCsvCommand}" Content="Import" />
+                        </ui:SettingsExpanderItem.Footer>
+                    </ui:SettingsExpanderItem>
+
+                    <!--  Remove underscores  -->
+                    <ui:SettingsExpanderItem
+                        Content="{x:Static lang:Resources.Label_CompletionReplaceUnderscoresWithSpaces}"
+                        IconSource="Underline"
+                        IsEnabled="{Binding IsPromptCompletionEnabled}">
+                        <ui:SettingsExpanderItem.Footer>
+                            <CheckBox Margin="8" IsChecked="{Binding IsCompletionRemoveUnderscoresEnabled}" />
+                        </ui:SettingsExpanderItem.Footer>
+                    </ui:SettingsExpanderItem>
+                </ui:SettingsExpander>
+            </sg:SpacedGrid>
+
+            <!--  General  -->
+            <sg:SpacedGrid RowDefinitions="Auto,*,*,*,*" RowSpacing="4">
+                <TextBlock
+                    Margin="0,0,0,4"
+                    FontWeight="Medium"
+                    Text="{x:Static lang:Resources.Label_General}" />
+
+                <!--  Filter Extra Networks  -->
+                <ui:SettingsExpander
+                    Grid.Row="1"
+                    Header="Filter Extra Networks by Base Model"
+                    IconSource="Filter">
+                    <ui:SettingsExpander.Footer>
+                        <ToggleSwitch Margin="0,-8,0,-6" IsChecked="{Binding FilterExtraNetworksByBaseModel}" />
+                    </ui:SettingsExpander.Footer>
+                </ui:SettingsExpander>
+
+                <!--  Image Viewer  -->
+                <ui:SettingsExpander
+                    Grid.Row="2"
+                    Header="{x:Static lang:Resources.Label_ImageViewer}"
+                    IconSource="Image"
+                    IsExpanded="True">
+
+                    <!--  Pixel grid  -->
+                    <ui:SettingsExpanderItem Content="Show pixel grid at high zoom levels" IconSource="ViewAll">
+                        <ui:SettingsExpanderItem.Footer>
+                            <CheckBox Margin="8" IsChecked="{Binding IsImageViewerPixelGridEnabled}" />
+                        </ui:SettingsExpanderItem.Footer>
+                    </ui:SettingsExpanderItem>
+
+                    <!--  Recycle Option  -->
+                    <ui:SettingsExpanderItem
+                        Content="Move files to the Recycle Bin when deleting"
+                        Description="If disabled, files will be permanently deleted"
+                        IsVisible="{x:Static native:NativeFileOperations.IsRecycleBinAvailable}">
+                        <ui:SettingsExpanderItem.IconSource>
+                            <fluentIcons:SymbolIconSource Symbol="Delete" />
+                        </ui:SettingsExpanderItem.IconSource>
+                        <ui:SettingsExpanderItem.Footer>
+                            <CheckBox Margin="8" IsChecked="{Binding IsInferenceImageBrowserUseRecycleBinForDelete}" />
+                        </ui:SettingsExpanderItem.Footer>
+                    </ui:SettingsExpanderItem>
+
+                </ui:SettingsExpander>
+
+                <!--  Output Image Files  -->
+                <ui:SettingsExpander
+                    Grid.Row="3"
+                    Header="{x:Static lang:Resources.Label_OutputImageFiles}"
+                    IsExpanded="True">
+                    <ui:SettingsExpander.IconSource>
+                        <fluentIcons:SymbolIconSource Symbol="TabDesktopImage" />
+                    </ui:SettingsExpander.IconSource>
+                    <!--  File name pattern  -->
+                    <ui:SettingsExpanderItem
+                        Content="File name pattern"
+                        Description="{Binding OutputImageFileNameFormatSample}"
+                        IconSource="Rename">
+                        <ui:SettingsExpanderItem.Footer>
+                            <TextBox
+                                Name="OutputImageFileNameFormatTextBox"
+                                MinWidth="150"
+                                FontFamily="Cascadia Code,Consolas,Menlo,Monospace,DejaVu Sans Mono,monospace"
+                                FontSize="13"
+                                Text="{Binding OutputImageFileNameFormat}"
+                                Watermark="{x:Static inference:FileNameFormat.DefaultTemplate}" />
+                        </ui:SettingsExpanderItem.Footer>
+                    </ui:SettingsExpanderItem>
+                </ui:SettingsExpander>
+
+                <ui:TeachingTip
+                    Title="Format Variables"
+                    Grid.Row="3"
+                    IsOpen="{Binding #OutputImageFileNameFormatTextBox.IsFocused}"
+                    PreferredPlacement="Top"
+                    Target="{Binding #OutputImageFileNameFormatTextBox, Mode=OneWay}">
+                    <DataGrid AutoGenerateColumns="True" ItemsSource="{Binding OutputImageFileNameFormatVars}" />
+                </ui:TeachingTip>
+
+                <ui:SettingsExpander
+                    Grid.Row="4"
+                    Description="Force all combo boxes to use floating search (floating typed text, auto-select first match). When off, each combo box uses its own configured search mode."
+                    Header="Use Floating Search">
+                    <ui:SettingsExpander.IconSource>
+                        <controls:FASymbolIconSource Symbol="fa-solid fa-magnifying-glass" />
+                    </ui:SettingsExpander.IconSource>
+                    <ui:SettingsExpander.Footer>
+                        <ToggleSwitch IsChecked="{Binding UseLegacySearch}" />
+                    </ui:SettingsExpander.Footer>
+                </ui:SettingsExpander>
+
+            </sg:SpacedGrid>
+
+            <!--  Dimensions  -->
+            <sg:SpacedGrid RowDefinitions="Auto,*,*,*" RowSpacing="4">
+                <TextBlock
+                    Margin="0,0,0,4"
+                    FontWeight="Medium"
+                    Text="Dimensions" />
+
+                <!--  Step Change  -->
+                <ui:SettingsExpander
+                    Grid.Row="1"
+                    Description="Controls how much the dimensions increase or decrease per step when adjusting with arrows or scroll."
+                    Header="Step Size">
+                    <ui:SettingsExpander.IconSource>
+                        <controls:FASymbolIconSource Symbol="fa-solid fa-stairs" />
+                    </ui:SettingsExpander.IconSource>
+                    <ui:SettingsExpander.Footer>
+                        <ui:NumberBox
+                            LargeChange="16"
+                            Maximum="1024"
+                            Minimum="8"
+                            SmallChange="8"
+                            SpinButtonPlacementMode="Inline"
+                            ValidationMode="InvalidInputOverwritten"
+                            Value="{Binding InferenceDimensionStepChange}" />
+                    </ui:SettingsExpander.Footer>
+                </ui:SettingsExpander>
+
+                <!--  Favorite Dimensions  -->
+                <ui:SettingsExpander
+                    Grid.Row="2"
+                    Header="Favorite Dimensions"
+                    IsExpanded="True">
+                    <ui:SettingsExpander.IconSource>
+                        <fluentIcons:SymbolIconSource Symbol="Grid" />
+                    </ui:SettingsExpander.IconSource>
+
+                    <ui:SettingsExpanderItem>
+                        <Grid RowDefinitions="Auto, *">
+                            <ui:CommandBar>
+                                <ui:CommandBar.PrimaryCommands>
+                                    <ui:CommandBarButton
+                                        Width="45"
+                                        Height="50"
+                                        Command="{Binding AddRowCommand}"
+                                        IconSource="Add"
+                                        Label="{x:Static lang:Resources.Action_Save}" />
+                                    <ui:CommandBarButton
+                                        Width="45"
+                                        Height="50"
+                                        Command="{Binding RemoveSelectedRowCommand}"
+                                        CommandParameter="{Binding #DimensionsGrid.SelectedItem}"
+                                        IconSource="Remove"
+                                        Label="{x:Static lang:Resources.Action_Remove}">
+                                        <ui:CommandBarButton.IsEnabled>
+                                            <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                                <Binding
+                                                    Converter="{x:Static ObjectConverters.IsNotNull}"
+                                                    ElementName="DimensionsGrid"
+                                                    Path="SelectedItem" />
+                                            </MultiBinding>
+                                        </ui:CommandBarButton.IsEnabled>
+                                    </ui:CommandBarButton>
+                                </ui:CommandBar.PrimaryCommands>
+                            </ui:CommandBar>
+                            <DataGrid
+                                x:Name="DimensionsGrid"
+                                Grid.Row="1"
+                                MaxHeight="400"
+                                ItemsSource="{Binding FavoriteDimensions}">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn
+                                        Width="5*"
+                                        x:DataType="system:String"
+                                        Binding="{Binding .}"
+                                        CanUserSort="True"
+                                        CustomSortComparer="{StaticResource DimensionStringComparer}"
+                                        FontFamily="Cascadia Code,Consolas,Menlo,Monospace,DejaVu Sans Mono,monospace"
+                                        Header="Dimension"
+                                        SortMemberPath="." />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
+                    </ui:SettingsExpanderItem>
+                </ui:SettingsExpander>
+            </sg:SpacedGrid>
+
+        </StackPanel>
+    </ScrollViewer>
+</controls:UserControlBase>

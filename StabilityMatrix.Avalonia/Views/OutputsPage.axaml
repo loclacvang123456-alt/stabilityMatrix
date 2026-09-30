@@ -1,0 +1,342 @@
+﻿<controls:UserControlBase
+    x:Class="StabilityMatrix.Avalonia.Views.OutputsPage"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:behaviors="clr-namespace:StabilityMatrix.Avalonia.Behaviors"
+    xmlns:controls="clr-namespace:StabilityMatrix.Avalonia.Controls"
+    xmlns:converters="clr-namespace:StabilityMatrix.Avalonia.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:fluentAvalonia="clr-namespace:FluentIcons.Avalonia.Fluent;assembly=FluentIcons.Avalonia.Fluent"
+    xmlns:lang="clr-namespace:StabilityMatrix.Avalonia.Languages"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:mocks="clr-namespace:StabilityMatrix.Avalonia.DesignData"
+    xmlns:models="clr-namespace:StabilityMatrix.Avalonia.Models"
+    xmlns:outputsPage="clr-namespace:StabilityMatrix.Avalonia.ViewModels.OutputsPage"
+    xmlns:scroll="clr-namespace:StabilityMatrix.Avalonia.Controls.Scroll"
+    xmlns:selectableImageCard="clr-namespace:StabilityMatrix.Avalonia.Controls.SelectableImageCard"
+    xmlns:ui="using:FluentAvalonia.UI.Controls"
+    xmlns:vendorLabs="clr-namespace:StabilityMatrix.Avalonia.Controls.VendorLabs"
+    xmlns:vm="clr-namespace:StabilityMatrix.Avalonia.ViewModels"
+    d:DataContext="{x:Static mocks:DesignData.OutputsPageViewModel}"
+    d:DesignHeight="650"
+    d:DesignWidth="800"
+    x:CompileBindings="True"
+    x:DataType="vm:OutputsPageViewModel"
+    Focusable="True"
+    mc:Ignorable="d">
+
+    <controls:UserControlBase.Resources>
+        <converters:FileUriConverter x:Key="FileUriConverter" />
+    </controls:UserControlBase.Resources>
+
+    <controls:UserControlBase.Styles>
+        <!--  hide the chevron in the button  -->
+        <Style Selector="ui|CommandBarButton:flyout">
+            <Style Selector="^ ui|FontIcon">
+                <Setter Property="Foreground" Value="Transparent" />
+            </Style>
+        </Style>
+    </controls:UserControlBase.Styles>
+
+    <Grid
+        Margin="16"
+        ColumnDefinitions="Auto, *"
+        RowDefinitions="Auto,*">
+
+        <TreeView
+            Grid.Row="1"
+            Grid.Column="0"
+            Margin="0,0,12,0"
+            IsVisible="{Binding ShowFolders}"
+            ItemsSource="{Binding Categories}"
+            SelectedItem="{Binding SelectedCategory}"
+            SelectionMode="AlwaysSelected">
+            <TreeView.ItemContainerTheme>
+                <ControlTheme
+                    x:DataType="models:TreeViewDirectory"
+                    BasedOn="{StaticResource {x:Type TreeViewItem}}"
+                    TargetType="TreeViewItem">
+                    <Setter Property="IsExpanded" Value="{Binding IsExpanded}" />
+                </ControlTheme>
+            </TreeView.ItemContainerTheme>
+            <TreeView.ItemTemplate>
+                <TreeDataTemplate ItemsSource="{Binding SubDirectories}">
+                    <TextBlock
+                        MaxWidth="250"
+                        Text="{Binding Name}"
+                        TextTrimming="CharacterEllipsis"
+                        TextWrapping="NoWrap"
+                        ToolTip.Tip="{Binding Name}" />
+                </TreeDataTemplate>
+            </TreeView.ItemTemplate>
+        </TreeView>
+
+        <Grid
+            Grid.Row="0"
+            Grid.Column="0"
+            Grid.ColumnSpan="2"
+            Margin="0,0,0,16"
+            ColumnDefinitions="Auto,Auto,*,Auto"
+            RowDefinitions="Auto,*">
+
+            <Grid.Styles>
+                <Style Selector="TextBox">
+                    <Setter Property="MinHeight" Value="40" />
+                </Style>
+                <Style Selector="ComboBox">
+                    <Setter Property="MinHeight" Value="40" />
+                </Style>
+            </Grid.Styles>
+
+            <TextBox
+                Grid.Row="1"
+                Grid.Column="2"
+                MinWidth="150"
+                Margin="4,0"
+                VerticalAlignment="Center"
+                VerticalContentAlignment="Center"
+                KeyDown="InputElement_OnKeyDown"
+                Text="{Binding SearchQuery, Mode=TwoWay}"
+                Watermark="{x:Static lang:Resources.Action_Search}">
+                <TextBox.InnerRightContent>
+                    <Grid>
+                        <Button
+                            Classes="transparent-full"
+                            Command="{Binding ClearSearchQuery}"
+                            IsVisible="{Binding SearchQuery.Length}">
+                            <ui:SymbolIcon Symbol="Cancel" />
+                        </Button>
+                        <ui:SymbolIcon
+                            Margin="0,0,10,0"
+                            FontSize="16"
+                            IsVisible="{Binding !SearchQuery.Length}"
+                            Symbol="Find" />
+                    </Grid>
+                </TextBox.InnerRightContent>
+            </TextBox>
+
+            <ui:CommandBar
+                Grid.Row="1"
+                Grid.Column="3"
+                Margin="8,0,0,0"
+                VerticalAlignment="Center"
+                VerticalContentAlignment="Center"
+                DefaultLabelPosition="Right">
+
+                <ui:CommandBar.PrimaryCommands>
+                    <ui:CommandBarElementContainer>
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding NumItemsSelected}"
+                            Text="{Binding NumImagesSelected}" />
+                    </ui:CommandBarElementContainer>
+                    <ui:CommandBarButton
+                        Command="{Binding DeleteAllSelected}"
+                        IconSource="Delete"
+                        IsEnabled="{Binding NumItemsSelected}" />
+                    <ui:CommandBarSeparator />
+                    <ui:CommandBarButton
+                        Command="{Binding SelectAll}"
+                        IconSource="SelectAll"
+                        IsEnabled="{Binding !IsLoading}"
+                        Label="{x:Static lang:Resources.Action_SelectAll}" />
+                    <ui:CommandBarButton
+                        Command="{Binding ClearSelection}"
+                        IconSource="ClearSelection"
+                        IsEnabled="{Binding NumItemsSelected}"
+                        Label="{x:Static lang:Resources.Action_ClearSelection}" />
+                    <ui:CommandBarSeparator />
+                    <ui:CommandBarButton
+                        Classes.loading="{Binding IsLoading}"
+                        Command="{Binding Refresh}"
+                        IconSource="Refresh"
+                        IsEnabled="{Binding !IsLoading}"
+                        Label="{x:Static lang:Resources.Action_Refresh}">
+                        <ui:CommandBarButton.Styles>
+                            <Style Selector="ui|CommandBarButton:disabled.loading">
+                                <Style Selector="^ ui|SymbolIcon">
+                                    <Style.Animations>
+                                        <Animation IterationCount="INFINITE" Duration="0:0:2">
+                                            <KeyFrame Cue="0%">
+                                                <Setter Property="RotateTransform.Angle" Value="0" />
+                                            </KeyFrame>
+                                            <KeyFrame Cue="100%">
+                                                <Setter Property="RotateTransform.Angle" Value="360" />
+                                            </KeyFrame>
+                                        </Animation>
+                                    </Style.Animations>
+                                </Style>
+                            </Style>
+                        </ui:CommandBarButton.Styles>
+                    </ui:CommandBarButton>
+                    <ui:CommandBarButton
+                        VerticalAlignment="Center"
+                        IconSource="Zoom"
+                        Label="View">
+                        <ui:CommandBarButton.Flyout>
+                            <Flyout>
+                                <StackPanel Orientation="Vertical">
+                                    <TextBlock
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Text="Show" />
+
+                                    <Separator Margin="0,8" />
+
+                                    <ToggleSwitch
+                                        Margin="8,-4"
+                                        HorizontalAlignment="Left"
+                                        HorizontalContentAlignment="Center"
+                                        IsChecked="{Binding ShowFolders}"
+                                        OffContent="Folder Sidebar"
+                                        OnContent="Folder Sidebar" />
+
+
+                                    <Separator Margin="0,8" />
+
+                                    <TextBlock
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Text="Zoom" />
+                                    <Slider
+                                        MinWidth="150"
+                                        Maximum="1.5"
+                                        Minimum="0.6"
+                                        SmallChange="0.05"
+                                        Value="{Binding ResizeFactor, Mode=TwoWay}" />
+                                    <TextBlock
+                                        Margin="0,-4,0,0"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Text="{Binding ResizeFactor, StringFormat={}{0:F2}x}" />
+                                </StackPanel>
+                            </Flyout>
+                        </ui:CommandBarButton.Flyout>
+                    </ui:CommandBarButton>
+                </ui:CommandBar.PrimaryCommands>
+
+                <ui:CommandBar.SecondaryCommands>
+                    <ui:CommandBarButton
+                        Command="{Binding ConsolidateImages}"
+                        IconSource="MoveToFolder"
+                        Label="{x:Static lang:Resources.Action_Consolidate}" />
+                </ui:CommandBar.SecondaryCommands>
+            </ui:CommandBar>
+        </Grid>
+
+        <controls:ProgressRing
+            Grid.Row="1"
+            Grid.Column="1"
+            Width="200"
+            Height="200"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            IsIndeterminate="True"
+            IsVisible="{Binding IsChangingCategory}" />
+
+        <scroll:BetterScrollViewer
+            Name="ImageScrollViewer"
+            Grid.Row="1"
+            Grid.Column="1">
+            <ItemsRepeater
+                HorizontalAlignment="Center"
+                VerticalAlignment="Top"
+                ItemsSource="{Binding Outputs}">
+                <Interaction.Behaviors>
+                    <behaviors:ResizeBehavior
+                        MaxResizeFactor="1.5"
+                        MinResizeFactor="0.6"
+                        PointerWheelTargetObject="{Binding #ImageScrollViewer}"
+                        ResizeFactor="{Binding ResizeFactor}" />
+                </Interaction.Behaviors>
+                <ItemsRepeater.Layout>
+                    <UniformGridLayout MinColumnSpacing="8" MinRowSpacing="8" />
+                </ItemsRepeater.Layout>
+                <ItemsRepeater.ItemTemplate>
+                    <DataTemplate DataType="{x:Type outputsPage:OutputImageViewModel}">
+                        <LayoutTransformControl>
+                            <LayoutTransformControl.LayoutTransform>
+                                <ScaleTransform ScaleX="{Binding $parent[scroll:BetterScrollViewer].((vm:OutputsPageViewModel)DataContext).ResizeFactor, FallbackValue=1, TargetNullValue=1}" ScaleY="{Binding $parent[scroll:BetterScrollViewer].((vm:OutputsPageViewModel)DataContext).ResizeFactor, FallbackValue=1, TargetNullValue=1}" />
+                            </LayoutTransformControl.LayoutTransform>
+                            <selectableImageCard:SelectableImageButton
+                                vendorLabs:BetterAsyncImage.ImageCache="{x:Static controls:ImageLoaders.OutputsPageImageCache}"
+                                Command="{Binding $parent[ItemsRepeater].((vm:OutputsPageViewModel)DataContext).OnImageClick}"
+                                CommandParameter="{Binding}"
+                                DecodeWidth="600"
+                                ImageHeight="300"
+                                ImageWidth="300"
+                                IsSelected="{Binding IsSelected}"
+                                IsVideo="{Binding ImageFile.IsVideo}"
+                                Source="{Binding DisplayPath, Converter={StaticResource FileUriConverter}}">
+                                <selectableImageCard:SelectableImageButton.ContextFlyout>
+                                    <ui:FAMenuFlyout>
+                                        <ui:MenuFlyoutItem
+                                            Command="{Binding $parent[ItemsRepeater].((vm:OutputsPageViewModel)DataContext).CopyImage}"
+                                            CommandParameter="{Binding ImageFile.AbsolutePath}"
+                                            HotKey="{x:Null}"
+                                            IconSource="Copy"
+                                            Text="{x:Static lang:Resources.Action_Copy}" />
+                                        <ui:MenuFlyoutItem
+                                            Command="{Binding $parent[ItemsRepeater].((vm:OutputsPageViewModel)DataContext).OpenImage}"
+                                            CommandParameter="{Binding ImageFile.AbsolutePath}"
+                                            HotKey="{x:Null}"
+                                            IconSource="Folder"
+                                            Text="{x:Static lang:Resources.Action_OpenInExplorer}" />
+                                        <ui:MenuFlyoutItem
+                                            Command="{Binding $parent[ItemsRepeater].((vm:OutputsPageViewModel)DataContext).ShowImageDialog}"
+                                            CommandParameter="{Binding}"
+                                            HotKey="{x:Null}"
+                                            IconSource="Image"
+                                            IsVisible="{Binding !!$parent[ItemsRepeater].((vm:OutputsPageViewModel)DataContext).NumItemsSelected}"
+                                            Text="{x:Static lang:Resources.Action_OpenInViewer}" />
+                                        <ui:MenuFlyoutItem
+                                            Command="{Binding $parent[ItemsRepeater].((vm:OutputsPageViewModel)DataContext).DeleteImage}"
+                                            CommandParameter="{Binding}"
+                                            HotKey="{x:Null}"
+                                            IconSource="Delete"
+                                            Text="{x:Static lang:Resources.Action_Delete}" />
+
+                                        <ui:MenuFlyoutSeparator IsVisible="{Binding ImageFile.GenerationParameters, Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+                                        <ui:MenuFlyoutSubItem
+                                            IconSource="Share"
+                                            IsVisible="{Binding ImageFile.GenerationParameters, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                            Text="{x:Static lang:Resources.Action_SendToInference}">
+                                            <ui:MenuFlyoutItem
+                                                Command="{Binding $parent[ItemsRepeater].((vm:OutputsPageViewModel)DataContext).SendToTextToImage}"
+                                                CommandParameter="{Binding}"
+                                                HotKey="{x:Null}"
+                                                IconSource="FullScreenMaximize"
+                                                Text="{x:Static lang:Resources.Label_TextToImage}" />
+                                            <ui:MenuFlyoutItem
+                                                Command="{Binding $parent[ItemsRepeater].((vm:OutputsPageViewModel)DataContext).SendToImageToImage}"
+                                                CommandParameter="{Binding}"
+                                                HotKey="{x:Null}"
+                                                IconSource="ImageCopy"
+                                                Text="{x:Static lang:Resources.Label_ImageToImage}" />
+                                            <ui:MenuFlyoutItem
+                                                Command="{Binding $parent[ItemsRepeater].((vm:OutputsPageViewModel)DataContext).SendToUpscale}"
+                                                CommandParameter="{Binding}"
+                                                HotKey="{x:Null}"
+                                                Text="{x:Static lang:Resources.Label_Upscale}">
+                                                <ui:MenuFlyoutItem.IconSource>
+                                                    <fluentAvalonia:SymbolIconSource FontSize="10" Symbol="ResizeImage" />
+                                                </ui:MenuFlyoutItem.IconSource>
+                                            </ui:MenuFlyoutItem>
+                                            <ui:MenuFlyoutItem
+                                                Command="{Binding $parent[ItemsRepeater].((vm:OutputsPageViewModel)DataContext).SendToImageToVideo}"
+                                                CommandParameter="{Binding}"
+                                                HotKey="{x:Null}"
+                                                IconSource="Video"
+                                                Text="{x:Static lang:Resources.Label_ImageToVideo}" />
+                                        </ui:MenuFlyoutSubItem>
+                                    </ui:FAMenuFlyout>
+                                </selectableImageCard:SelectableImageButton.ContextFlyout>
+                            </selectableImageCard:SelectableImageButton>
+                        </LayoutTransformControl>
+                    </DataTemplate>
+                </ItemsRepeater.ItemTemplate>
+            </ItemsRepeater>
+        </scroll:BetterScrollViewer>
+    </Grid>
+</controls:UserControlBase>

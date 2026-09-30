@@ -1,0 +1,1287 @@
+﻿using System.Diagnostics;
+using System.Runtime.Versioning;
+using Microsoft.Win32;
+using NLog;
+using Python.Runtime;
+using StabilityMatrix.Core.Exceptions;
+using StabilityMatrix.Core.Helper;
+using StabilityMatrix.Core.Helper.HardwareInfo;
+using StabilityMatrix.Core.Models;
+using StabilityMatrix.Core.Models.FileInterfaces;
+using StabilityMatrix.Core.Models.Packages;
+using StabilityMatrix.Core.Models.Progress;
+using StabilityMatrix.Core.Processes;
+using StabilityMatrix.Core.Python;
+using StabilityMatrix.Core.Services;
+
+namespace StabilityMatrix.Avalonia.Helpers;
+
+[SupportedOSPlatform("windows")]
+public class WindowsPrerequisiteHelper(
+    IDownloadService downloadService,
+    ISettingsManager settingsManager,
+    IPyRunner pyRunner,
+    IPyInstallationManager pyInstallationManager
+) : IPrerequisiteHelper
+{
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
+    private const string PortableGitDownloadUrl =
+        "https://github.com/git-for-windows/git/releases/download/v2.52.0.windows.1/PortableGit-2.52.0-64-bit.7z.exe";
+    private const string ExpectedGitVersion = "2.52.0";
+
+    // VS 2015-2022 (v17) x64 runtime - supersedes the older 2015-2019 (v16) build
+    private const string VcRedistDownloadUrl = "https://aka.ms/vs/17/release/vc_redist.x64.exe";
+
+    // Minimum required runtime build. 33810 = 14.40.33810; modern packages (PyTorch,
+    // ONNX Runtime, etc.) link against the 2015-2022 runtime, so the older 2015-2019
+    // build (14.29.30139) is no longer sufficient.
+    private const uint MinVcRedistBuild = 33810;
+
+    private const string TkinterDownloadUrl =
+        "https://cdn.lykos.ai/tkinter-cpython-embedded-3.10.11-win-x64.zip";
+
+    private const string NodeDownloadUrl = "https://nodejs.org/dist/v20.19.3/node-v20.19.3-win-x64.zip";
+
+    private const string Dotnet7DownloadUrl =
+        "https://download.visualstudio.microsoft.com/download/pr/2133b143-9c4f-4daa-99b0-34fa6035d67b/193ede446d922eb833f1bfe0239be3fc/dotnet-sdk-7.0.405-win-x64.zip";
+
+    private const string Dotnet8DownloadUrl =
+        "https://download.visualstudio.microsoft.com/download/pr/6902745c-34bd-4d66-8e84-d5b61a17dfb7/e61732b00f7e144e162d7e6914291f16/dotnet-sdk-8.0.101-win-x64.zip";
+
+    private const string CppBuildToolsUrl = "https://aka.ms/vs/17/release/vs_BuildTools.exe";
+
+    private const string HipSdkDownloadUrl =
+        "https://download.amd.com/developer/eula/rocm-hub/AMD-Software-PRO-Edition-25.Q3-Win10-Win11-For-HIP.exe";
+    private const string PythonLibsDownloadUrl = "https://cdn.lykos.ai/python_libs_for_sage.zip";
+
+    private const string UvWindowsDownloadUrl =
+        "https://github.com/astral-sh/uv/releases/download/0.9.30/uv-x86_64-pc-windows-msvc.zip";
+
+    private string HomeDir => settingsManager.LibraryDir;
+
+    private string VcRedistDownloadPath => Path.Combine(HomeDir, "vcredist.x64.exe");
+
+    private string AssetsDir => Path.Combine(HomeDir, "Assets");
+    private string SevenZipPath => Path.Combine(AssetsDir, "7za.exe");
+
+    private string GetPythonDownloadPath(PyVersion version) =>
+        Path.Combine(
+            AssetsDir,
+            version == PyInstallationManager.Python_3_10_11
+                ? "python-3.10.11-embed-amd64.zip"
+                : $"python-{version}-amd64.tar.gz"
+        );
+
+    private string GetPythonDir(PyVersion version) =>
+        version == PyInstallationManager.Python_3_10_11
+            ? Path.Combine(AssetsDir, "Python310")
+            : Path.Combine(AssetsDir, $"Python{version.Major}{version.Minor}{version.Micro}");
+
+    private string GetPythonDllPath(PyVersion version) =>
+        Path.Combine(GetPythonDir(version), $"python{version.Major}{version.Minor}.dll");
+
+    private string GetPythonLibraryZipPath(PyVersion version) =>
+        Path.Combine(GetPythonDir(version), $"python{version.Major}{version.Minor}.zip");
+
+    private string GetPipPath(PyVersion version) => Path.Combine(GetPythonDir(version), "get-pip.pyc");
+
+    // Temporary directory to extract venv to during python install
+    private string GetVenvTempDir(PyVersion version) => Path.Combine(GetPythonDir(version), "venv");
+
+    private string PortableGitInstallDir => Path.Combine(HomeDir, "PortableGit");
+    private string PortableGitDownloadPath => Path.Combine(HomeDir, "PortableGit.7z.exe");
+    private string GitExePath => Path.Combine(PortableGitInstallDir, "bin", "git.exe");
+    private string TkinterZipPath => Path.Combine(AssetsDir, "tkinter.zip");
+    private string TkinterExtractPath => Path.Combine(AssetsDir, "Python310");
+    private string TkinterExistsPath => Path.Combine(TkinterExtractPath, "tkinter");
+    private string NodeExistsPath => Path.Combine(AssetsDir, "nodejs", "npm.cmd");
+    private string NodeExePath => Path.Combine(AssetsDir, "nodejs", "node.exe");
+    private string NodeDownloadPath => Path.Combine(AssetsDir, "nodejs.zip");
+    private string Dotnet7DownloadPath => Path.Combine(AssetsDir, "dotnet-sdk-7.0.405-win-x64.zip");
+    private string Dotnet8DownloadPath => Path.Combine(AssetsDir, "dotnet-sdk-8.0.101-win-x64.zip");
+    private string DotnetExistsPath => Path.Combine(DotnetDir, "dotnet.exe");
+    private string Dotnet7SdkExistsPath => Path.Combine(DotnetDir, "sdk", "7.0.405");
+    private string Dotnet8SdkExistsPath => Path.Combine(DotnetDir, "sdk", "8.0.101");
+    private string VcBuildToolsDownloadPath => Path.Combine(AssetsDir, "vs_BuildTools.exe");
+
+    private string VcBuildToolsExistsPath =>
+        Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
+            "Microsoft Visual Studio",
+            "2022",
+            "BuildTools"
+        );
+
+    private string HipSdkDownloadPath => Path.Combine(AssetsDir, "AMD-HIP-SDK.exe");
+
+    private string HipInstalledPath =>
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "AMD", "ROCm", "6.4");
+
+    private string UvDownloadPath => Path.Combine(AssetsDir, "uv.zip");
+    private string UvExtractPath => Path.Combine(AssetsDir, "uv");
+    public string UvExePath => Path.Combine(UvExtractPath, "uv.exe");
+    public bool IsUvInstalled => File.Exists(UvExePath);
+    private string ExpectedUvVersion => "0.9.30";
+
+    // FFmpeg paths
+    private string FfmpegDownloadPath => Path.Combine(AssetsDir, "ffmpeg.zip");
+    private string FfmpegExtractPath => Path.Combine(AssetsDir, "ffmpeg");
+    public string FfmpegPath => Path.Combine(FfmpegExtractPath, "bin", "ffmpeg.exe");
+    public bool IsFfmpegInstalled => File.Exists(FfmpegPath);
+
+    public string GitBinPath => Path.Combine(PortableGitInstallDir, "bin");
+    public bool IsVcBuildToolsInstalled => Directory.Exists(VcBuildToolsExistsPath);
+    public bool IsHipSdkInstalled => Directory.Exists(HipInstalledPath);
+    public DirectoryPath DotnetDir => Path.Combine(AssetsDir, "dotnet");
+
+    // Check if a specific Python version is installed
+    public bool IsPythonVersionInstalled(PyVersion version) => File.Exists(GetPythonDllPath(version));
+
+    // Legacy property for compatibility
+    public bool IsPythonInstalled => IsPythonVersionInstalled(PyInstallationManager.DefaultVersion);
+
+    // Implement interface method - uses default Python version
+    public Task InstallPythonIfNecessary(IProgress<ProgressReport>? progress = null)
+    {
+        return InstallPythonIfNecessary(PyInstallationManager.DefaultVersion, progress);
+    }
+
+    // Implement interface method - uses default Python version
+    public Task InstallTkinterIfNecessary(IProgress<ProgressReport>? progress = null)
+    {
+        return InstallTkinterIfNecessary(PyInstallationManager.DefaultVersion, progress);
+    }
+
+    public async Task RunGit(
+        ProcessArgs args,
+        Action<ProcessOutput>? onProcessOutput = null,
+        string? workingDirectory = null
+    )
+    {
+        var process = ProcessRunner.StartAnsiProcess(
+            GitExePath,
+            args,
+            workingDirectory,
+            onProcessOutput,
+            environmentVariables: new Dictionary<string, string>
+            {
+                { "PATH", Compat.GetEnvPathWithExtensions(GitBinPath) },
+                { "GIT_TERMINAL_PROMPT", "0" },
+                // Set UTF-8 locale to handle Unicode characters in paths
+                // This helps Git load libcurl-4.dll when paths contain non-ASCII characters
+                { "LC_ALL", "C.UTF-8" },
+                { "LANG", "C.UTF-8" },
+            }
+        );
+        await process.WaitForExitAsync().ConfigureAwait(false);
+        if (process.ExitCode != 0)
+        {
+            throw new ProcessException($"Git exited with code {process.ExitCode}");
+        }
+    }
+
+    public Task<ProcessResult> GetGitOutput(ProcessArgs args, string? workingDirectory = null)
+    {
+        return ProcessRunner.GetProcessResultAsync(
+            GitExePath,
+            args,
+            workingDirectory: workingDirectory,
+            environmentVariables: new Dictionary<string, string>
+            {
+                { "PATH", Compat.GetEnvPathWithExtensions(GitBinPath) },
+                // Set UTF-8 locale to handle Unicode characters in paths
+                // This helps Git load libcurl-4.dll when paths contain non-ASCII characters
+                { "LC_ALL", "C.UTF-8" },
+                { "LANG", "C.UTF-8" },
+            }
+        );
+    }
+
+    private async Task<string> RunNode(
+        ProcessArgs args,
+        string? workingDirectory = null,
+        IReadOnlyDictionary<string, string>? envVars = null
+    )
+    {
+        var result = await ProcessRunner
+            .GetProcessResultAsync(NodeExePath, args, workingDirectory, envVars)
+            .ConfigureAwait(false);
+
+        result.EnsureSuccessExitCode();
+        return result.StandardOutput ?? result.StandardError ?? string.Empty;
+    }
+
+    public async Task RunNpm(
+        ProcessArgs args,
+        string? workingDirectory = null,
+        Action<ProcessOutput>? onProcessOutput = null,
+        IReadOnlyDictionary<string, string>? envVars = null
+    )
+    {
+        var result = await ProcessRunner
+            .GetProcessResultAsync(NodeExistsPath, args, workingDirectory, envVars)
+            .ConfigureAwait(false);
+
+        result.EnsureSuccessExitCode();
+        onProcessOutput?.Invoke(ProcessOutput.FromStdOutLine(result.StandardOutput));
+        onProcessOutput?.Invoke(ProcessOutput.FromStdErrLine(result.StandardError));
+    }
+
+    public AnsiProcess RunNpmDetached(
+        ProcessArgs args,
+        string? workingDirectory = null,
+        Action<ProcessOutput>? onProcessOutput = null,
+        IReadOnlyDictionary<string, string>? envVars = null
+    )
+    {
+        return ProcessRunner.StartAnsiProcess(
+            NodeExistsPath,
+            args,
+            workingDirectory,
+            onProcessOutput,
+            envVars ?? new Dictionary<string, string>()
+        );
+    }
+
+    public Task InstallPackageRequirements(
+        BasePackage package,
+        PyVersion? pyVersion = null,
+        IProgress<ProgressReport>? progress = null
+    ) => InstallPackageRequirements(package.Prerequisites.ToList(), pyVersion, progress);
+
+    public async Task InstallUvIfNecessary(IProgress<ProgressReport>? progress = null)
+    {
+        if (IsUvInstalled)
+        {
+            var version = await GetInstalledUvVersionAsync();
+            if (version.Contains(ExpectedUvVersion))
+            {
+                Logger.Debug("UV already installed at {UvExePath}", UvExePath);
+                return;
+            }
+
+            Logger.Warn(
+                "UV version mismatch at {UvExePath}. Expected: {ExpectedVersion}, Found: {FoundVersion}",
+                UvExePath,
+                ExpectedUvVersion,
+                version
+            );
+        }
+
+        Logger.Info("UV not found at {UvExePath}, downloading...", UvExePath);
+
+        Directory.CreateDirectory(AssetsDir);
+
+        // Download UV zip
+        await downloadService.DownloadToFileAsync(UvWindowsDownloadUrl, UvDownloadPath, progress: progress);
+
+        progress?.Report(
+            new ProgressReport(
+                progress: 0.5f,
+                isIndeterminate: true,
+                type: ProgressType.Generic,
+                message: "Installing UV package manager..."
+            )
+        );
+
+        // Create extraction directory
+        Directory.CreateDirectory(UvExtractPath);
+
+        // Extract UV
+        await ArchiveHelper.Extract(UvDownloadPath, UvExtractPath, progress);
+
+        progress?.Report(
+            new ProgressReport(progress: 1f, message: "UV installation complete", type: ProgressType.Generic)
+        );
+
+        // Clean up download
+        File.Delete(UvDownloadPath);
+    }
+
+    public async Task InstallPackageRequirements(
+        List<PackagePrerequisite> prerequisites,
+        PyVersion? pyVersion = null,
+        IProgress<ProgressReport>? progress = null
+    )
+    {
+        await UnpackResourcesIfNecessary(progress);
+        await InstallUvIfNecessary(progress);
+
+        if (prerequisites.Contains(PackagePrerequisite.HipSdk))
+        {
+            await InstallHipSdkIfNecessary(progress);
+        }
+
+        if (prerequisites.Contains(PackagePrerequisite.Python310))
+        {
+            await InstallPythonIfNecessary(PyInstallationManager.Python_3_10_11, progress);
+            await InstallVirtualenvIfNecessary(PyInstallationManager.Python_3_10_11, progress);
+        }
+
+        if (pyVersion is not null)
+        {
+            if (!await EnsurePythonVersion(pyVersion.Value))
+            {
+                throw new MissingPrerequisiteException(
+                    @"Python",
+                    @$"Python {pyVersion} was not found and/or failed to install. Please check the logs for more details."
+                );
+            }
+        }
+
+        if (prerequisites.Contains(PackagePrerequisite.Git))
+        {
+            await InstallGitIfNecessary(progress);
+        }
+
+        if (prerequisites.Contains(PackagePrerequisite.VcRedist))
+        {
+            await InstallVcRedistIfNecessary(progress);
+        }
+
+        if (prerequisites.Contains(PackagePrerequisite.Node))
+        {
+            await InstallNodeIfNecessary(progress);
+        }
+
+        if (prerequisites.Contains(PackagePrerequisite.Dotnet))
+        {
+            await InstallDotnetIfNecessary(progress);
+        }
+
+        if (prerequisites.Contains(PackagePrerequisite.Tkinter))
+        {
+            await InstallTkinterIfNecessary(PyInstallationManager.Python_3_10_11, progress);
+        }
+
+        if (prerequisites.Contains(PackagePrerequisite.VcBuildTools))
+        {
+            await InstallVcBuildToolsIfNecessary(progress);
+        }
+    }
+
+    public async Task InstallAllIfNecessary(IProgress<ProgressReport>? progress = null)
+    {
+        await InstallVcRedistIfNecessary(progress);
+        await UnpackResourcesIfNecessary(progress);
+        await InstallPythonIfNecessary(PyInstallationManager.Python_3_10_11, progress);
+        await InstallGitIfNecessary(progress);
+        await InstallNodeIfNecessary(progress);
+        await InstallVcBuildToolsIfNecessary(progress);
+        await InstallHipSdkIfNecessary(progress);
+        await InstallUvIfNecessary(progress);
+    }
+
+    public async Task UnpackResourcesIfNecessary(IProgress<ProgressReport>? progress = null)
+    {
+        // Array of (asset_uri, extract_to)
+        var assets = new[] { (Assets.SevenZipExecutable, AssetsDir), (Assets.SevenZipLicense, AssetsDir) };
+
+        progress?.Report(new ProgressReport(0, message: "Unpacking resources", isIndeterminate: true));
+
+        Directory.CreateDirectory(AssetsDir);
+        foreach (var (asset, extractDir) in assets)
+        {
+            await asset.ExtractToDir(extractDir);
+        }
+
+        progress?.Report(new ProgressReport(1, message: "Unpacking resources", isIndeterminate: false));
+    }
+
+    public async Task InstallPythonIfNecessary(PyVersion version, IProgress<ProgressReport>? progress = null)
+    {
+        var pythonDllPath = GetPythonDllPath(version);
+
+        if (File.Exists(pythonDllPath))
+        {
+            Logger.Debug("Python {Version} already installed at {PythonDllPath}", version, pythonDllPath);
+            return;
+        }
+
+        Logger.Info("Python {Version} not found at {PythonDllPath}, downloading...", version, pythonDllPath);
+
+        Directory.CreateDirectory(AssetsDir);
+
+        var pythonLibraryZipPath = GetPythonLibraryZipPath(version);
+
+        // Delete existing python zip if it exists
+        if (File.Exists(pythonLibraryZipPath))
+        {
+            File.Delete(pythonLibraryZipPath);
+        }
+
+        // Get the correct download URL for this Python version
+        RemoteResource? remote = null;
+        if (version == PyInstallationManager.Python_3_10_11)
+        {
+            remote = Assets.PythonDownloadUrl;
+        }
+        else
+        {
+            throw new ArgumentException($"No download URL configured for Python {version}");
+        }
+
+        var url = remote.Value.Url.ToString();
+        var pythonDownloadPath = GetPythonDownloadPath(version);
+
+        Logger.Info($"Downloading Python {version} from {url} to {pythonDownloadPath}");
+
+        // Cleanup to remove zip if download fails
+        try
+        {
+            // Download python zip
+            await downloadService.DownloadToFileAsync(url, pythonDownloadPath, progress: progress);
+
+            // Verify python hash
+            var downloadHash = await FileHash.GetSha256Async(pythonDownloadPath, progress);
+            if (downloadHash != remote.Value.HashSha256)
+            {
+                var fileExists = File.Exists(pythonDownloadPath);
+                var fileSize = new FileInfo(pythonDownloadPath).Length;
+                var msg =
+                    $"Python download hash mismatch: {downloadHash} != {remote.Value.HashSha256} "
+                    + $"(file exists: {fileExists}, size: {fileSize})";
+                throw new Exception(msg);
+            }
+
+            progress?.Report(
+                new ProgressReport(progress: 1f, message: $"Python {version} download complete")
+            );
+
+            progress?.Report(
+                new ProgressReport(-1, $"Installing Python {version}...", isIndeterminate: true)
+            );
+
+            // We also need 7z if it's not already unpacked
+            if (!File.Exists(SevenZipPath))
+            {
+                await Assets.SevenZipExecutable.ExtractToDir(AssetsDir);
+                await Assets.SevenZipLicense.ExtractToDir(AssetsDir);
+            }
+
+            var pythonDir = GetPythonDir(version);
+
+            // Delete existing python dir
+            if (Directory.Exists(pythonDir))
+            {
+                Directory.Delete(pythonDir, true);
+            }
+
+            // For Python 3.10.11, we need to handle embedded venv folder
+            if (version == PyInstallationManager.Python_3_10_11)
+            {
+                try
+                {
+                    // Extract embedded venv folder
+                    var venvTempDir = GetVenvTempDir(version);
+                    Directory.CreateDirectory(venvTempDir);
+                    foreach (var (resource, relativePath) in Assets.PyModuleVenv)
+                    {
+                        var path = Path.Combine(venvTempDir, relativePath);
+                        // Create missing directories
+                        var dir = Path.GetDirectoryName(path);
+                        if (dir != null)
+                        {
+                            Directory.CreateDirectory(dir);
+                        }
+
+                        await resource.ExtractTo(path);
+                    }
+                    // Add venv to python's library zip
+                    await ArchiveHelper.AddToArchive7Z(pythonLibraryZipPath, venvTempDir);
+                }
+                finally
+                {
+                    // Remove venv
+                    var venvTempDir = GetVenvTempDir(version);
+                    if (Directory.Exists(venvTempDir))
+                    {
+                        Directory.Delete(venvTempDir, true);
+                    }
+                }
+            }
+
+            // Unzip python
+            if (version == PyInstallationManager.Python_3_10_11)
+            {
+                await ArchiveHelper.Extract7Z(pythonDownloadPath, pythonDir);
+                // We need to uncomment the #import site line in python._pth for pip to work
+                var pythonPthPath = Path.Combine(pythonDir, $"python{version.Major}{version.Minor}._pth");
+                var pythonPthContent = await File.ReadAllTextAsync(pythonPthPath);
+                pythonPthContent = pythonPthContent.Replace("#import site", "import site");
+                await File.WriteAllTextAsync(pythonPthPath, pythonPthContent);
+
+                // Install TKinter
+                await InstallTkinterIfNecessary(version, progress);
+            }
+            else
+            {
+                await ArchiveHelper.Extract7ZTar(pythonDownloadPath, pythonDir);
+                // it gets extracted into a folder named `python`, we need to move the contents to this pythonDir
+                var extractedDir = Path.Combine(pythonDir, "python");
+                if (Directory.Exists(extractedDir))
+                {
+                    foreach (var file in Directory.GetFiles(extractedDir))
+                    {
+                        var destFile = Path.Combine(pythonDir, Path.GetFileName(file));
+                        File.Move(file, destFile);
+                    }
+
+                    foreach (var dir in Directory.GetDirectories(extractedDir))
+                    {
+                        var destDir = Path.Combine(pythonDir, Path.GetFileName(dir));
+                        Directory.Move(dir, destDir);
+                    }
+
+                    Directory.Delete(extractedDir, true);
+                }
+            }
+
+            // Extract get-pip.pyc
+            await Assets.PyScriptGetPip.ExtractToDir(pythonDir);
+            progress?.Report(new ProgressReport(1f, $"Python {version} install complete"));
+        }
+        finally
+        {
+            // Always delete zip after download
+            if (File.Exists(pythonDownloadPath))
+            {
+                File.Delete(pythonDownloadPath);
+            }
+        }
+    }
+
+    public async Task InstallVirtualenvIfNecessary(
+        PyVersion version,
+        IProgress<ProgressReport>? progress = null
+    )
+    {
+        var installation = await pyInstallationManager.GetInstallationAsync(version);
+
+        // Check if pip and venv are installed for this version
+        if (!installation.PipInstalled || !installation.VenvInstalled)
+        {
+            progress?.Report(
+                new ProgressReport(
+                    -1f,
+                    $"Installing Python {version} prerequisites...",
+                    isIndeterminate: true
+                )
+            );
+
+            // Switch to this version if needed
+            if (PythonEngine.IsInitialized)
+            {
+                await pyRunner.SwitchToInstallation(version).ConfigureAwait(false);
+            }
+            else
+            {
+                // Initialize with this version
+                await pyRunner.Initialize().ConfigureAwait(false);
+                await pyRunner.SwitchToInstallation(version).ConfigureAwait(false);
+            }
+
+            if (!installation.PipInstalled)
+            {
+                await pyRunner.SetupPip(version).ConfigureAwait(false);
+            }
+
+            if (!installation.VenvInstalled)
+            {
+                await pyRunner.InstallPackage("virtualenv", version).ConfigureAwait(false);
+            }
+        }
+    }
+
+    [SupportedOSPlatform("windows")]
+    public async Task InstallTkinterIfNecessary(PyVersion version, IProgress<ProgressReport>? progress = null)
+    {
+        var pythonDir = GetPythonDir(version);
+        var tkinterPath = Path.Combine(pythonDir, "tkinter");
+
+        if (!Directory.Exists(tkinterPath))
+        {
+            Logger.Info($"Downloading Tkinter for Python {version}");
+            await downloadService.DownloadToFileAsync(TkinterDownloadUrl, TkinterZipPath, progress: progress);
+            progress?.Report(
+                new ProgressReport(
+                    progress: 1f,
+                    message: "Tkinter download complete",
+                    type: ProgressType.Download
+                )
+            );
+
+            await ArchiveHelper.Extract(TkinterZipPath, pythonDir, progress);
+
+            File.Delete(TkinterZipPath);
+        }
+
+        progress?.Report(
+            new ProgressReport(progress: 1f, message: "Tkinter install complete", type: ProgressType.Generic)
+        );
+    }
+
+    public async Task InstallGitIfNecessary(IProgress<ProgressReport>? progress = null)
+    {
+        if (File.Exists(GitExePath))
+        {
+            var installedVersion = await GetInstalledGitVersionAsync();
+            if (installedVersion.Contains(ExpectedGitVersion))
+            {
+                Logger.Debug(
+                    "Git {Version} already installed at {GitExePath}",
+                    ExpectedGitVersion,
+                    GitExePath
+                );
+                return;
+            }
+
+            Logger.Info(
+                "Git version mismatch. Installed: {Installed}, Expected: {Expected}. Upgrading...",
+                installedVersion.Trim(),
+                ExpectedGitVersion
+            );
+
+            // Delete existing installation to upgrade
+            if (Directory.Exists(PortableGitInstallDir))
+            {
+                await new DirectoryPath(PortableGitInstallDir).DeleteAsync(true);
+            }
+        }
+
+        Logger.Info("Git not found or outdated at {GitExePath}, downloading...", GitExePath);
+
+        // Download
+        if (!File.Exists(PortableGitDownloadPath))
+        {
+            await downloadService.DownloadToFileAsync(
+                PortableGitDownloadUrl,
+                PortableGitDownloadPath,
+                progress: progress
+            );
+            progress?.Report(new ProgressReport(progress: 1f, message: "Git download complete"));
+        }
+
+        await UnzipGit(progress);
+
+        await FixGitLongPaths();
+        await ConfigurePortableGit();
+    }
+
+    [SupportedOSPlatform("windows")]
+    public async Task<bool> FixGitLongPaths()
+    {
+        if (!Compat.IsWindows)
+            return false;
+
+        try
+        {
+            await RunGit(["config", "--system", "core.longpaths", "true"]);
+            return true;
+        }
+        catch (Exception e)
+        {
+            Logger.Error(e, "Failed to set git longpaths");
+        }
+
+        return false;
+    }
+
+    private async Task ConfigurePortableGit()
+    {
+        try
+        {
+            await RunGit(["config", "--system", "advice.detachedHead", "false"]);
+        }
+        catch (Exception e)
+        {
+            Logger.Warn(e, "Failed to configure portable git");
+        }
+    }
+
+    [SupportedOSPlatform("windows")]
+    public async Task InstallVcRedistIfNecessary(IProgress<ProgressReport>? progress = null)
+    {
+        using var key = Registry.LocalMachine.OpenSubKey(
+            @"SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\X64",
+            false
+        );
+        if (key?.GetValue("Bld") is { } bldValue && Convert.ToUInt32(bldValue) >= MinVcRedistBuild)
+        {
+            Logger.Debug(
+                "VC Redist build {Build} already satisfies minimum {Min}",
+                bldValue,
+                MinVcRedistBuild
+            );
+            return;
+        }
+
+        Logger.Info("Downloading VC Redist");
+
+        await downloadService.DownloadToFileAsync(
+            VcRedistDownloadUrl,
+            VcRedistDownloadPath,
+            progress: progress
+        );
+        progress?.Report(
+            new ProgressReport(
+                progress: 1f,
+                message: "Visual C++ download complete",
+                type: ProgressType.Download
+            )
+        );
+
+        Logger.Info("Installing VC Redist");
+        progress?.Report(
+            new ProgressReport(
+                progress: 0.5f,
+                isIndeterminate: true,
+                type: ProgressType.Generic,
+                message: "Installing prerequisites..."
+            )
+        );
+        var process = ProcessRunner.StartAnsiProcess(VcRedistDownloadPath, "/install /quiet /norestart");
+        await process.WaitForExitAsync();
+        progress?.Report(
+            new ProgressReport(
+                progress: 1f,
+                message: "Visual C++ install complete",
+                type: ProgressType.Generic
+            )
+        );
+
+        File.Delete(VcRedistDownloadPath);
+    }
+
+    [SupportedOSPlatform("windows")]
+    public async Task InstallNodeIfNecessary(IProgress<ProgressReport>? progress = null)
+    {
+        // NOTE TO FUTURE DEVS: if this is causing merge conflicts with dev, just nuke it we don't need anymore
+        var nodeFolder = new DirectoryPath(AssetsDir, "nodejs");
+        if (nodeFolder.Exists)
+        {
+            try
+            {
+                var result = await RunNode("-v");
+                if (result.Contains("20.19.3"))
+                {
+                    Logger.Debug("Node.js already installed at {NodeExistsPath}", NodeExistsPath);
+                    return;
+                }
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
+
+            Logger.Warn("Node.js version mismatch, reinstalling...");
+            await nodeFolder.DeleteAsync(true);
+        }
+
+        await DownloadAndExtractPrerequisite(progress, NodeDownloadUrl, NodeDownloadPath, AssetsDir);
+
+        var extractedNodeDir = Path.Combine(AssetsDir, "node-v20.19.3-win-x64");
+        if (Directory.Exists(extractedNodeDir))
+        {
+            Directory.Move(extractedNodeDir, Path.Combine(AssetsDir, "nodejs"));
+        }
+    }
+
+    [SupportedOSPlatform("windows")]
+    public async Task InstallFfmpegIfNecessary(IProgress<ProgressReport>? progress = null)
+    {
+        if (IsFfmpegInstalled)
+        {
+            Logger.Debug("FFmpeg already installed at {FfmpegPath}", FfmpegPath);
+            return;
+        }
+
+        Logger.Info("FFmpeg not found at {FfmpegPath}, downloading...", FfmpegPath);
+
+        Directory.CreateDirectory(AssetsDir);
+
+        var downloadUrl = Assets.FfmpegDownloadUrl.Url.ToString();
+
+        progress?.Report(
+            new ProgressReport(
+                progress: 0f,
+                isIndeterminate: false,
+                type: ProgressType.Download,
+                message: "Downloading FFmpeg..."
+            )
+        );
+
+        await downloadService.DownloadToFileAsync(downloadUrl, FfmpegDownloadPath, progress: progress);
+
+        progress?.Report(
+            new ProgressReport(
+                progress: 0.5f,
+                isIndeterminate: true,
+                type: ProgressType.Generic,
+                message: "Installing FFmpeg..."
+            )
+        );
+
+        // Extract to temp location first since archive has nested folder
+        var tempExtractPath = Path.Combine(AssetsDir, "ffmpeg-temp");
+        Directory.CreateDirectory(tempExtractPath);
+
+        await ArchiveHelper.Extract(FfmpegDownloadPath, tempExtractPath, progress);
+
+        // Find the extracted directory (e.g., ffmpeg-n7.1-latest-win64-lgpl-7.1)
+        var extractedDirs = Directory.GetDirectories(tempExtractPath);
+        if (extractedDirs.Length > 0)
+        {
+            var extractedDir = extractedDirs[0];
+
+            // Move to final location
+            if (Directory.Exists(FfmpegExtractPath))
+            {
+                Directory.Delete(FfmpegExtractPath, true);
+            }
+            Directory.Move(extractedDir, FfmpegExtractPath);
+        }
+
+        // Cleanup
+        if (Directory.Exists(tempExtractPath))
+        {
+            Directory.Delete(tempExtractPath, true);
+        }
+        File.Delete(FfmpegDownloadPath);
+
+        progress?.Report(
+            new ProgressReport(progress: 1f, message: "FFmpeg install complete", type: ProgressType.Generic)
+        );
+
+        Logger.Info("FFmpeg installed successfully at {FfmpegPath}", FfmpegPath);
+    }
+
+    [SupportedOSPlatform("windows")]
+    public async Task InstallDotnetIfNecessary(IProgress<ProgressReport>? progress = null)
+    {
+        if (!Directory.Exists(Dotnet7SdkExistsPath))
+        {
+            await DownloadAndExtractPrerequisite(
+                progress,
+                Dotnet7DownloadUrl,
+                Dotnet7DownloadPath,
+                DotnetDir
+            );
+        }
+
+        if (!Directory.Exists(Dotnet8SdkExistsPath))
+        {
+            await DownloadAndExtractPrerequisite(
+                progress,
+                Dotnet8DownloadUrl,
+                Dotnet8DownloadPath,
+                DotnetDir
+            );
+        }
+    }
+
+    [SupportedOSPlatform("windows")]
+    public async Task InstallVcBuildToolsIfNecessary(IProgress<ProgressReport>? progress = null)
+    {
+        if (
+            Directory.Exists(VcBuildToolsExistsPath)
+            && Directory.EnumerateDirectories(VcBuildToolsExistsPath).Any()
+        )
+            return;
+
+        await downloadService.DownloadToFileAsync(
+            CppBuildToolsUrl,
+            VcBuildToolsDownloadPath,
+            progress: progress
+        );
+
+        Logger.Info("Installing VC Build Tools");
+        progress?.Report(
+            new ProgressReport(
+                progress: 0.5f,
+                isIndeterminate: true,
+                type: ProgressType.Generic,
+                message: "Installing prerequisites..."
+            )
+        );
+
+        var process = ProcessRunner.StartAnsiProcess(
+            VcBuildToolsDownloadPath,
+            "--quiet --wait "
+                + "--add Microsoft.VisualStudio.Workload.VCTools "
+                + "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 "
+                + "--add Microsoft.VisualStudio.Component.VC.CMake.Project "
+                + "--add Microsoft.VisualStudio.Component.VC.Llvm.Clang "
+                + "--add Microsoft.VisualStudio.ComponentGroup.NativeDesktop.Llvm.Clang "
+                + "--add Microsoft.VisualStudio.Component.Windows10SDK.18362 "
+                + "--add Microsoft.VisualStudio.Component.Windows10SDK.19041 "
+                + "--add Microsoft.VisualStudio.Component.Windows10SDK.20348 "
+                + "--add Microsoft.VisualStudio.Component.Windows11SDK.22000 "
+                + "--add Microsoft.VisualStudio.Component.Windows11SDK.22621 "
+                + "--add Microsoft.VisualStudio.Component.Windows11SDK.26100",
+            outputDataReceived: output =>
+                progress?.Report(
+                    new ProgressReport(
+                        progress: 0.5f,
+                        isIndeterminate: true,
+                        type: ProgressType.Generic,
+                        message: output.ApcMessage?.Data ?? output.Text
+                    )
+                )
+        );
+        await process.WaitForExitAsync();
+    }
+
+    [SupportedOSPlatform("windows")]
+    public async Task InstallHipSdkIfNecessary(IProgress<ProgressReport>? progress = null)
+    {
+        if (IsHipSdkInstalled)
+        {
+            await PatchHipSdkIfNecessary(progress);
+            return;
+        }
+
+        await downloadService.DownloadToFileAsync(HipSdkDownloadUrl, HipSdkDownloadPath, progress: progress);
+        Logger.Info("Downloaded & installing HIP SDK");
+
+        progress?.Report(
+            new ProgressReport(
+                progress: 0.5f,
+                isIndeterminate: true,
+                type: ProgressType.Generic,
+                message: "Installing HIP SDK, this may take a few minutes..."
+            )
+        );
+
+        var info = new ProcessStartInfo
+        {
+            FileName = HipSdkDownloadPath,
+            Arguments = "-install -log hip_install.log",
+            UseShellExecute = true,
+            CreateNoWindow = true,
+            Verb = "runas",
+        };
+
+        if (Process.Start(info) is { } process)
+        {
+            await process.WaitForExitAsync();
+        }
+
+        await PatchHipSdkIfNecessary(progress);
+    }
+
+    public async Task<Process> RunDotnet(
+        ProcessArgs args,
+        string? workingDirectory = null,
+        Action<ProcessOutput>? onProcessOutput = null,
+        IReadOnlyDictionary<string, string>? envVars = null,
+        bool waitForExit = true
+    )
+    {
+        var process = ProcessRunner.StartAnsiProcess(
+            DotnetExistsPath,
+            args,
+            workingDirectory,
+            onProcessOutput,
+            envVars
+        );
+
+        if (!waitForExit)
+            return process;
+
+        await process.WaitForExitAsync();
+
+        if (process.ExitCode == 0)
+            return process;
+
+        Logger.Error(
+            "dotnet8 with args [{Args}] failed with exit code " + "{ExitCode}:\n{StdOut}\n{StdErr}",
+            args,
+            process.ExitCode,
+            process.StandardOutput,
+            process.StandardError
+        );
+
+        throw new ProcessException(
+            $"dotnet8 with args [{args}] failed with exit code"
+                + $" {process.ExitCode}:\n{process.StandardOutput}\n{process.StandardError}"
+        );
+    }
+
+    [SupportedOSPlatform("Windows")]
+    public async Task AddMissingLibsToVenv(
+        DirectoryPath installedPackagePath,
+        PyBaseInstall baseInstall,
+        IProgress<ProgressReport>? progress = null
+    )
+    {
+        var venvLibsDir = installedPackagePath.JoinDir("venv", "libs");
+        var venvIncludeDir = installedPackagePath.JoinDir("venv", "include");
+        if (venvLibsDir.Exists && venvIncludeDir.Exists && venvLibsDir.JoinFile("python3.lib").Exists)
+        {
+            Logger.Debug("Python libs already installed at {VenvLibsDir}", venvLibsDir);
+            return;
+        }
+
+        var sourceLibsDir = new DirectoryPath(baseInstall.RootPath, "libs");
+        var sourceIncludeDir = new DirectoryPath(baseInstall.RootPath, "include");
+
+        var destLibsDir = installedPackagePath.JoinDir("venv", "libs");
+        var destIncludeDir = installedPackagePath.JoinDir("venv", "include");
+        var destIncludeScriptsDir = installedPackagePath.JoinDir("venv", "Scripts", "include");
+
+        destLibsDir.Create();
+        destIncludeDir.Create();
+        destIncludeScriptsDir.Create();
+
+        // Copy libs
+        await sourceLibsDir.CopyToAsync(destLibsDir);
+        await sourceIncludeDir.CopyToAsync(destIncludeDir);
+        await sourceIncludeDir.CopyToAsync(destIncludeScriptsDir);
+
+        // var downloadPath = installedPackagePath.JoinFile("python_libs_for_sage.zip");
+        // var venvDir = installedPackagePath.JoinDir("venv");
+        // await downloadService
+        //     .DownloadToFileAsync(PythonLibsDownloadUrl, downloadPath, progress)
+        //     .ConfigureAwait(false);
+        //
+        // progress?.Report(
+        //     new ProgressReport(-1f, message: "Extracting Python libraries", isIndeterminate: true)
+        // );
+        // await ArchiveHelper.Extract7Z(downloadPath, venvDir, progress);
+        //
+        // var includeFolder = venvDir.JoinDir("include");
+        // var scriptsIncludeFolder = venvDir.JoinDir("Scripts").JoinDir("include");
+        // await includeFolder.CopyToAsync(scriptsIncludeFolder);
+        //
+        // await downloadPath.DeleteAsync();
+    }
+
+    public string? GetGfxArchFromAmdGpuName(GpuInfo? gpu = null)
+    {
+        gpu ??=
+            settingsManager.Settings.PreferredGpu
+            ?? HardwareHelper.IterGpuInfo().FirstOrDefault(x => x is { Name: not null, IsAmd: true });
+
+        if (gpu?.Name is null || !gpu.IsAmd)
+            return null;
+
+        return gpu.GetAmdGfxArch();
+    }
+
+    private async Task DownloadAndExtractPrerequisite(
+        IProgress<ProgressReport>? progress,
+        string downloadUrl,
+        string downloadPath,
+        string extractPath
+    )
+    {
+        Logger.Info($"Downloading {downloadUrl} to {downloadPath}");
+        await downloadService.DownloadToFileAsync(downloadUrl, downloadPath, progress: progress);
+
+        Logger.Info("Extracting prerequisite");
+        progress?.Report(
+            new ProgressReport(
+                progress: 0.5f,
+                isIndeterminate: true,
+                type: ProgressType.Generic,
+                message: "Installing prerequisites..."
+            )
+        );
+
+        Directory.CreateDirectory(extractPath);
+
+        // unzip
+        await ArchiveHelper.Extract(downloadPath, extractPath, progress);
+
+        progress?.Report(
+            new ProgressReport(
+                progress: 1f,
+                message: "Prerequisite install complete",
+                type: ProgressType.Generic
+            )
+        );
+
+        File.Delete(downloadPath);
+    }
+
+    private async Task UnzipGit(IProgress<ProgressReport>? progress = null)
+    {
+        if (progress == null)
+        {
+            await ArchiveHelper.Extract7Z(PortableGitDownloadPath, PortableGitInstallDir);
+        }
+        else
+        {
+            await ArchiveHelper.Extract7Z(PortableGitDownloadPath, PortableGitInstallDir, progress);
+        }
+
+        Logger.Info("Extracted Git");
+
+        File.Delete(PortableGitDownloadPath);
+    }
+
+    private async Task PatchHipSdkIfNecessary(IProgress<ProgressReport>? progress)
+    {
+        var theGpu =
+            settingsManager.Settings.PreferredGpu
+            ?? HardwareHelper.IterGpuInfo().FirstOrDefault(x => x.Name != null && x.Name.Contains("AMD"));
+
+        if (theGpu?.Name is null)
+            return;
+        var downloadUrl = GetDownloadUrlFromGpuName(theGpu.Name);
+        if (downloadUrl is null)
+            return;
+
+        progress?.Report(new ProgressReport(-1, "Patching ROCm for your GPU", isIndeterminate: true));
+
+        var rocmLibsDownloadPath = new FilePath(AssetsDir, "rocmLibs.7z");
+        await downloadService.DownloadToFileAsync(downloadUrl, rocmLibsDownloadPath, progress: progress);
+
+        var rocmLibsExtractPath = new DirectoryPath(AssetsDir, "rocmLibs");
+        await ArchiveHelper.Extract7Z(rocmLibsDownloadPath, rocmLibsExtractPath, progress);
+
+        var hipInstalledPath = new DirectoryPath(HipInstalledPath);
+
+        var zipFolderName = downloadUrl switch
+        {
+            _ when downloadUrl.Contains("gfx1103.for.hip") => "rocm gfx1103 for hip 6.4.2",
+            _ when downloadUrl.Contains("gfx1034") => "rocm gfx1034.gfx1035.gfx1036 for hip 6.4.2",
+            _ when downloadUrl.Contains("gfx1032") => "rocm gfx1032 for hip 6.4.2",
+            _ when downloadUrl.Contains("gfx1031") => "rocm gfx1031 for hip 6.4.2",
+            _ when downloadUrl.Contains("gfx1010") => "rocm gfx1010-xnack-gfx1012-xnack-.for.hip6.4.2",
+            _ => null,
+        };
+
+        var librarySourceDir = rocmLibsExtractPath;
+        if (!string.IsNullOrWhiteSpace(zipFolderName))
+        {
+            librarySourceDir = librarySourceDir.JoinDir(zipFolderName);
+        }
+
+        librarySourceDir = librarySourceDir.JoinDir("library");
+        var libraryDestDir = hipInstalledPath.JoinDir("bin", "rocblas", "library");
+        await WindowsElevated.Robocopy(librarySourceDir, libraryDestDir);
+
+        var rocblasSource = rocmLibsExtractPath;
+        if (!string.IsNullOrWhiteSpace(zipFolderName))
+        {
+            rocblasSource = rocblasSource.JoinDir(zipFolderName);
+        }
+
+        var rocblasSourceFile = rocblasSource.JoinFile("rocblas.dll");
+        var rocblasDest = hipInstalledPath.JoinDir("bin").JoinFile("rocblas.dll");
+        if (rocblasSourceFile.Exists)
+        {
+            await WindowsElevated.MoveFiles((rocblasSourceFile.FullPath, rocblasDest.FullPath));
+        }
+    }
+
+    private string? GetDownloadUrlFromGpuName(string name)
+    {
+        // not used anymore but good to know for gfx -> name reference
+        // gfx1201
+        // if (name.Contains("9060") || name.Contains("9070"))
+        // {
+        //     return "https://github.com/likelovewant/ROCmLibs-for-gfx1103-AMD780M-APU/releases/download/v0.6.2.4/rocm.gfx1201.for.hip.skd.6.2.4-no-optimized.7z";
+        // }
+
+        // not used anymore but good to know for gfx -> name reference
+        // gfx1150
+        // if (
+        //     name.Contains("8050S")
+        //     || name.Contains("8060S")
+        //     || name.Contains("880M")
+        //     || name.Contains("890M")
+        // )
+        // {
+        //     return "https://github.com/likelovewant/ROCmLibs-for-gfx1103-AMD780M-APU/releases/download/v0.6.2.4/rocm.gfx1150.for.hip.skd.6.2.4.7z";
+        // }
+
+        // gfx1103
+        if (name.Contains("740M") || name.Contains("760M") || name.Contains("780M") || name.Contains("Z1"))
+        {
+            return "https://github.com/likelovewant/ROCmLibs-for-gfx1103-AMD780M-APU/releases/download/v0.6.4.2/rocm.gfx1103.for.hip.6.4.2.7z";
+        }
+
+        // gfx1034, gfx1035, gfx1036
+        if (
+            name.Contains("6300")
+            || name.Contains("6400")
+            || name.Contains("6450")
+            || name.Contains("6500")
+            || name.Contains("6550")
+            || name.Contains("660M")
+            || name.Contains("680M")
+            || name.Contains("Graphics 128SP")
+        )
+        {
+            return "https://github.com/likelovewant/ROCmLibs-for-gfx1103-AMD780M-APU/releases/download/v0.6.4.2/rocm.gfx1034.gfx1035.gfx1036.for.hip.6.4.2.7z";
+        }
+
+        // gfx1032
+        if (
+            name.Contains("6700S")
+            || name.Contains("6800S")
+            || name.Contains("6600")
+            || name.Contains("6650")
+        )
+        {
+            return "https://github.com/likelovewant/ROCmLibs-for-gfx1103-AMD780M-APU/releases/download/v0.6.4.2/rocm.gfx1032.for.hip.6.4.2.7z";
+        }
+
+        // gfx1031
+        if (
+            name.Contains("6700")
+            || name.Contains("6750")
+            || name.Contains("6800M")
+            || name.Contains("6850M")
+        )
+        {
+            return "https://github.com/likelovewant/ROCmLibs-for-gfx1103-AMD780M-APU/releases/download/v0.6.4.2/rocm.gfx1031.for.hip.6.4.2.7z";
+        }
+
+        // gfx1010/1012
+        if (name.Contains("5700") || name.Contains("5600") || name.Contains("5300") || name.Contains("5500"))
+        {
+            return "https://github.com/likelovewant/ROCmLibs-for-gfx1103-AMD780M-APU/releases/download/v0.6.4.2/rocm.gfx1010-xnack-gfx1012-xnack-.for.hip6.4.2.7z";
+        }
+
+        return null;
+    }
+
+    private async Task<string> GetInstalledUvVersionAsync()
+    {
+        try
+        {
+            var processResult = await ProcessRunner.GetProcessResultAsync(UvExePath, "--version");
+            return processResult.StandardOutput ?? processResult.StandardError ?? string.Empty;
+        }
+        catch (Exception e)
+        {
+            Logger.Warn(e, "Failed to get UV version from {UvExePath}", UvExePath);
+            return string.Empty;
+        }
+    }
+
+    private async Task<string> GetInstalledGitVersionAsync()
+    {
+        try
+        {
+            var result = await GetGitOutput(["--version"]);
+            return result.StandardOutput ?? string.Empty;
+        }
+        catch (Exception e)
+        {
+            Logger.Warn(e, "Failed to get Git version");
+            return string.Empty;
+        }
+    }
+
+    private async Task<bool> EnsurePythonVersion(PyVersion pyVersion)
+    {
+        var result = await pyInstallationManager.GetInstallationAsync(pyVersion);
+        return result.Exists();
+    }
+}
