@@ -24,7 +24,7 @@
       "rollForward": false
     },
     "refitter": {
-      "version": "1.4.1",
+      "version": "2.3.0",
       "commands": [
         "refitter"
       ],
