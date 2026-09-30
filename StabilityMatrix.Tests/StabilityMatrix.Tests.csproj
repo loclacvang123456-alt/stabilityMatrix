@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <Import Project="..\Runtimes.Default.props" />
+    
+    <PropertyGroup>
+        <EnableWindowsTargeting>true</EnableWindowsTargeting>
+        <IsPackable>false</IsPackable>
+        <IsTestProject>true</IsTestProject>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="DotNet.Bundle" />
+        <PackageReference Include="DotNext" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
+        <PackageReference Include="Microsoft.Extensions.Http.Polly" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="MSTest.TestAdapter" />
+        <PackageReference Include="MSTest.TestFramework" />
+        <PackageReference Include="coverlet.collector">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="NSubstitute" />
+        <PackageReference Include="Polly" />
+        <PackageReference Include="Polly.Contrib.WaitAndRetry" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\StabilityMatrix.Avalonia\StabilityMatrix.Avalonia.csproj" />
+      <ProjectReference Include="..\StabilityMatrix.Core\StabilityMatrix.Core.csproj" />
+      <ProjectReference Include="..\StabilityMatrix.Native\StabilityMatrix.Native.csproj" />
+
+    </ItemGroup>
+
+    <ItemGroup>
+        <EmbeddedResource Include="..\StabilityMatrix.Avalonia\Assets\ImagePrompt.tmLanguage.json" />
+        <EmbeddedResource Include="..\StabilityMatrix.Avalonia\Assets\ThemeMatrixDark.json" />
+    </ItemGroup>
+
+
+</Project>

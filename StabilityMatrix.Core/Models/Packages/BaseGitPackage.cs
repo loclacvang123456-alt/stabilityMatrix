@@ -1,0 +1,1054 @@
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.IO.Compression;
+using NLog;
+using Octokit;
+using StabilityMatrix.Core.Extensions;
+using StabilityMatrix.Core.Helper;
+using StabilityMatrix.Core.Helper.Cache;
+using StabilityMatrix.Core.Models.Database;
+using StabilityMatrix.Core.Models.FileInterfaces;
+using StabilityMatrix.Core.Models.Progress;
+using StabilityMatrix.Core.Models.Rocm;
+using StabilityMatrix.Core.Processes;
+using StabilityMatrix.Core.Python;
+using StabilityMatrix.Core.Services;
+using StabilityMatrix.Core.Services.Rocm;
+
+namespace StabilityMatrix.Core.Models.Packages;
+
+/// <summary>
+/// Base class for packages that are hosted on Github.
+/// Author and Name should be the Github username and repository name respectively.
+/// </summary>
+[SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
+[SuppressMessage("ReSharper", "VirtualMemberNeverOverridden.Global")]
+public abstract class BaseGitPackage : BasePackage
+{
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
+    protected readonly IGithubApiCache GithubApi;
+    protected readonly IDownloadService DownloadService;
+    protected readonly IPrerequisiteHelper PrerequisiteHelper;
+    protected readonly IPyInstallationManager PyInstallationManager;
+    protected readonly IPipWheelService PipWheelService;
+    public IPyVenvRunner? VenvRunner;
+
+    public virtual string RepositoryName => Name;
+    public virtual string RepositoryAuthor => Author;
+
+    /// <summary>
+    /// URL of the hosted web page on launch
+    /// </summary>
+    protected string WebUrl = string.Empty;
+
+    public override string GithubUrl => $"https://github.com/{RepositoryAuthor}/{RepositoryName}";
+
+    public string DownloadLocation => Path.Combine(SettingsManager.LibraryDir, "Packages", $"{Name}.zip");
+
+    protected string GetDownloadUrl(DownloadPackageVersionOptions versionOptions)
+    {
+        if (!string.IsNullOrWhiteSpace(versionOptions.CommitHash))
+        {
+            return $"https://github.com/{RepositoryAuthor}/{RepositoryName}/archive/{versionOptions.CommitHash}.zip";
+        }
+
+        if (!string.IsNullOrWhiteSpace(versionOptions.VersionTag))
+        {
+            return $"https://api.github.com/repos/{RepositoryAuthor}/{RepositoryName}/zipball/{versionOptions.VersionTag}";
+        }
+
+        if (!string.IsNullOrWhiteSpace(versionOptions.BranchName))
+        {
+            return $"https://api.github.com/repos/{RepositoryAuthor}/{RepositoryName}/zipball/{versionOptions.BranchName}";
+        }
+
+        throw new Exception("No download URL available");
+    }
+
+    protected BaseGitPackage(
+        IGithubApiCache githubApi,
+        ISettingsManager settingsManager,
+        IDownloadService downloadService,
+        IPrerequisiteHelper prerequisiteHelper,
+        IPyInstallationManager pyInstallationManager,
+        IPipWheelService pipWheelService
+    )
+        : base(settingsManager)
+    {
+        GithubApi = githubApi;
+        DownloadService = downloadService;
+        PrerequisiteHelper = prerequisiteHelper;
+        PyInstallationManager = pyInstallationManager;
+        PipWheelService = pipWheelService;
+    }
+
+    protected bool HasWindowsRocmSupport(IRocmPackageHelper rocmPackageHelper)
+    {
+        return GetWindowsRocmCompatibility(rocmPackageHelper).IsCompatible;
+    }
+
+    protected RocmCompatibilityResult GetWindowsRocmCompatibility(IRocmPackageHelper rocmPackageHelper)
+    {
+        if (!Compat.IsWindows)
+        {
+            return new RocmCompatibilityResult { IsCompatible = false };
+        }
+
+        return rocmPackageHelper.GetCompatibility();
+    }
+
+    public override async Task<DownloadPackageVersionOptions?> GetLatestVersion(
+        bool includePrerelease = false
+    )
+    {
+        if (ShouldIgnoreReleases)
+        {
+            var commits = await GithubApi
+                .GetAllCommits(RepositoryAuthor, RepositoryName, MainBranch)
+                .ConfigureAwait(false);
+            return new DownloadPackageVersionOptions
+            {
+                IsLatest = true,
+                IsPrerelease = false,
+                BranchName = MainBranch,
+                CommitHash = commits?.FirstOrDefault()?.Sha,
+            };
+        }
+
+        var releases = await GithubApi.GetAllReleases(RepositoryAuthor, RepositoryName).ConfigureAwait(false);
+        var releaseList = releases.ToList();
+        if (releaseList.Count == 0)
+        {
+            return new DownloadPackageVersionOptions
+            {
+                IsLatest = true,
+                IsPrerelease = false,
+                BranchName = MainBranch,
+            };
+        }
+
+        var latestRelease = includePrerelease ? releaseList.First() : releaseList.First(x => !x.Prerelease);
+
+        return new DownloadPackageVersionOptions
+        {
+            IsLatest = true,
+            IsPrerelease = latestRelease.Prerelease,
+            VersionTag = latestRelease.TagName!,
+        };
+    }
+
+    public override Task<IEnumerable<GitCommit>?> GetAllCommits(string branch, int page = 1, int perPage = 10)
+    {
+        return GithubApi.GetAllCommits(RepositoryAuthor, RepositoryName, branch, page, perPage);
+    }
+
+    public override async Task<PackageVersionOptions> GetAllVersionOptions()
+    {
+        var packageVersionOptions = new PackageVersionOptions();
+
+        if (!ShouldIgnoreReleases)
+        {
+            var allReleases = await GithubApi
+                .GetAllReleases(RepositoryAuthor, RepositoryName)
+                .ConfigureAwait(false);
+            var releasesList = allReleases.ToList();
+            if (releasesList.Any())
+            {
+                packageVersionOptions.AvailableVersions = releasesList.Select(r => new PackageVersion
+                {
+                    TagName = r.TagName!,
+                    ReleaseNotesMarkdown = r.Body,
+                    IsPrerelease = r.Prerelease,
+                });
+            }
+        }
+
+        // Branch mode
+        var allBranches = await GithubApi
+            .GetAllBranches(RepositoryAuthor, RepositoryName)
+            .ConfigureAwait(false);
+        packageVersionOptions.AvailableBranches = allBranches.Select(b => new PackageVersion
+        {
+            TagName = $"{b.Name}",
+            ReleaseNotesMarkdown = string.Empty,
+        });
+
+        return packageVersionOptions;
+    }
+
+    /// <summary>
+    /// Setup the virtual environment for the package.
+    /// </summary>
+    [MemberNotNull(nameof(VenvRunner))]
+    public async Task<IPyVenvRunner> SetupVenv(
+        string installedPackagePath,
+        string venvName = "venv",
+        bool forceRecreate = false,
+        Action<ProcessOutput>? onConsoleOutput = null,
+        PyVersion? pythonVersion = null
+    )
+    {
+        if (Interlocked.Exchange(ref VenvRunner, null) is { } oldRunner)
+        {
+            await oldRunner.DisposeAsync().ConfigureAwait(false);
+        }
+
+        var venvRunner = await SetupVenvPure(
+                installedPackagePath,
+                venvName,
+                forceRecreate,
+                onConsoleOutput,
+                pythonVersion
+            )
+            .ConfigureAwait(false);
+
+        if (Interlocked.Exchange(ref VenvRunner, venvRunner) is { } oldRunner2)
+        {
+            await oldRunner2.DisposeAsync().ConfigureAwait(false);
+        }
+
+        Debug.Assert(VenvRunner != null, "VenvRunner != null");
+
+        return venvRunner;
+    }
+
+    /// <summary>
+    /// Like <see cref="SetupVenv"/>, but does not set the <see cref="VenvRunner"/> property.
+    /// Returns a new <see cref="PyVenvRunner"/> instance.
+    /// </summary>
+    public async Task<IPyVenvRunner> SetupVenvPure(
+        string installedPackagePath,
+        string venvName = "venv",
+        bool forceRecreate = false,
+        Action<ProcessOutput>? onConsoleOutput = null,
+        PyVersion? pythonVersion = null
+    )
+    {
+        // Use either the specific version or the default one
+        var baseInstall = pythonVersion.HasValue
+            ? new PyBaseInstall(
+                await PyInstallationManager.GetInstallationAsync(pythonVersion.Value).ConfigureAwait(false)
+            )
+            : PyBaseInstall.Default;
+
+        if (!PrerequisiteHelper.IsUvInstalled)
+        {
+            await PrerequisiteHelper.InstallUvIfNecessary().ConfigureAwait(false);
+        }
+
+        var venvRunner = await baseInstall
+            .CreateVenvRunnerAsync(
+                Path.Combine(installedPackagePath, venvName),
+                workingDirectory: installedPackagePath,
+                environmentVariables: SettingsManager.Settings.EnvironmentVariables,
+                withDefaultTclTkEnv: Compat.IsWindows,
+                withQueriedTclTkEnv: Compat.IsUnix
+            )
+            .ConfigureAwait(false);
+
+        if (forceRecreate || !venvRunner.Exists())
+        {
+            await venvRunner.Setup(true, onConsoleOutput).ConfigureAwait(false);
+        }
+
+        // Constrain setuptools<82 in uv's isolated build environments.
+        // setuptools 82+ removed pkg_resources, breaking source builds that import it.
+        var buildConstraintsPath = Path.Combine(installedPackagePath, venvName, "uv-build-constraints.txt");
+        await File.WriteAllTextAsync(buildConstraintsPath, "setuptools<82\n").ConfigureAwait(false);
+        // Use relative path because uv splits UV_BUILD_CONSTRAINT on spaces (it's a list-type env var),
+        // which breaks when the absolute path contains spaces. The working directory is installedPackagePath,
+        // so the relative path resolves correctly.
+        var relativeBuildConstraintsPath = Path.Combine(venvName, "uv-build-constraints.txt");
+        venvRunner.UpdateEnvironmentVariables(env =>
+            env.SetItem("UV_BUILD_CONSTRAINT", relativeBuildConstraintsPath)
+        );
+
+        // ensure pip is installed
+        await venvRunner.PipInstall("pip", onConsoleOutput).ConfigureAwait(false);
+
+        if (!Compat.IsWindows)
+            return venvRunner;
+
+        try
+        {
+            await PrerequisiteHelper
+                .AddMissingLibsToVenv(installedPackagePath, baseInstall)
+                .ConfigureAwait(false);
+        }
+        catch (Exception e)
+        {
+            Logger.Warn(e, "Failed to add missing libs to venv");
+        }
+
+        return venvRunner;
+    }
+
+    public override async Task<IEnumerable<Release>> GetReleaseTags()
+    {
+        var allReleases = await GithubApi
+            .GetAllReleases(RepositoryAuthor, RepositoryName)
+            .ConfigureAwait(false);
+        return allReleases;
+    }
+
+    public override async Task DownloadPackage(
+        string installLocation,
+        DownloadPackageOptions options,
+        IProgress<ProgressReport>? progress = null,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var versionOptions = options.VersionOptions;
+
+        const long fiveGigs = 5 * SystemInfo.Gibibyte;
+
+        if (SystemInfo.GetDiskFreeSpaceBytes(installLocation) is < fiveGigs)
+        {
+            throw new ApplicationException(
+                $"Not enough space to download {Name} to {installLocation}, need at least 5GB"
+            );
+        }
+
+        var gitArgs = new List<string> { "clone" };
+
+        var branchArg = !string.IsNullOrWhiteSpace(versionOptions.VersionTag)
+            ? versionOptions.VersionTag
+            : versionOptions.BranchName;
+
+        if (!string.IsNullOrWhiteSpace(branchArg))
+        {
+            gitArgs.Add("--branch");
+            gitArgs.Add(branchArg);
+        }
+
+        gitArgs.Add(GithubUrl);
+        gitArgs.Add(installLocation);
+
+        await PrerequisiteHelper
+            .RunGit(gitArgs.ToArray(), progress?.AsProcessOutputHandler())
+            .ConfigureAwait(false);
+
+        if (!versionOptions.IsLatest && !string.IsNullOrWhiteSpace(versionOptions.CommitHash))
+        {
+            await PrerequisiteHelper
+                .RunGit(
+                    ["checkout", versionOptions.CommitHash],
+                    progress?.AsProcessOutputHandler(),
+                    installLocation
+                )
+                .ConfigureAwait(false);
+        }
+
+        progress?.Report(new ProgressReport(100, message: "Download Complete"));
+    }
+
+    protected Task UnzipPackage(string installLocation, IProgress<ProgressReport>? progress = null)
+    {
+        using var zip = ZipFile.OpenRead(DownloadLocation);
+        var zipDirName = string.Empty;
+        var totalEntries = zip.Entries.Count;
+        var currentEntry = 0;
+
+        foreach (var entry in zip.Entries)
+        {
+            currentEntry++;
+            if (string.IsNullOrWhiteSpace(entry.Name) && entry.FullName.EndsWith("/"))
+            {
+                if (string.IsNullOrWhiteSpace(zipDirName))
+                {
+                    zipDirName = entry.FullName;
+                }
+
+                var folderPath = Path.Combine(
+                    installLocation,
+                    entry.FullName.Replace(zipDirName, string.Empty)
+                );
+                Directory.CreateDirectory(folderPath);
+                continue;
+            }
+
+            var destinationPath = Path.GetFullPath(
+                Path.Combine(installLocation, entry.FullName.Replace(zipDirName, string.Empty))
+            );
+            entry.ExtractToFile(destinationPath, true);
+
+            progress?.Report(
+                new ProgressReport(
+                    current: Convert.ToUInt64(currentEntry),
+                    total: Convert.ToUInt64(totalEntries)
+                )
+            );
+        }
+
+        return Task.CompletedTask;
+    }
+
+    public override async Task<bool> CheckForUpdates(InstalledPackage package)
+    {
+        var currentVersion = package.Version;
+        if (currentVersion is null or { InstalledReleaseVersion: null, InstalledBranch: null })
+        {
+            Logger.Warn(
+                "Could not check updates for package {Name}, version is invalid: {@currentVersion}",
+                Name,
+                currentVersion
+            );
+            return false;
+        }
+
+        try
+        {
+            if (currentVersion.IsReleaseMode)
+            {
+                var latestVersion = await GetLatestVersion(currentVersion.IsPrerelease).ConfigureAwait(false);
+                UpdateAvailable = latestVersion.VersionTag != currentVersion.InstalledReleaseVersion;
+                return UpdateAvailable;
+            }
+
+            var allCommits = (
+                await GetAllCommits(currentVersion.InstalledBranch!).ConfigureAwait(false)
+            )?.ToList();
+
+            if (allCommits == null || allCommits.Count == 0)
+            {
+                Logger.Warn("No commits found for {Package}", package.PackageName);
+                return false;
+            }
+            var latestCommitHash = allCommits.First().Sha;
+            return latestCommitHash != currentVersion.InstalledCommitSha;
+        }
+        catch (ApiException e)
+        {
+            Logger.Warn(e, "Failed to check for package updates");
+            return false;
+        }
+    }
+
+    public override async Task<DownloadPackageVersionOptions?> GetUpdate(InstalledPackage installedPackage)
+    {
+        var currentVersion = installedPackage.Version;
+        if (currentVersion is null or { InstalledReleaseVersion: null, InstalledBranch: null })
+        {
+            Logger.Warn(
+                "Could not check updates for package {Name}, version is invalid: {@currentVersion}",
+                Name,
+                currentVersion
+            );
+            return null;
+        }
+
+        var versionOptions = new DownloadPackageVersionOptions { IsLatest = true };
+
+        try
+        {
+            if (currentVersion.IsReleaseMode)
+            {
+                var latestVersion = await GetLatestVersion(currentVersion.IsPrerelease).ConfigureAwait(false);
+                versionOptions.IsPrerelease = latestVersion.IsPrerelease;
+                versionOptions.VersionTag = latestVersion.VersionTag;
+                return versionOptions;
+            }
+
+            var allCommits = (
+                await GetAllCommits(currentVersion.InstalledBranch!).ConfigureAwait(false)
+            )?.ToList();
+
+            if (allCommits == null || allCommits.Count == 0)
+            {
+                Logger.Warn("No commits found for {Package}", installedPackage.PackageName);
+                return null;
+            }
+            var latestCommitHash = allCommits.First().Sha;
+
+            versionOptions.CommitHash = latestCommitHash;
+            versionOptions.BranchName = currentVersion.InstalledBranch;
+
+            return versionOptions;
+        }
+        catch (ApiException e)
+        {
+            Logger.Warn(e, "Failed to check for package updates");
+            return null;
+        }
+    }
+
+    public override async Task<InstalledPackageVersion> Update(
+        string installLocation,
+        InstalledPackage installedPackage,
+        UpdatePackageOptions options,
+        IProgress<ProgressReport>? progress = null,
+        Action<ProcessOutput>? onConsoleOutput = null,
+        CancellationToken cancellationToken = default
+    )
+    {
+        if (installedPackage.Version == null)
+            throw new NullReferenceException("Version is null");
+
+        if (!Directory.Exists(Path.Combine(installedPackage.FullPath!, ".git")))
+        {
+            Logger.Info("not a git repo, initializing...");
+            progress?.Report(new ProgressReport(-1f, "Initializing git repo", isIndeterminate: true));
+            await PrerequisiteHelper
+                .RunGit("init", onConsoleOutput, installedPackage.FullPath)
+                .ConfigureAwait(false);
+            await PrerequisiteHelper
+                .RunGit(
+                    new[] { "remote", "add", "origin", GithubUrl },
+                    onConsoleOutput,
+                    installedPackage.FullPath
+                )
+                .ConfigureAwait(false);
+        }
+
+        var sharedFolderMethodToUse =
+            installedPackage.PreferredSharedFolderMethod ?? RecommendedSharedFolderMethod;
+        // Temporarily remove symlinks if using Symlink method
+        if (sharedFolderMethodToUse == SharedFolderMethod.Symlink)
+        {
+            if (SharedFolders is not null)
+            {
+                try
+                {
+                    Helper.SharedFolders.RemoveLinksForPackage(
+                        SharedFolders,
+                        new DirectoryPath(installedPackage.FullPath!)
+                    );
+                }
+                catch (Exception e)
+                {
+                    Logger.Warn(
+                        e,
+                        "Failed to remove symlinks for package {Package}",
+                        installedPackage.PackageName
+                    );
+                }
+            }
+
+            if (SharedOutputFolders is not null && installedPackage.UseSharedOutputFolder)
+            {
+                try
+                {
+                    Helper.SharedFolders.RemoveLinksForPackage(
+                        SharedOutputFolders,
+                        new DirectoryPath(installedPackage.FullPath!)
+                    );
+                }
+                catch (Exception e)
+                {
+                    Logger.Warn(
+                        e,
+                        "Failed to remove output symlinks for package {Package}",
+                        installedPackage.PackageName
+                    );
+                }
+            }
+        }
+
+        var versionOptions = options.VersionOptions;
+
+        if (!string.IsNullOrWhiteSpace(versionOptions.VersionTag))
+        {
+            progress?.Report(new ProgressReport(-1f, "Fetching tags...", isIndeterminate: true));
+            await PrerequisiteHelper
+                .RunGit(new[] { "fetch", "--tags", "--force" }, onConsoleOutput, installedPackage.FullPath)
+                .ConfigureAwait(false);
+
+            progress?.Report(
+                new ProgressReport(-1f, $"Checking out {versionOptions.VersionTag}", isIndeterminate: true)
+            );
+            await PrerequisiteHelper
+                .RunGit(
+                    new[] { "checkout", versionOptions.VersionTag, "--force" },
+                    onConsoleOutput,
+                    installedPackage.FullPath
+                )
+                .ConfigureAwait(false);
+
+            await InstallPackage(
+                    installLocation,
+                    installedPackage,
+                    options.AsInstallOptions(),
+                    progress,
+                    onConsoleOutput,
+                    cancellationToken
+                )
+                .ConfigureAwait(false);
+
+            return new InstalledPackageVersion
+            {
+                InstalledReleaseVersion = versionOptions.VersionTag,
+                IsPrerelease = versionOptions.IsPrerelease,
+            };
+        }
+
+        // fetch
+        progress?.Report(new ProgressReport(-1f, "Fetching data...", isIndeterminate: true));
+        await PrerequisiteHelper
+            .RunGit(new[] { "fetch", "--force" }, onConsoleOutput, installedPackage.FullPath)
+            .ConfigureAwait(false);
+
+        if (versionOptions.IsLatest)
+        {
+            // checkout
+            progress?.Report(
+                new ProgressReport(
+                    -1f,
+                    $"Checking out {installedPackage.Version.InstalledBranch}...",
+                    isIndeterminate: true
+                )
+            );
+            await PrerequisiteHelper
+                .RunGit(
+                    new[] { "checkout", versionOptions.BranchName!, "--force" },
+                    onConsoleOutput,
+                    installedPackage.FullPath
+                )
+                .ConfigureAwait(false);
+
+            // pull
+            progress?.Report(new ProgressReport(-1f, "Pulling changes...", isIndeterminate: true));
+            // Try fast-forward-only first
+            var ffOnly = await PrerequisiteHelper
+                .GetGitOutput(
+                    ["pull", "--ff-only", "--autostash", "origin", installedPackage.Version.InstalledBranch!],
+                    installedPackage.FullPath!
+                )
+                .ConfigureAwait(false);
+
+            if (ffOnly.ExitCode != 0)
+            {
+                // Fallback to rebase to preserve local changes if any
+                var rebaseRes = await PrerequisiteHelper
+                    .GetGitOutput(
+                        [
+                            "pull",
+                            "--rebase",
+                            "--autostash",
+                            "origin",
+                            installedPackage.Version.InstalledBranch!,
+                        ],
+                        installedPackage.FullPath!
+                    )
+                    .ConfigureAwait(false);
+                rebaseRes.EnsureSuccessExitCode();
+            }
+        }
+        else
+        {
+            // checkout
+            progress?.Report(
+                new ProgressReport(
+                    -1f,
+                    $"Checking out {installedPackage.Version.InstalledBranch}...",
+                    isIndeterminate: true
+                )
+            );
+            await PrerequisiteHelper
+                .RunGit(
+                    new[] { "checkout", versionOptions.CommitHash!, "--force" },
+                    onConsoleOutput,
+                    installedPackage.FullPath
+                )
+                .ConfigureAwait(false);
+        }
+
+        await InstallPackage(
+                installLocation,
+                installedPackage,
+                options.AsInstallOptions(),
+                progress,
+                onConsoleOutput,
+                cancellationToken
+            )
+            .ConfigureAwait(false);
+
+        return new InstalledPackageVersion
+        {
+            InstalledBranch = versionOptions.BranchName,
+            InstalledCommitSha = versionOptions.CommitHash,
+            IsPrerelease = versionOptions.IsPrerelease,
+        };
+    }
+
+    private async Task FixInfinityFolders(DirectoryPath rootDirectory, string infinityFolderName)
+    {
+        // Skip if first infinity not found
+        if (
+            rootDirectory.JoinDir(infinityFolderName)
+            is not { Exists: true, IsSymbolicLink: false } firstInfinity
+        )
+        {
+            return;
+        }
+
+        var depth = 0;
+        var currentDir = rootDirectory;
+
+        while (currentDir.JoinDir(infinityFolderName) is { Exists: true, IsSymbolicLink: false } newInfinity)
+        {
+            depth++;
+            currentDir = newInfinity;
+        }
+
+        Logger.Info("Found {Depth} infinity folders from {FirstPath}", depth, firstInfinity.ToString());
+
+        // Move all items in infinity folder to root
+        Logger.Info("Moving infinity folders content to root: {Path}", currentDir.ToString());
+        await FileTransfers.MoveAllFilesAndDirectories(currentDir, rootDirectory).ConfigureAwait(false);
+
+        // Move any files from first infinity by enumeration just in case
+        foreach (var file in firstInfinity.EnumerateFiles())
+        {
+            await file.MoveToDirectoryAsync(rootDirectory).ConfigureAwait(false);
+        }
+
+        // Delete infinity folders chain from first
+        Logger.Info("Deleting infinity folders: {Path}", currentDir.ToString());
+        await firstInfinity.DeleteAsync(true).ConfigureAwait(false);
+    }
+
+    private async Task FixForgeInfinity()
+    {
+        var modelsDir = new DirectoryPath(SettingsManager.ModelsDirectory);
+        var rootDirectory = modelsDir.JoinDir("StableDiffusion").JoinDir("sd");
+        var infinityFolderName = "sd";
+        var firstInfinity = rootDirectory.JoinDir(infinityFolderName);
+
+        var depth = 0;
+        var currentDir = rootDirectory;
+
+        while (currentDir.JoinDir(infinityFolderName) is { Exists: true, IsSymbolicLink: false } newInfinity)
+        {
+            depth++;
+            currentDir = newInfinity;
+        }
+
+        if (depth <= 5)
+        {
+            Logger.Info("not really that infinity, aborting");
+            return;
+        }
+
+        Logger.Info("Found {Depth} infinity folders from {FirstPath}", depth, firstInfinity.ToString());
+
+        // Move all items in infinity folder to root
+        Logger.Info("Moving infinity folders content to root: {Path}", currentDir.ToString());
+        await FileTransfers
+            .MoveAllFilesAndDirectories(currentDir, rootDirectory, overwriteIfHashMatches: true)
+            .ConfigureAwait(false);
+
+        // Move any files from first infinity by enumeration just in case
+        var leftoverFiles = firstInfinity.EnumerateFiles(searchOption: SearchOption.AllDirectories);
+        foreach (var file in leftoverFiles)
+        {
+            await file.MoveToWithIncrementAsync(rootDirectory.JoinFile(file.Name)).ConfigureAwait(false);
+        }
+
+        if (!firstInfinity.EnumerateFiles(searchOption: SearchOption.AllDirectories).Any())
+        {
+            // Delete infinity folders chain from first
+            Logger.Info("Deleting infinity folders: {Path}", currentDir.ToString());
+            await firstInfinity.DeleteAsync(true).ConfigureAwait(false);
+        }
+    }
+
+    public override async Task SetupModelFolders(
+        DirectoryPath installDirectory,
+        SharedFolderMethod sharedFolderMethod
+    )
+    {
+        if (sharedFolderMethod is SharedFolderMethod.Configuration && SharedFolderLayout is not null)
+        {
+            await SharedFoldersConfigHelper
+                .UpdateConfigFileForSharedAsync(
+                    SharedFolderLayout,
+                    installDirectory.FullPath,
+                    SettingsManager.ModelsDirectory
+                )
+                .ConfigureAwait(false);
+        }
+        else if (sharedFolderMethod is SharedFolderMethod.Symlink && SharedFolders is { } sharedFolders)
+        {
+            var modelsDir = new DirectoryPath(SettingsManager.ModelsDirectory);
+
+            // fix infinity controlnet folders
+            await FixInfinityFolders(modelsDir.JoinDir("ControlNet"), "ControlNet").ConfigureAwait(false);
+            await FixForgeInfinity().ConfigureAwait(false);
+
+            // fix duplicate links in models dir
+            // see https://github.com/LykosAI/StabilityMatrix/issues/338
+            string[] duplicatePaths =
+            [
+                Path.Combine("ControlNet", "ControlNet"),
+                Path.Combine("IPAdapter", "base"),
+                Path.Combine("IPAdapter", "sd15"),
+                Path.Combine("IPAdapter", "sdxl"),
+            ];
+
+            foreach (var duplicatePath in duplicatePaths)
+            {
+                var linkDir = modelsDir.JoinDir(duplicatePath);
+                if (!linkDir.IsSymbolicLink)
+                    continue;
+
+                Logger.Info("Removing duplicate junction at {Path}", linkDir.ToString());
+                await linkDir.DeleteAsync(false).ConfigureAwait(false);
+            }
+
+            await Helper
+                .SharedFolders.UpdateLinksForPackage(
+                    sharedFolders,
+                    SettingsManager.ModelsDirectory,
+                    installDirectory
+                )
+                .ConfigureAwait(false);
+        }
+    }
+
+    public override Task UpdateModelFolders(
+        DirectoryPath installDirectory,
+        SharedFolderMethod sharedFolderMethod
+    ) => SetupModelFolders(installDirectory, sharedFolderMethod);
+
+    public override Task RemoveModelFolderLinks(
+        DirectoryPath installDirectory,
+        SharedFolderMethod sharedFolderMethod
+    )
+    {
+        // Auto handling for SharedFolderLayout
+        if (sharedFolderMethod is SharedFolderMethod.Configuration && SharedFolderLayout is not null)
+        {
+            return SharedFoldersConfigHelper.UpdateConfigFileForDefaultAsync(
+                SharedFolderLayout,
+                installDirectory.FullPath
+            );
+        }
+
+        if (SharedFolders is not null && sharedFolderMethod is SharedFolderMethod.Symlink)
+        {
+            Helper.SharedFolders.RemoveLinksForPackage(SharedFolders, installDirectory);
+        }
+        return Task.CompletedTask;
+    }
+
+    public override Task SetupOutputFolderLinks(DirectoryPath installDirectory)
+    {
+        if (SharedOutputFolders is { } sharedOutputFolders)
+        {
+            return Helper.SharedFolders.UpdateLinksForPackage(
+                sharedOutputFolders,
+                SettingsManager.ImagesDirectory,
+                installDirectory,
+                recursiveDelete: true
+            );
+        }
+
+        return Task.CompletedTask;
+    }
+
+    public override Task RemoveOutputFolderLinks(DirectoryPath installDirectory)
+    {
+        if (SharedOutputFolders is { } sharedOutputFolders)
+        {
+            Helper.SharedFolders.RemoveLinksForPackage(sharedOutputFolders, installDirectory);
+        }
+        return Task.CompletedTask;
+    }
+
+    // Send input to the running process.
+    public virtual void SendInput(string input)
+    {
+        var process = VenvRunner?.Process;
+        if (process == null)
+        {
+            Logger.Warn("No process running for {Name}", Name);
+            return;
+        }
+        process.StandardInput.WriteLine(input);
+    }
+
+    public virtual async Task SendInputAsync(string input)
+    {
+        var process = VenvRunner?.Process;
+        if (process == null)
+        {
+            Logger.Warn("No process running for {Name}", Name);
+            return;
+        }
+        await process.StandardInput.WriteLineAsync(input).ConfigureAwait(false);
+    }
+
+    protected PipInstallArgs GetTorchPipArgs(
+        TorchIndex torchIndex,
+        string torchVersion = "",
+        string torchvisionVersion = "",
+        string torchaudioVersion = "",
+        string xformersVersion = "",
+        string cudaIndex = "cu130",
+        string rocmIndex = "rocm6.4",
+        string xpuIndex = "xpu"
+    )
+    {
+        var pipArgs = new PipInstallArgs();
+
+        if (torchIndex == TorchIndex.DirectMl)
+        {
+            return pipArgs.WithTorchDirectML();
+        }
+
+        pipArgs = pipArgs.WithTorch(torchVersion).WithTorchVision(torchvisionVersion);
+
+        if (!string.IsNullOrEmpty(torchaudioVersion))
+        {
+            pipArgs = pipArgs.WithTorchAudio(torchaudioVersion);
+        }
+
+        var extraIndex = torchIndex switch
+        {
+            TorchIndex.Cpu => "cpu",
+            TorchIndex.Cuda => cudaIndex,
+            TorchIndex.Rocm => rocmIndex,
+            TorchIndex.Mps => "cpu",
+            TorchIndex.Zluda => cudaIndex,
+            TorchIndex.Ipex => xpuIndex,
+            _ => "cpu",
+        };
+
+        pipArgs = pipArgs.WithTorchExtraIndex(extraIndex);
+
+        if (torchIndex is TorchIndex.Cuda or TorchIndex.Zluda && !string.IsNullOrEmpty(xformersVersion))
+        {
+            pipArgs = pipArgs.WithXFormers(xformersVersion);
+        }
+
+        return pipArgs;
+    }
+
+    /// <summary>
+    /// Executes a standardized pip installation workflow: optional pre-install steps, requirements install,
+    /// optional torch install, and final post-install package pins.
+    /// </summary>
+    protected async Task StandardPipInstallProcessAsync(
+        IPyVenvRunner venvRunner,
+        InstallPackageOptions options,
+        InstalledPackage installedPackage,
+        PipInstallConfig config,
+        Action<ProcessOutput>? onConsoleOutput = null,
+        IProgress<ProgressReport>? progress = null,
+        CancellationToken cancellationToken = default
+    )
+    {
+        progress?.Report(new ProgressReport(-1f, "Upgrading pip...", isIndeterminate: true));
+        await venvRunner.PipInstall("--upgrade pip wheel", onConsoleOutput).ConfigureAwait(false);
+
+        if (config.PrePipInstallArgs.Any())
+        {
+            await venvRunner
+                .PipInstall(new PipInstallArgs([.. config.PrePipInstallArgs]), onConsoleOutput)
+                .ConfigureAwait(false);
+        }
+
+        var requirementsPipArgs = new PipInstallArgs([.. config.ExtraPipArgs]);
+
+        foreach (var path in config.RequirementsFilePaths)
+        {
+            var requirementsFile = new FilePath(venvRunner.WorkingDirectory!, path);
+            if (!requirementsFile.Exists)
+                continue;
+
+            var content = await requirementsFile.ReadAllTextAsync(cancellationToken).ConfigureAwait(false);
+            requirementsPipArgs = requirementsPipArgs.WithParsedFromRequirementsTxt(
+                content,
+                config.RequirementsExcludePattern
+            );
+        }
+
+        if (installedPackage.PipOverrides != null)
+        {
+            requirementsPipArgs = requirementsPipArgs.WithUserOverrides(installedPackage.PipOverrides);
+        }
+
+        var hasRequirementTargets = requirementsPipArgs.Arguments.Any(arg =>
+            !arg.HasKey && !arg.Value.StartsWith("-", StringComparison.Ordinal)
+        );
+
+        if (config.UpgradePackages && hasRequirementTargets)
+        {
+            requirementsPipArgs = requirementsPipArgs.AddArg("--upgrade");
+        }
+
+        if (hasRequirementTargets)
+        {
+            progress?.Report(
+                new ProgressReport(-1f, "Installing package requirements...", isIndeterminate: true)
+            );
+
+            await venvRunner.PipInstall(requirementsPipArgs, onConsoleOutput).ConfigureAwait(false);
+        }
+
+        if (!config.SkipTorchInstall)
+        {
+            progress?.Report(new ProgressReport(-1f, "Installing torch...", isIndeterminate: true));
+            var torchIndex = options.PythonOptions.TorchIndex ?? GetRecommendedTorchVersion();
+
+            var torchPipArgs = GetTorchPipArgs(
+                torchIndex,
+                config.TorchVersion,
+                config.TorchvisionVersion,
+                config.TorchaudioVersion,
+                config.XformersVersion,
+                config.CudaIndex,
+                config.RocmIndex
+            );
+
+            if (config.UpgradePackages)
+            {
+                torchPipArgs = torchPipArgs.AddArg("--upgrade");
+            }
+
+            if (config.ForceReinstallTorch)
+            {
+                torchPipArgs = torchPipArgs.AddArg("--force-reinstall");
+            }
+
+            if (installedPackage.PipOverrides != null)
+            {
+                torchPipArgs = torchPipArgs.WithUserOverrides(installedPackage.PipOverrides);
+            }
+
+            await venvRunner.PipInstall(torchPipArgs, onConsoleOutput).ConfigureAwait(false);
+        }
+
+        if (config.PostInstallPipArgs.Any())
+        {
+            var postInstallPipArgs = new PipInstallArgs([.. config.PostInstallPipArgs]);
+            if (installedPackage.PipOverrides != null)
+            {
+                postInstallPipArgs = postInstallPipArgs.WithUserOverrides(installedPackage.PipOverrides);
+            }
+
+            await venvRunner.PipInstall(postInstallPipArgs, onConsoleOutput).ConfigureAwait(false);
+        }
+    }
+
+    /// <inheritdoc />
+    public override void Shutdown()
+    {
+        if (VenvRunner is not null)
+        {
+            VenvRunner.Dispose();
+            VenvRunner = null;
+        }
+    }
+
+    /// <inheritdoc />
+    public override async Task WaitForShutdown()
+    {
+        if (VenvRunner is not null)
+        {
+            await VenvRunner.DisposeAsync().ConfigureAwait(false);
+            VenvRunner = null;
+        }
+    }
+}

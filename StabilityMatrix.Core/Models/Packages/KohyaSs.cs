@@ -1,0 +1,239 @@
+﻿using System.Text.RegularExpressions;
+using Injectio.Attributes;
+using StabilityMatrix.Core.Helper;
+using StabilityMatrix.Core.Helper.Cache;
+using StabilityMatrix.Core.Helper.HardwareInfo;
+using StabilityMatrix.Core.Models.FileInterfaces;
+using StabilityMatrix.Core.Models.Progress;
+using StabilityMatrix.Core.Processes;
+using StabilityMatrix.Core.Python;
+using StabilityMatrix.Core.Services;
+
+namespace StabilityMatrix.Core.Models.Packages;
+
+[RegisterSingleton<BasePackage, KohyaSs>(Duplicate = DuplicateStrategy.Append)]
+public class KohyaSs(
+    IGithubApiCache githubApi,
+    ISettingsManager settingsManager,
+    IDownloadService downloadService,
+    IPrerequisiteHelper prerequisiteHelper,
+    IPyRunner runner,
+    IPyInstallationManager pyInstallationManager,
+    IPipWheelService pipWheelService
+)
+    : BaseGitPackage(
+        githubApi,
+        settingsManager,
+        downloadService,
+        prerequisiteHelper,
+        pyInstallationManager,
+        pipWheelService
+    )
+{
+    public override string Name => "kohya_ss";
+    public override string DisplayName { get; set; } = "kohya_ss";
+    public override string Author => "bmaltais";
+    public override string Blurb => "A Windows-focused Gradio GUI for Kohya's Stable Diffusion trainers";
+    public override string LicenseType => "Apache-2.0";
+    public override string LicenseUrl => "https://github.com/bmaltais/kohya_ss/blob/master/LICENSE.md";
+    public override string LaunchCommand => "kohya_gui.py";
+    public override Uri PreviewImageUri => new("https://cdn.lykos.ai/sm/packages/kohyass/preview.webp");
+    public override string OutputFolderName => string.Empty;
+    public override bool IsCompatible => HardwareHelper.HasNvidiaGpu();
+
+    public override TorchIndex GetRecommendedTorchVersion() => TorchIndex.Cuda;
+
+    public override PackageDifficulty InstallerSortOrder => PackageDifficulty.UltraNightmare;
+    public override PackageType PackageType => PackageType.SdTraining;
+    public override bool OfferInOneClickInstaller => false;
+    public override SharedFolderMethod RecommendedSharedFolderMethod => SharedFolderMethod.None;
+    public override IEnumerable<TorchIndex> AvailableTorchIndices => [TorchIndex.Cuda];
+    public override IEnumerable<SharedFolderMethod> AvailableSharedFolderMethods => [SharedFolderMethod.None];
+    public override IEnumerable<PackagePrerequisite> Prerequisites =>
+        base.Prerequisites.Concat([PackagePrerequisite.Tkinter]);
+
+    public override List<LaunchOptionDefinition> LaunchOptions =>
+        [
+            new LaunchOptionDefinition
+            {
+                Name = "Listen Address",
+                Type = LaunchOptionType.String,
+                DefaultValue = "127.0.0.1",
+                Options = ["--listen"],
+            },
+            new LaunchOptionDefinition
+            {
+                Name = "Port",
+                Type = LaunchOptionType.String,
+                Options = ["--port"],
+            },
+            new LaunchOptionDefinition
+            {
+                Name = "Skip Requirements Verification",
+                Type = LaunchOptionType.Bool,
+                Options = ["--noverify"],
+                InitialValue = true,
+            },
+            new LaunchOptionDefinition
+            {
+                Name = "Username",
+                Type = LaunchOptionType.String,
+                Options = ["--username"],
+            },
+            new LaunchOptionDefinition
+            {
+                Name = "Password",
+                Type = LaunchOptionType.String,
+                Options = ["--password"],
+            },
+            new LaunchOptionDefinition
+            {
+                Name = "Auto-Launch Browser",
+                Type = LaunchOptionType.Bool,
+                Options = ["--inbrowser"],
+            },
+            new LaunchOptionDefinition
+            {
+                Name = "Share",
+                Type = LaunchOptionType.Bool,
+                Options = ["--share"],
+            },
+            new LaunchOptionDefinition
+            {
+                Name = "Headless",
+                Type = LaunchOptionType.Bool,
+                Options = ["--headless"],
+            },
+            new LaunchOptionDefinition
+            {
+                Name = "Language",
+                Type = LaunchOptionType.String,
+                Options = ["--language"],
+            },
+            LaunchOptionDefinition.Extras,
+        ];
+
+    public override async Task InstallPackage(
+        string installLocation,
+        InstalledPackage installedPackage,
+        InstallPackageOptions options,
+        IProgress<ProgressReport>? progress = null,
+        Action<ProcessOutput>? onConsoleOutput = null,
+        CancellationToken cancellationToken = default
+    )
+    {
+        progress?.Report(new ProgressReport(-1f, "Updating submodules", isIndeterminate: true));
+        await PrerequisiteHelper
+            .RunGit(
+                ["submodule", "update", "--init", "--recursive", "--quiet"],
+                onConsoleOutput,
+                installLocation
+            )
+            .ConfigureAwait(false);
+
+        if (Compat.IsWindows)
+        {
+            await PrerequisiteHelper.FixGitLongPaths().ConfigureAwait(false);
+        }
+
+        progress?.Report(new ProgressReport(-1f, "Setting up venv", isIndeterminate: true));
+        await using var venvRunner = await SetupVenvPure(
+                installLocation,
+                pythonVersion: options.PythonOptions.PythonVersion
+            )
+            .ConfigureAwait(false);
+
+        // --- Platform-Specific Installation ---
+        if (Compat.IsLinux)
+        {
+            // Linux path is too custom for the orchestrator, so it remains as is.
+            await venvRunner
+                .PipInstall("rich packaging setuptools uv", onConsoleOutput)
+                .ConfigureAwait(false);
+            await venvRunner
+                .CustomInstall(
+                    [
+                        "setup/setup_linux.py",
+                        "--platform-requirements-file=requirements_linux.txt",
+                        "--no_run_accelerate",
+                    ],
+                    onConsoleOutput
+                )
+                .ConfigureAwait(false);
+        }
+        else if (Compat.IsWindows)
+        {
+            // Windows path is a perfect fit for the orchestrator.
+            var isLegacyNvidia =
+                SettingsManager.Settings.PreferredGpu?.IsLegacyNvidiaGpu()
+                ?? HardwareHelper.HasLegacyNvidiaGpu();
+
+            var config = new PipInstallConfig
+            {
+                PrePipInstallArgs = ["rich", "packaging", "setuptools", "uv"],
+                RequirementsFilePaths = ["requirements_windows.txt"],
+                // Pin torch to match upstream's requirements_pytorch_windows.txt (torch 2.7.0+cu128,
+                // torchvision 0.22.0+cu128, xformers>=0.0.30). The torch ecosystem is excluded from
+                // the requirements file via the default pattern and installed here instead.
+                TorchVersion = "==2.7.0",
+                TorchvisionVersion = "==0.22.0",
+                TorchaudioVersion = "==2.7.0",
+                XformersVersion = " ",
+                CudaIndex = isLegacyNvidia ? "cu126" : "cu128",
+                // Add back the generic bitsandbytes and the specific numpy version
+                ExtraPipArgs = ["bitsandbytes"],
+                PostInstallPipArgs = ["numpy==1.26.4"],
+            };
+
+            await StandardPipInstallProcessAsync(
+                    venvRunner,
+                    options,
+                    installedPackage,
+                    config,
+                    onConsoleOutput,
+                    progress,
+                    cancellationToken
+                )
+                .ConfigureAwait(false);
+        }
+    }
+
+    public override async Task RunPackage(
+        string installLocation,
+        InstalledPackage installedPackage,
+        RunPackageOptions options,
+        Action<ProcessOutput>? onConsoleOutput = null,
+        CancellationToken cancellationToken = default
+    )
+    {
+        await SetupVenv(installLocation, pythonVersion: PyVersion.Parse(installedPackage.PythonVersion))
+            .ConfigureAwait(false);
+
+        void HandleConsoleOutput(ProcessOutput s)
+        {
+            onConsoleOutput?.Invoke(s);
+
+            if (!s.Text.Contains("Running on", StringComparison.OrdinalIgnoreCase))
+                return;
+
+            var regex = new Regex(@"(https?:\/\/)([^:\s]+):(\d+)");
+            var match = regex.Match(s.Text);
+            if (!match.Success)
+                return;
+
+            WebUrl = match.Value;
+            OnStartupComplete(WebUrl);
+        }
+
+        VenvRunner.RunDetached(
+            [Path.Combine(installLocation, options.Command ?? LaunchCommand), .. options.Arguments],
+            HandleConsoleOutput,
+            OnExit
+        );
+    }
+
+    public override Dictionary<SharedFolderType, IReadOnlyList<string>>? SharedFolders { get; }
+    public override Dictionary<SharedOutputType, IReadOnlyList<string>>? SharedOutputFolders { get; }
+
+    public override string MainBranch => "master";
+}
